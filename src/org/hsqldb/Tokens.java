@@ -898,6 +898,16 @@ public class Tokens {
     static final String        T_UNIX_MILLIS      = "UNIX_MILLIS";
     static final String        T_UNIX_TIMESTAMP   = "UNIX_TIMESTAMP";
 
+
+    //rasdaman specific tokens
+    static final String        T_RAS_TIFF         = "TIFF";
+    static final String        T_RAS_PNG          = "PNG";
+    static final String        T_RAS_CSV          = "CSV";
+    static final String        T_RAS_JPEG         = "JPEG";
+    static final String        T_RAS_BMP          = "BMP";
+
+    static final String        T_RAS_COLVAL       = "COLVAL";
+
     //
     static final String T_ISOLATION_LEVEL         = "ISOLATION_LEVEL";
     static final String T_SESSION_ISOLATION_LEVEL = "SESSION_ISOLATION_LEVEL";
@@ -1778,6 +1788,16 @@ public class Tokens {
     public static final int X_MALFORMED_IDENTIFIER     = 883;
     public static final int X_MALFORMED_UNICODE_ESCAPE = 884;
 
+    //rasdaman specific tokens:
+    public static final int RAS_TIFF                   = 1000;
+    public static final int RAS_PNG                    = 1001;
+    public static final int RAS_CSV                    = 1002;
+    public static final int RAS_JPEG                   = 1003;
+    public static final int RAS_BMP                    = 1004;
+
+    public static final int RAS_COLVAL                 = 1005;
+
+
     //
     public static final int X_UNKNOWN_TOKEN = -1;
     private static final IntValueHashMap reservedKeys =
@@ -2111,6 +2131,15 @@ public class Tokens {
         reservedKeys.put(Tokens.T_WITHOUT, WITHOUT);
         reservedKeys.put(Tokens.T_WHILE, WHILE);
         reservedKeys.put(Tokens.T_YEAR, YEAR);
+
+        //rasdaman keys
+        reservedKeys.put(Tokens.T_RAS_TIFF, RAS_TIFF);
+        reservedKeys.put(Tokens.T_RAS_PNG, RAS_PNG);
+        reservedKeys.put(Tokens.T_RAS_CSV, RAS_CSV);
+        reservedKeys.put(Tokens.T_RAS_JPEG, RAS_JPEG);
+        reservedKeys.put(Tokens.T_RAS_BMP, RAS_BMP);
+
+        reservedKeys.put(Tokens.T_RAS_COLVAL, RAS_COLVAL);
     }
 
     private static final IntValueHashMap commandSet = new IntValueHashMap(299);

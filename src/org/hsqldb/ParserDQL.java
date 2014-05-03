@@ -69,6 +69,8 @@ import org.hsqldb.types.Types;
  */
 public class ParserDQL extends ParserBase {
 
+    private ExpressionRasElementList dimensions = null;
+
     protected Database             database;
     protected Session              session;
     protected final CompileContext compileContext;
@@ -2201,7 +2203,7 @@ public class ParserDQL extends ParserBase {
         }
 
         if (minus) {
-            e = new ExpressionArithmetic(OpTypes.NEGATE, e);
+            e = ExpressionArithmetic.createUnary(OpTypes.NEGATE, e);
         }
 
         return e;
@@ -2975,7 +2977,7 @@ public class ParserDQL extends ParserBase {
 
             readThis(Tokens.RIGHTBRACKET);
 
-            e = new ExpressionAccessor(e, e1);
+            e = ExpressionAccessor.forExpression(e, e1);
         }
 
         return e;
@@ -3035,7 +3037,7 @@ public class ParserDQL extends ParserBase {
 
             e = XreadAllTypesTerm(boole);
             e = boole ? (Expression) new ExpressionLogical(type, a, e)
-                      : new ExpressionArithmetic(type, a, e);
+                      : ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -3088,7 +3090,7 @@ public class ParserDQL extends ParserBase {
             }
 
             e = boole ? (Expression) new ExpressionLogical(type, a, e)
-                      : new ExpressionArithmetic(type, a, e);
+                      : ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -3154,7 +3156,7 @@ public class ParserDQL extends ParserBase {
         if (unknown) {
             e = new ExpressionLogical(OpTypes.IS_NULL, e);
         } else if (minus) {
-            e = new ExpressionArithmetic(OpTypes.NEGATE, e);
+            e = ExpressionArithmetic.createUnary(OpTypes.NEGATE, e);
         } else if (not) {
             e = new ExpressionLogical(OpTypes.NOT, e);
         }
@@ -3181,7 +3183,7 @@ public class ParserDQL extends ParserBase {
 
             e         = XreadCharacterPrimary();
             collation = readCollateClauseOrNull();
-            e         = new ExpressionArithmetic(OpTypes.CONCAT, a, e);
+            e         = ExpressionArithmetic.createBinary(OpTypes.CONCAT, a, e);
         }
 
         return e;
@@ -3258,6 +3260,42 @@ public class ParserDQL extends ParserBase {
         return XreadValueExpressionPrimary();
     }
 
+    /**
+     * Reads a rasdaman array index expression.
+     * @return
+     */
+    Expression XreadRasArrayIndexExpression() {
+        Expression e = XreadRasArrayIndexRangeExpression();
+
+        while (token.tokenType == Tokens.COMMA) {
+            read();
+
+            Expression a = e;
+
+            e = XreadRasArrayIndexRangeExpression();
+            e = new ExpressionRasIndex(OpTypes.ARRAY_INDEX_LIST, a, e);
+        }
+
+        return e;
+    }
+
+    /**
+     * Reads a rasdaman array range expression of format numberExp[:numberExp]
+     * @return
+     */
+    Expression XreadRasArrayIndexRangeExpression() {
+        Expression e = XreadNumericValueExpression();
+        if (token.tokenType == Tokens.COLON) {
+            read();
+
+            Expression a = e;
+
+            e = XreadNumericValueExpression();
+            e = new ExpressionRasIndex(OpTypes.ARRAY_RANGE, a, e);
+        }
+        return e;
+    }
+
     Expression XreadNumericValueExpression() {
 
         Expression e = XreadTerm();
@@ -3278,7 +3316,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadTerm();
-            e = new ExpressionArithmetic(type, a, e);
+            e = ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -3308,7 +3346,7 @@ public class ParserDQL extends ParserBase {
                 throw unexpectedToken();
             }
 
-            e = new ExpressionArithmetic(type, a, e);
+            e = ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -3327,14 +3365,18 @@ public class ParserDQL extends ParserBase {
             minus = true;
         }
 
-        e = XreadNumericPrimary();
+        e = XreadRasArrayVariableOrNull();
+
+        if (e == null) {
+            e = XreadNumericPrimary();
+        }
 
         if (e == null) {
             return null;
         }
 
         if (minus) {
-            e = new ExpressionArithmetic(OpTypes.NEGATE, e);
+            e = ExpressionArithmetic.createUnary(OpTypes.NEGATE, e);
         }
 
         return e;
@@ -3360,7 +3402,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadDateTimeIntervalTerm();
-            e = new ExpressionArithmetic(type, a, e);
+            e = ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -3386,7 +3428,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadDateTimeIntervalTerm();
-            e = new ExpressionArithmetic(type, a, e);
+            e = ExpressionArithmetic.createBinary(type, a, e);
         }
 
         return e;
@@ -4787,7 +4829,7 @@ public class ParserDQL extends ParserBase {
                 throw Error.error(ErrorCode.X_42501, token.tokenString);
             }
 
-            e = new ExpressionAccessor(column.getAccessor(), e);
+            e = ExpressionAccessor.forExpression(column.getAccessor(), e);
 
             readThis(Tokens.RIGHTBRACKET);
 
@@ -4913,11 +4955,11 @@ public class ParserDQL extends ParserBase {
         if (token.tokenType == Tokens.LEFTBRACKET) {
             read();
 
-            Expression e1 = XreadNumericValueExpression();
+            final Expression e1 = XreadRasArrayIndexExpression();
 
             readThis(Tokens.RIGHTBRACKET);
 
-            e = new ExpressionAccessor(e, e1);
+            e = ExpressionAccessor.forExpression(e, e1);
         }
 
         return e;
@@ -5155,6 +5197,10 @@ public class ParserDQL extends ParserBase {
                 }
             }
 
+            if (function == null) {
+                function = FunctionRas.newRasFunction(token.tokenType);
+            }
+
             if (function != null) {
                 int pos = getPosition();
 
@@ -5272,16 +5318,98 @@ public class ParserDQL extends ParserBase {
         read();
 
         if (token.tokenType == Tokens.OPENBRACKET) {
+            //TODO: this is still the old syntax
             return XreadArrayConstructor();
         } else {
+            final Expression dimensionList = XreadRasArrayDimensionLiteral();
+
+            final Expression value;
+            final int constructorType;
+            if (token.tokenType == Tokens.VALUES) {
+                readThis(Tokens.VALUES);
+
+                dimensions = (ExpressionRasElementList) dimensionList;
+                value = XreadNumericValueExpression();
+                dimensions = null;
+
+                constructorType = OpTypes.ARRAY_CONSTRUCTOR_VALUE;
+            } else {
+                value = XreadRasArrayLiteral();
+
+                constructorType = OpTypes.ARRAY_CONSTRUCTOR_LITERAL;
+            }
+
+            return new ExpressionRasArrayConstructor(constructorType, dimensionList, value);
+        }
+    }
+
+    public Expression XreadRasArrayVariableOrNull() {
+        if (dimensions == null || !dimensions.isDimensionName(token)) {
+            return null;
+        }
+        final int index = dimensions.getIndexForName(token);
+        read();
+        return new ExpressionRasValueVariable(index);
+    }
+
+    /**
+     * Reads a dimension literal for the array constructor.
+     * @return
+     */
+    private Expression XreadRasArrayDimensionLiteral() {
+        readThis(Tokens.LEFTBRACKET);
+
+        final HsqlArrayList list = new HsqlArrayList();
+
+        for (int i = 0; ; i++) { //first, read the dimensions
+            if (token.tokenType == Tokens.RIGHTBRACKET) {
+                read();
+                break;
+            }
+
+            if (i > 0) {
+                readThis(Tokens.COMMA);
+            }
+
+            checkIsNonCoreReservedIdentifier();
+
+            final HsqlNameManager.SimpleName name = HsqlNameManager.getSimpleName(token.tokenString,
+                    isDelimitedIdentifier());
+            read();
+
+            readThis(Tokens.OPENBRACKET);
+
+            final Expression range = XreadRasArrayIndexRangeExpression();
+
+            readThis(Tokens.CLOSEBRACKET);
+
+            final Expression dimension = new ExpressionRasDimensionLiteral(name, i, range);
+            list.add(dimension);
+
+        }
+
+        final Expression[] array = new Expression[list.size()];
+
+        list.toArray(array);
+
+        return new ExpressionRasElementList(OpTypes.ARRAY_DIMENSION_LIST, array);
+    }
+
+    /**
+     * Reads an ExpressionRasElementList containing the value part of an array literal.
+     * Elements are either more ExpressionRasElementList objects, or numerical expressions.
+     * @return ExpressionRasElementList with containing array values or further dimensions.
+     */
+    private Expression XreadRasArrayLiteral() {
+        if (token.tokenType == Tokens.LEFTBRACKET) {
+
             readThis(Tokens.LEFTBRACKET);
 
-            HsqlArrayList list = new HsqlArrayList();
+            final HsqlArrayList list = new HsqlArrayList();
 
-            for (int i = 0; ; i++) {
+            for (int i = 0; ; i++) { //read all elements separated by commas
                 if (token.tokenType == Tokens.RIGHTBRACKET) {
                     read();
-
                     break;
                 }
 
@@ -5289,17 +5417,17 @@ public class ParserDQL extends ParserBase {
                     readThis(Tokens.COMMA);
                 }
 
-                Expression e = XreadValueExpressionOrNull();
+                list.add(XreadRasArrayLiteral());
 
-                list.add(e);
             }
 
-            Expression[] array = new Expression[list.size()];
+            final Expression[] array = new Expression[list.size()];
 
             list.toArray(array);
 
-            return new Expression(OpTypes.ARRAY, array);
+            return new ExpressionRasElementList(OpTypes.ARRAY_ELEMENT_LIST, array);
         }
+        return XreadNumericValueExpression();
     }
 
     private Expression readDecodeExpressionOrNull() {
@@ -5385,7 +5513,7 @@ public class ParserDQL extends ParserBase {
 
         do {
             r    = XreadValueExpression();
-            root = new ExpressionArithmetic(OpTypes.CONCAT, root, r);
+            root = ExpressionArithmetic.createBinary(OpTypes.CONCAT, root, r);
 
             if (token.tokenType == Tokens.COMMA) {
                 readThis(Tokens.COMMA);

@@ -785,9 +785,9 @@ public class FunctionCustom extends FunctionSQL {
         switch (funcType) {
 
             case FUNC_CONCAT :
-                return new ExpressionArithmetic(OpTypes.CONCAT,
-                                                nodes[Expression.LEFT],
-                                                nodes[Expression.RIGHT]);
+                return ExpressionArithmetic.createBinary(OpTypes.CONCAT,
+                        nodes[Expression.LEFT],
+                        nodes[Expression.RIGHT]);
         }
 
         return super.getFunctionExpression();

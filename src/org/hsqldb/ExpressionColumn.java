@@ -44,7 +44,11 @@ import org.hsqldb.lib.Set;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.navigator.RangeIterator;
 import org.hsqldb.persist.PersistentStore;
+import org.hsqldb.ras.RasArrayId;
+import org.hsqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
+
+import java.util.HashSet;
 
 /**
  * Implementation of column, variable, parameter, etc. access operations.
@@ -632,7 +636,8 @@ public class ExpressionColumn extends Expression {
         }
     }
 
-    public Object getValue(Session session) {
+    @Override
+    public Object getValue(final Session session, final boolean isRasRoot) {
 
         switch (opType) {
 
@@ -653,18 +658,18 @@ public class ExpressionColumn extends Expression {
                     .triggerArguments[rangeVariable.rangePosition][columnIndex];
             }
             case OpTypes.COLUMN : {
-                RangeIterator[] iterators =
-                    session.sessionContext.rangeIterators;
-                Object value =
-                    iterators[rangeVariable.rangePosition].getCurrent(
-                        columnIndex);
-
-                if (dataType != column.dataType) {
-                    value = dataType.convertToType(session, value,
-                                                   column.dataType);
+                if (dataType != null && dataType.isCharacterArrayType()) {
+                    //parse the rasdaman array contained in this expression
+                    if (isRasRoot) {
+                        final RasArrayId coid = RasArrayId.parseString(
+                                RasUtil.objectArrayToString(getHsqlColumnValue(session)), this.getColumnName());
+                        return RasUtil.stringToObjectArray(
+                                RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid));
+                    } else {
+                        return RasUtil.stringToObjectArray(this.getColumnName());
+                    }
                 }
-
-                return value;
+                return getHsqlColumnValue(session);
             }
             case OpTypes.SIMPLE_COLUMN : {
                 Object value =
@@ -704,6 +709,48 @@ public class ExpressionColumn extends Expression {
                 throw Error.runtimeError(ErrorCode.U_S0500,
                                          "ExpressionColumn");
         }
+    }
+
+    /**
+     * Retrieves the value of this column.
+     *
+     * Note: this method evaluates to the value actually contained in the column.
+     *       This will return the same value as getValue(session) for non array data types.
+     *       For array data types, this method skips the rasql evaluation.
+     *
+     * @param session current session
+     * @return the real hsql value of the column
+     */
+    public Object getHsqlColumnValue(Session session) {
+        if (opType != OpTypes.COLUMN)
+            throw new RuntimeException("Method getHsqlColumnValue can only be called with opType "+OpTypes.COLUMN+", found: "+opType);
+        RangeIterator[] iterators =
+                session.sessionContext.rangeIterators;
+        Object value =
+                iterators[rangeVariable.rangePosition].getCurrent(
+                        columnIndex);
+
+        if (dataType != column.dataType) {
+            value = dataType.convertToType(session, value,
+                    column.dataType);
+        }
+        return value;
+    }
+
+    /**
+     * Extracts all RasArrayIds that are used in this and the child nodes.
+     * This Expression can't have children, so we can simplify this method.
+     * @param session current session
+     * @return Set of 0 or 1 RasArrayIds
+     */
+    @Override
+    public java.util.Set<RasArrayId> extractRasArrayIds(Session session) {
+        java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
+        if (dataType != null && dataType.isCharacterArrayType()) {
+            rasArrayIds.add(RasArrayId.parseString(
+                    RasUtil.objectArrayToString(getHsqlColumnValue(session)), getColumnName()));
+        }
+        return rasArrayIds;
     }
 
     private Object getDiagnosticsVariable(Session session) {

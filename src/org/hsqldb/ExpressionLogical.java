@@ -2168,8 +2168,8 @@ public class ExpressionLogical extends Expression {
         ExpressionArithmetic newArg          = null;
 
         if (!replaceColumn) {
-            newArg = new ExpressionArithmetic(operation, otherExpression,
-                                              nonColExpression);
+            newArg = ExpressionArithmetic.createBinary(operation, otherExpression,
+                    nonColExpression);
 
             newArg.resolveTypesForArithmetic(session, parent);
         }

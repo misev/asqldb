@@ -49,7 +49,7 @@ import org.hsqldb.types.Types;
  */
 public class ExpressionArithmetic extends Expression {
 
-    ExpressionArithmetic(int type, Expression left, Expression right) {
+    protected ExpressionArithmetic(final int type, final Expression left, final Expression right) {
 
         super(type);
 
@@ -71,7 +71,7 @@ public class ExpressionArithmetic extends Expression {
         }
     }
 
-    ExpressionArithmetic(int type, Expression e) {
+    protected ExpressionArithmetic(final int type, final Expression e) {
 
         super(type);
 
@@ -86,6 +86,35 @@ public class ExpressionArithmetic extends Expression {
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "Expression");
         }
+    }
+
+    /**
+     * Factory method for binary arithmetic expression.
+     * Builds a Ras expression if one of the operands is an array.
+     * @param type OpType of the operation
+     * @param left left operand
+     * @param right right operand
+     * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
+     */
+    static ExpressionArithmetic createBinary(final int type, final Expression left, final Expression right) {
+        if (left.isArrayExpression() || right.isArrayExpression()) {
+            return new ExpressionArithmeticRas(type, left, right);
+        }
+        return new ExpressionArithmetic(type, left, right);
+    }
+
+    /**
+     * Factory method for unary arithmetic expression.
+     * Builds a Ras expression if one of the operands is an array.
+     * @param type OpType of the operation
+     * @param e operand
+     * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
+     */
+    static ExpressionArithmetic createUnary(int type, Expression e) {
+        if (e.isArrayExpression()) {
+            return new ExpressionArithmeticRas(type, e);
+        }
+        return new ExpressionArithmetic(type, e);
     }
 
     public String getSQL() {
@@ -606,7 +635,7 @@ public class ExpressionArithmetic extends Expression {
         }
     }
 
-    public Object getValue(Session session) {
+    public Object getValue(final Session session, final boolean isRasRoot) {
 
         switch (opType) {
 

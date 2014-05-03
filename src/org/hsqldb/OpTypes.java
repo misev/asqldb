@@ -120,6 +120,14 @@ public interface OpTypes {
         MULTICOLUMN          = 97,
         USER_AGGREGATE       = 98,
         ARRAY_ACCESS         = 99,
-        ARRAY_SUBQUERY       = 100
+        ARRAY_SUBQUERY       = 100,
+        ARRAY_INDEX_LIST          = 200, //rasdaman operations
+        ARRAY_ELEMENT_LIST        = 201,
+        ARRAY_RANGE               = 202,
+        ARRAY_DIMENSION           = 203,
+        ARRAY_DIMENSION_LIST      = 204,
+        ARRAY_CONSTRUCTOR_LITERAL = 205,
+        ARRAY_CONSTRUCTOR_VALUE   = 206,
+        ARRAY_VALUE_VARIABLE      = 207
     ;
 }

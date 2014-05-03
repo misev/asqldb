@@ -47,6 +47,8 @@ import org.hsqldb.lib.OrderedIntHashSet;
 import org.hsqldb.lib.Set;
 import org.hsqldb.navigator.RowSetNavigatorData;
 import org.hsqldb.persist.PersistentStore;
+import org.hsqldb.ras.ExpressionRas;
+import org.hsqldb.ras.RasArrayId;
 import org.hsqldb.result.Result;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.CharacterType;
@@ -54,6 +56,8 @@ import org.hsqldb.types.Collation;
 import org.hsqldb.types.NullType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
+
+import java.util.HashSet;
 
 /**
  * Expression class.
@@ -255,6 +259,31 @@ public class Expression implements Cloneable {
         this(type);
 
         this.nodes = list;
+    }
+
+    /**
+     * Checks whether this expression (or any of its children) is an array expression.
+     * @return true if it's an array expression
+     */
+    public boolean isArrayExpression() {
+        for (Expression node: nodes) {
+            if (node.isArrayExpression())
+                return true;
+        }
+        return this instanceof ExpressionRas || (dataType != null && dataType.isCharacterArrayType());
+    }
+
+    /**
+     * Extracts all RasArrayIds that are used in this and the child nodes.
+     * @param session current session
+     * @return Set of all OIDs used in this subtree
+     */
+    public java.util.Set<RasArrayId> extractRasArrayIds(Session session) {
+        java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
+        for (Expression node: nodes) {
+            rasArrayIds.addAll(node.extractRasArrayIds(session));
+        }
+        return rasArrayIds;
     }
 
     static String getContextSQL(Expression expression) {
@@ -1250,7 +1279,7 @@ public class Expression implements Cloneable {
                 break;
             }
             default :
-                throw Error.runtimeError(ErrorCode.U_S0500, "Expression");
+                throw Error.runtimeError(ErrorCode.U_S0500, "Expression (type "+opType+")");
         }
     }
 
@@ -1524,7 +1553,28 @@ public class Expression implements Cloneable {
         }
     }
 
+    /**
+     * Evaluates this node together with all child nodes.
+     * Wrapper for the getValue(Session, boolean) method to be compatible with the HSQL parser.
+     * See @link{#getValue(Session, boolean)} for more information.
+     * @param session current session
+     * @return resulting value
+     */
     public Object getValue(Session session) {
+        return getValue(session, true);
+    }
+
+    /**
+     * Evaluates this node and all child nodes.
+     * Takes a flag to determine whether this is the root of a rasdaman sub-tree in the parse tree.
+     * This will be propagated as true, until the first RasExpression is found.
+     * The first RasExpression, which is passed the value 'true' for this flag, will execute the rasdaman query
+     * after gathering the subqueries by propagating the flag as 'false'.
+     * @param session current session
+     * @param isRasRoot true if there are no RasExpressions above this one
+     * @return Result object
+     */
+    public Object getValue(Session session, boolean isRasRoot) {
 
         switch (opType) {
 

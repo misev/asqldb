@@ -68,6 +68,8 @@
      <echo>jar filename    build command   explanation
 --------------  -------------   -----------------------------------
 hsqldb.jar      ant hsqldb      Default distribution jar
+hsqldb.jar      ant run         Runs hsqldb.jar as a
+                                standalone database located in /var/hsqldb.
 hsqljdbc.jar    ant hsqljdbc    JDBC network client JDBC Driver.
                                 (Can connect to HyperSQL Servers)
 hsqldbmain.jar  ant hsqldbmain  No utility programs
@@ -282,6 +284,10 @@ examples:
              optimize="${build.optimize}"
              encoding="${javac.encoding}"
       >
+          <classpath>
+              <pathelement location="${servletapi.lib}"/>
+              <pathelement location="lib/rasj.jar" />
+          </classpath>
          <exclude name="org/hsqldb/lib/AppendableException.java"/>
          <exclude name="org/hsqldb/lib/RefCapablePropertyResourceBundle.java"/>
          <exclude name="org/hsqldb/lib/RefCapableRBInterface.java"/>
@@ -306,7 +312,9 @@ examples:
        >
          <classpath>
             <pathelement location="${servletapi.lib}"/>
+             <pathelement location="lib/rasj.jar" />
          </classpath>
+
          <include name="org/hsqldb/*.java"/>
          <include name="org/hsqldb/dbinfo/*.java"/>
          <include name="org/hsqldb/index/*.java"/>
@@ -680,6 +688,30 @@ examples:
          <exclude name="org/hsqldb/lib/tar/TarGeneratorMain.class"/>
          <exclude name="org/hsqldb/lib/tar/TarReaderMain.class"/>
        </jar>
+    </target>
+
+    <target name="run" description="Runs the ">
+        <java fork="true" classname="org.hsqldb.util.DatabaseManagerSwing">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/hsqldb.jar" />
+            </classpath>
+            <arg line="--driver org.hsqldb.jdbcDriver --url jdbc:hsqldb:file:/var/hsqldb/db --user SA"/>
+        </java>
+
+    </target>
+
+    <target name="buildrun" depends="hsqldb" description="Runs the ">
+        <java fork="true" classname="org.hsqldb.util.DatabaseManagerSwing">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/hsqldb.jar" />
+            </classpath>
+            <arg line="--driver org.hsqldb.jdbcDriver --url jdbc:hsqldb:file:/var/hsqldb/db --user SA"/>
+        </java>
+
     </target>
 
     <target name="hsqldb" depends="classes16, util, swing, -prep-license-files"

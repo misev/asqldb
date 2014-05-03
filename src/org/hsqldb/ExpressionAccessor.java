@@ -45,13 +45,29 @@ import org.hsqldb.types.Type;
  */
 public class ExpressionAccessor extends Expression {
 
-    ExpressionAccessor(Expression left, Expression right) {
+    protected ExpressionAccessor(Expression left, Expression right) {
 
         super(OpTypes.ARRAY_ACCESS);
 
         nodes = new Expression[] {
             left, right
         };
+    }
+
+    /**
+     * Factory method to build an Expression accessor.
+     * Recognized rasdaman array expressions and return the corresponding subclass.
+     *
+     * Note: Initialization of the GUI uses SQL arrays, so we need this for backwards compatibility.
+     *
+     * @param left Expression to be accessed
+     * @param right index
+     * @return ExpressionAccessor (or ExpressionAccessorRas for rasdaman arrays)
+     */
+    static ExpressionAccessor forExpression(Expression left, Expression right) {
+        if (left.isArrayExpression() || right instanceof ExpressionRasIndex)
+            return new ExpressionAccessorRas(left, right);
+        return new ExpressionAccessor(left, right);
     }
 
     public ColumnSchema getColumn() {

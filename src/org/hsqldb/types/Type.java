@@ -1228,4 +1228,13 @@ public abstract class Type implements SchemaObject, Cloneable {
 
         return true;
     }
+
+    /**
+     * Method to determine whether this Type is an array of characters.
+     * This is used to determine which columns contains rasdaman oids.
+     * @return
+     */
+    public boolean isCharacterArrayType() {
+        return this.isArrayType() && ((ArrayType) this).dataType.isCharacterType();
+    }
 }

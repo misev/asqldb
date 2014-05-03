@@ -35,7 +35,7 @@ import java.sql.Connection;
 
 public class TestScript extends TestBase {
 
-//    String path = "TestAny.txt";
+    String path = "TestAny.txt";
 //    String path = "TestSelf.txt";
 //    String path = "TestSelfArrays.txt";
 //    String path = "TestSelf3PartNames.txt";
