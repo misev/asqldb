@@ -315,7 +315,9 @@ examples:
              <pathelement location="lib/rasj.jar" />
          </classpath>
 
-         <include name="org/hsqldb/*.java"/>
+         <include name="org/hsqldb/ras/tests/*"/>
+          <include name="org/hsqldb/*.java"/>
+          <include name="org/hsqldb/ras/*.java"/>
          <include name="org/hsqldb/dbinfo/*.java"/>
          <include name="org/hsqldb/index/*.java"/>
          <include name="org/hsqldb/jdbc/*.java"/>
@@ -701,6 +703,19 @@ examples:
         </java>
 
     </target>
+
+    <target name="rastests" depends="classes16" description="Runs some ras tests">
+        <java fork="true" classname="org.hsqldb.ras.tests.RasTester">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="classes" />
+            </classpath>
+        </java>
+
+    </target>
+
+
 
     <target name="buildrun" depends="hsqldb" description="Runs the ">
         <java fork="true" classname="org.hsqldb.util.DatabaseManagerSwing">
