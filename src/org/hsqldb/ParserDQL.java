@@ -5321,7 +5321,15 @@ public class ParserDQL extends ParserBase {
             //TODO: this is still the old syntax
             return XreadArrayConstructor();
         } else {
-            final Expression dimensionList = XreadRasArrayDimensionLiteral();
+            final Expression dimensionList = XreadRasArrayDimensionLiteralOrNull();
+
+            if (dimensionList == null) {
+                //todo: this is for insert/update statements with ARRAY['collname:oid']
+//                unexpectedToken();
+                Expression e = XreadValueExpressionOrNull();
+                readThis(Tokens.RIGHTBRACKET);
+                return new Expression(OpTypes.ARRAY, new Expression[]{e});
+            }
 
             final Expression value;
             final int constructorType;
@@ -5356,7 +5364,7 @@ public class ParserDQL extends ParserBase {
      * Reads a dimension literal for the array constructor.
      * @return
      */
-    private Expression XreadRasArrayDimensionLiteral() {
+    private Expression XreadRasArrayDimensionLiteralOrNull() {
         readThis(Tokens.LEFTBRACKET);
 
         final HsqlArrayList list = new HsqlArrayList();
@@ -5371,7 +5379,11 @@ public class ParserDQL extends ParserBase {
                 readThis(Tokens.COMMA);
             }
 
-            checkIsNonCoreReservedIdentifier();
+            if (!isNonCoreReservedIdentifier()) {
+                return null;
+            }
+
+//            checkIsNonCoreReservedIdentifier();
 
             final HsqlNameManager.SimpleName name = HsqlNameManager.getSimpleName(token.tokenString,
                     isDelimitedIdentifier());
@@ -6023,7 +6035,7 @@ public class ParserDQL extends ParserBase {
         checkIsSimpleName();
 
         SimpleName name = HsqlNameManager.getSimpleName(token.tokenString,
-            isDelimitedIdentifier());
+                isDelimitedIdentifier());
 
         read();
 
@@ -6156,7 +6168,7 @@ public class ParserDQL extends ParserBase {
         String schema = session.getSchemaName(token.namePrefix);
         SchemaObject object =
             database.schemaManager.getSchemaObject(token.tokenString, schema,
-                type);
+                    type);
 
         read();
 
@@ -6345,7 +6357,7 @@ public class ParserDQL extends ParserBase {
             ResultConstants.SQL_UPDATABLE, scrollability, holdability,
             returnability);
         StatementQuery cs = compileCursorSpecification(rangeGroups, props,
-            isRoutine);
+                isRoutine);
 
         cs.setCursorName(cursorName);
 
