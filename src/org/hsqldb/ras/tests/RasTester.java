@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import org.hsqldb.ras.RasUtil;
 
 /**
  * Created by Johannes on 5/5/14.
@@ -51,8 +52,11 @@ public class RasTester {
     }
 
     public static boolean insertValues(Connection conn) throws SQLException {
+        String oidQuery = "select oid(c) from rgb as c";
+        String oid = RasUtil.executeRasqlQuery(oidQuery).toString();
+        oid = oid.replaceAll("[\\[\\]]", "");
         String createString =
-                "INSERT INTO RASTEST VALUES(0, ARRAY['rgb:17409'])";
+                "INSERT INTO RASTEST VALUES(0, ARRAY['rgb:" + Double.valueOf(oid).intValue() + "'])";
         return executeUpdate(conn, createString);
     }
 

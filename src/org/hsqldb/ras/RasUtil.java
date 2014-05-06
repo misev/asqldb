@@ -101,7 +101,7 @@ public class RasUtil {
             query = String.format("SELECT %s FROM %s WHERE %s", selector, RasArrayId.stringifyRasCollections(rasArrayIds), RasArrayId.stringifyOids(rasArrayIds));
         }
         System.out.println(query);
-        DBag result = (DBag) executeRasqlQuery(query, USER, PASSWD);
+        DBag result = (DBag) executeRasqlQuery(query);
 
         final Iterator it = result.iterator();
         if (!(it.hasNext()))
@@ -151,10 +151,10 @@ public class RasUtil {
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */
-    public static Object executeRasqlQuery(String query, String username, String password) throws HsqlException {
+    public static Object executeRasqlQuery(String query) throws HsqlException {
 
         RasImplementation impl = new RasImplementation("http://"+SERVER+":"+PORT);
-        impl.setUserIdentification(username, password);
+        impl.setUserIdentification(USER, PASSWD);
         Database db = impl.newDatabase();
         int attempts = 0;
 
