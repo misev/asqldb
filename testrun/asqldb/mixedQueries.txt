@@ -1,0 +1,12 @@
+-- Initialization is done in the test class, since it requires database queries to find the oids
+-- Table rastest with columns id and coll (ras collection) is created and populated.
+
+select * from rastest
+select png(coll) from rastest
+select id, png(coll) as collpath from rastest
+select id, coll[100:200, 30:150] from rastest
+select id, csv(coll[100:200, 3]) from rastest
+select id, coll[100:200, id] from rastest
+select id, coll[100:200, id + 1] from rastest
+select id, coll[100:200, id:1+id*10] from rastest
+select id, coll[100:200, id:1+id*10] + 10 from rastest

@@ -313,6 +313,7 @@ examples:
          <classpath>
             <pathelement location="${servletapi.lib}"/>
              <pathelement location="lib/rasj.jar" />
+             <pathelement location="lib/JSAP-2.1.jar" />
          </classpath>
 
          <include name="org/hsqldb/ras/tests/*"/>
@@ -709,8 +710,36 @@ examples:
             <classpath>
                 <!--<pathelement location="${servletapi.lib}"/>-->
                 <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/JSAP-2.1.jar" />
                 <pathelement location="classes" />
             </classpath>
+            <arg line="${java.args}"/>
+        </java>
+
+    </target>
+
+    <target name="sqltests" depends="classes16" description="Runs some sql regression tests">
+        <java fork="true" classname="org.hsqldb.ras.tests.RasTester">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/JSAP-2.1.jar" />
+                <pathelement location="classes" />
+            </classpath>
+            <arg line="--sql --noras"/>
+        </java>
+
+    </target>
+
+    <target name="rastestssql" depends="classes16" description="Runs some sql regression tests">
+        <java fork="true" classname="org.hsqldb.ras.tests.RasTester">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/JSAP-2.1.jar" />
+                <pathelement location="classes" />
+            </classpath>
+            <arg line="--sql"/>
         </java>
 
     </target>

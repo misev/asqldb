@@ -146,8 +146,6 @@ public class RasUtil {
     /**
      * Execute a RasQL query with specified credentials.
      * @param query The rasql query string.
-     * @param username The ras user.
-     * @param password The user's password.
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */

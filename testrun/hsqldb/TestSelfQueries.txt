@@ -11,8 +11,7 @@ create cached table TESTTABLE (
     aDate                date                           not null,
     secondNum            integer                        not null,
     thirdNum             integer                        not null,
-    aName                varchar(32)                    not null
-  );
+    aName                varchar(32)                    not null);
 create  index IDX_TESTTABLE_aString on TESTTABLE (aString);
 create  index IDX_TESTTABLE_aDate_secondNum on TESTTABLE (aDate,secondNum);
 insert into TESTTABLE(aString, firstNum, aDate, secondNum, thirdNum, aName)
@@ -98,11 +97,13 @@ CREATE INDEX IDX_USERNAME ON CONFIGUSER(USR_USERNAME);
 --
 -- COUNT(DISTINCT ) when there are no records
 -- bug #718866
+drop table if exists IBANX_PERMIT;
 CREATE TABLE IBANX_PERMIT(ID INT, A1 VARCHAR(10));
 /*r0*/SELECT count(distinct A0.ID) FROM IBANX_PERMIT A0;
 --
 -- use of column aliases in the where clause
 --bug #696595
+drop table if exists "liste";
 CREATE TABLE "liste"("kosten" INT, "preis" INT);
 insert into "liste" values(100, 10);
 /*r100*/SELECT "kosten" AS "total" FROM "liste" WHERE "kosten" > 0 ORDER BY "total" DESC;

@@ -1,6 +1,7 @@
 --
 -- TestSelfJoins.txt
 --
+drop table if exists tsj1
 create table tsj1 (a integer primary key, b integer);
 insert into tsj1 values(5,5);
 insert into tsj1 values(6,6);
@@ -20,10 +21,10 @@ insert into tsj1 values(17,27);
 
 drop table table1 if exists
 create table table1(column1 int not null, column2 varchar(255) not null,
- primary key(column1))
-insert into table1(column1,column2) values(100,'string1')
-insert into table1(column1,column2) values(200,'string2')
-insert into table1(column1,column2) values(300,'string3')
+ primary key(column1));
+insert into table1(column1,column2) values(100,'string1');
+insert into table1(column1,column2) values(200,'string2');
+insert into table1(column1,column2) values(300,'string3');
 /*r3*/select count(1) rows from table1
 /*r0*/select count(1) rows from table1 where column1<300 and column1>=200 and column1<1
 /*r0*/select count(1) rows from table1 where column1<1 and column1<300 and column1>=200
