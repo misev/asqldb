@@ -113,7 +113,7 @@ public class ExpressionAccessor extends Expression {
         }
     }
 
-    public Object getValue(Session session) {
+    public Object getValue(Session session, boolean isRasRoot) {
 
         Object[] array = (Object[]) nodes[LEFT].getValue(session);
 

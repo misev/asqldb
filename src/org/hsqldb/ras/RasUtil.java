@@ -151,6 +151,7 @@ public class RasUtil {
      */
     public static Object executeRasqlQuery(String query) throws HsqlException {
 
+        //todo: make this once per reqest
         RasImplementation impl = new RasImplementation("http://"+SERVER+":"+PORT);
         impl.setUserIdentification(USER, PASSWD);
         Database db = impl.newDatabase();
