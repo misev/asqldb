@@ -658,7 +658,7 @@ public class ExpressionColumn extends Expression {
                     .triggerArguments[rangeVariable.rangePosition][columnIndex];
             }
             case OpTypes.COLUMN : {
-                if (dataType != null && dataType.isCharacterArrayType()) {
+                if (isArrayExpression()) {
                     //parse the rasdaman array contained in this expression
                     if (isRasRoot) {
                         final RasArrayId coid = RasArrayId.parseString(

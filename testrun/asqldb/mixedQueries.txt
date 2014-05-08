@@ -3,6 +3,7 @@
 
 select * from rastest
 select png(coll) from rastest
+select colval(coll) from rastest
 select id, png(coll) as collpath from rastest
 select id, coll[100:200, 30:150] from rastest
 select id, csv(coll[100:200, 3]) from rastest

@@ -87,22 +87,28 @@ public class RasTester {
     }
 
     public void test() {
-        boolean success;
+        boolean success = true;
 
         try {
             Connection conn = getConnection();
 
-            success = dropTables(conn);
 
-            //test setup:
-            success = success && createTables(conn);
-            success = success && insertValues(conn);
+
+            if (testRas) {
+                success = dropTables(conn);
+
+                //test setup:
+                success = success && createTables(conn);
+                success = success && insertValues(conn);
+            }
 
             //test queries:
             success = success && runTests(conn);
 
-            //test cleanup:
-            success = success && dropTables(conn);
+            if (testRas) {
+                //test cleanup:
+                success = success && dropTables(conn);
+            }
         } catch (final SQLException e) {
             throw new RuntimeException("Tests FAILED. SQLExcpetion occured while performing tests.", e);
         }

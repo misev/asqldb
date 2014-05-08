@@ -17,11 +17,6 @@ public class ExpressionAccessorRas extends ExpressionAccessor implements Express
     }
 
     @Override
-    public Object getValue(Session session) {
-        return getValue(session, true);
-    }
-
-    @Override
     public Object getValue(Session session, boolean isRasRoot) {
         final String index = (nodes[RIGHT]==null)?"":("[" + nodes[RIGHT].getValue(session, false) + "]");
         final String colName = nodes[LEFT].getColumnName();
