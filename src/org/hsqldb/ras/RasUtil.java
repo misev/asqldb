@@ -36,12 +36,15 @@ import rasj.RasConnectionFailedException;
 import rasj.RasGMArray;
 import rasj.RasImplementation;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -52,16 +55,56 @@ import java.util.Set;
  */
 public class RasUtil {
 
-    //todo: make this customizable
-    private static final String SERVER = "127.0.0.1";
-    private static final String BASE = "RASBASE";
-    private static final String PORT = "7001";
-    private static final String USER = "rasguest";
-    private static final String PASSWD = "rasguest";
+    private static final String DEFAULT_SERVER = "127.0.0.1";
+    private static final String DEFAULT_BASE = "RASBASE";
+    private static final String DEFAULT_PORT = "7001";
+    private static final String DEFAULT_USER = "rasguest";
+    private static final String DEFAULT_PASSWD = "rasguest";
+
     private static final int RAS_MAX_ATTEMPTS = 5;
     private static final int RAS_TIMEOUT = 1000;
 
+    private static String server;
+    private static String database;
+    private static String port;
+    private static String username;
+    private static String password;
+
     private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
+
+    static {//load properties from config file
+
+        final Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+
+            input = new FileInputStream("config.properties");
+            prop.load(input);
+
+            server = prop.getProperty("ras.server", DEFAULT_SERVER);
+            database = prop.getProperty("ras.database", DEFAULT_BASE);
+            port = prop.getProperty("ras.port", DEFAULT_PORT);
+            username = prop.getProperty("ras.username", DEFAULT_USER);
+            password = prop.getProperty("ras.password", DEFAULT_PASSWD);
+
+        } catch (IOException ex) {
+            System.out.println("RasUtil: Failed to load config file, using default values: " + ex.getMessage());
+            server = DEFAULT_SERVER;
+            database = DEFAULT_BASE;
+            port = DEFAULT_PORT;
+            username = DEFAULT_USER;
+            password = DEFAULT_PASSWD;
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     /**
      * Executes an Hsql multidimensional array query.
@@ -152,8 +195,8 @@ public class RasUtil {
     public static Object executeRasqlQuery(String query) throws HsqlException {
 
         //todo: make this once per reqest
-        RasImplementation impl = new RasImplementation("http://"+SERVER+":"+PORT);
-        impl.setUserIdentification(USER, PASSWD);
+        RasImplementation impl = new RasImplementation("http://"+ server +":"+ port);
+        impl.setUserIdentification(username, password);
         Database db = impl.newDatabase();
         int attempts = 0;
 
@@ -175,7 +218,7 @@ public class RasUtil {
             //Try to obtain a free rasdaman server
             try {
                 log.finer("Opening database ...");
-                db.open(BASE, Database.OPEN_READ_ONLY);
+                db.open(database, Database.OPEN_READ_ONLY);
                 dbOpened = true;
 
                 log.finer("Starting transaction ...");
