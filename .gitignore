@@ -5,3 +5,8 @@ hsqldb.iml
 classes
 out
 tmp
+
+*.array
+*.png
+*.csv
+*.tiff
