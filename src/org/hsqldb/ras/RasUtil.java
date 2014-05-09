@@ -60,6 +60,8 @@ public class RasUtil {
     private static final String DEFAULT_PORT = "7001";
     private static final String DEFAULT_USER = "rasguest";
     private static final String DEFAULT_PASSWD = "rasguest";
+    private static final String DEFAULT_ADMIN_USER = "rasadmin";
+    private static final String DEFAULT_ADMIN_PASSWD = "rasadmin";
 
     private static final int RAS_MAX_ATTEMPTS = 5;
     private static final int RAS_TIMEOUT = 1000;
@@ -67,8 +69,11 @@ public class RasUtil {
     private static String server;
     private static String database;
     private static String port;
-    private static String username;
-    private static String password;
+
+    public static String username;
+    public static String password;
+    public static String adminUsername;
+    public static String adminPassword;
 
     private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
 
@@ -87,6 +92,8 @@ public class RasUtil {
             port = prop.getProperty("ras.port", DEFAULT_PORT);
             username = prop.getProperty("ras.username", DEFAULT_USER);
             password = prop.getProperty("ras.password", DEFAULT_PASSWD);
+            adminUsername = prop.getProperty("ras.admin.username", DEFAULT_ADMIN_USER);
+            adminPassword = prop.getProperty("ras.admin.password", DEFAULT_ADMIN_PASSWD);
 
         } catch (IOException ex) {
             System.out.println("RasUtil: Failed to load config file, using default values: " + ex.getMessage());
@@ -95,6 +102,8 @@ public class RasUtil {
             port = DEFAULT_PORT;
             username = DEFAULT_USER;
             password = DEFAULT_PASSWD;
+            adminUsername = DEFAULT_ADMIN_USER;
+            adminPassword = DEFAULT_ADMIN_PASSWD;
         } finally {
             if (input != null) {
                 try {
@@ -144,7 +153,7 @@ public class RasUtil {
             query = String.format("SELECT %s FROM %s WHERE %s", selector, RasArrayId.stringifyRasCollections(rasArrayIds), RasArrayId.stringifyOids(rasArrayIds));
         }
         System.out.println(query);
-        DBag result = (DBag) executeRasqlQuery(query);
+        DBag result = (DBag) executeRasqlQuery(query, username, password);
 
         final Iterator it = result.iterator();
         if (!(it.hasNext()))
@@ -189,10 +198,12 @@ public class RasUtil {
     /**
      * Execute a RasQL query with specified credentials.
      * @param query The rasql query string.
+     * @param username rasql user
+     * @param password rasql user's password
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */
-    public static Object executeRasqlQuery(String query) throws HsqlException {
+    public static Object executeRasqlQuery(String query, String username, String password) throws HsqlException {
 
         //todo: make this once per reqest
         RasImplementation impl = new RasImplementation("http://"+ server +":"+ port);
@@ -218,7 +229,7 @@ public class RasUtil {
             //Try to obtain a free rasdaman server
             try {
                 log.finer("Opening database ...");
-                db.open(database, Database.OPEN_READ_ONLY);
+                db.open(database, username.equals(adminUsername)?Database.OPEN_READ_WRITE:Database.OPEN_READ_ONLY);
                 dbOpened = true;
 
                 log.finer("Starting transaction ...");

@@ -21,5 +21,11 @@ select id, coll[100:200, id:1+id*10] + 10 from rastest
 select array[x(1:2), y(-1:0)][[1, 2],[3,4]] from rastest
 -- select array[x(1:2), y(-1:0)] values x + y from rastest
 
--- select aggregate + over [x(1:2)] using coll[x, 10] from rastest
+select aggregate + over [x(1:2)] using coll[x, 10] from rastest
+select aggregate - over [x(-1:2), y(1:15)] using coll[x, y] from rastest
+select aggregate min over [x(-1:2), y(1:15)] using coll[x, y+1] from rastest
+select aggregate max over [x(-1:2), y(1:15)] using coll[x+id, y+1] from rastest
+select aggregate and over [x(-1:2), y(1:15)] using coll[x+id, y+1] from rastest
+select aggregate or over [x(-1:2), y(1:15), z(2:4)] using coll[x+id, y+z] from rastest
+
 -- select aggregate + over [x(1:2)] using str[x, 10] from oid

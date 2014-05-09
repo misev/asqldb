@@ -86,11 +86,11 @@ public class RasTester {
         testRas = !config.getBoolean("noras");
     }
 
-    public void test() {
+    public void test() throws SQLException {
         boolean success = true;
-
+        Connection conn = null;
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
 
 
 
@@ -104,13 +104,16 @@ public class RasTester {
 
             //test queries:
             success = success && runTests(conn);
-
+        } catch (final SQLException e) {
+            throw new RuntimeException("Tests FAILED. SQLException occurred while performing tests.", e);
+        }
+        finally {
             if (testRas) {
                 //test cleanup:
-                success = success && dropTables(conn);
+                dropRasCollections();
+                if (conn != null)
+                    success = success && dropTables(conn);
             }
-        } catch (final SQLException e) {
-            throw new RuntimeException("Tests FAILED. SQLExcpetion occured while performing tests.", e);
         }
 
         if (success) {
@@ -127,12 +130,24 @@ public class RasTester {
     }
 
     public boolean insertValues(final Connection conn) throws SQLException {
-        final String oidQuery = "select oid(c) from rgb as c";
-        String oid = RasUtil.executeRasqlQuery(oidQuery).toString();
+        RasUtil.executeRasqlQuery("create collection rastest GreySet",
+                RasUtil.adminUsername, RasUtil.adminPassword);
+        RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:225] values 0c",
+                RasUtil.adminUsername, RasUtil.adminPassword);
+        RasUtil.executeRasqlQuery("create collection rastest2 GreySet",
+                RasUtil.adminUsername, RasUtil.adminPassword);
+        RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:225, 0:225] values 2c",
+                RasUtil.adminUsername, RasUtil.adminPassword);
+
+        String oidQuery = "select oid(c) from rastest as c";
+        String oid = RasUtil.executeRasqlQuery(oidQuery, RasUtil.username, RasUtil.password).toString();
         oid = oid.replaceAll("[\\[\\]]", "");
+        oidQuery = "select oid(c) from rastest2 as c";
+        String oid2 = RasUtil.executeRasqlQuery(oidQuery, RasUtil.username, RasUtil.password).toString();
+        oid2 = oid2.replaceAll("[\\[\\]]", "");
         String[] insertQueries = new String[]{
-                "INSERT INTO RASTEST VALUES(0, ARRAY['rgb:" + Double.valueOf(oid).intValue() + "'])",
-                "INSERT INTO RASTEST VALUES(1, ARRAY['rgb:" + Double.valueOf(oid).intValue() + "'])"
+                "INSERT INTO RASTEST VALUES(0, ARRAY['rastest:" + Double.valueOf(oid).intValue() + "'])",
+                "INSERT INTO RASTEST VALUES(1, ARRAY['rastest2:" + Double.valueOf(oid2).intValue() + "'])"
         };
         for (String query : insertQueries) {
             if (!executeQuery(conn, query, 0))
@@ -189,6 +204,13 @@ public class RasTester {
     public boolean dropTables(final Connection conn) throws SQLException {
         String createString = "drop table if exists RASTEST";
         return executeQuery(conn, createString, 0);
+    }
+
+    public void dropRasCollections() {
+        RasUtil.executeRasqlQuery("drop collection rastest",
+                RasUtil.adminUsername, RasUtil.adminPassword);
+        RasUtil.executeRasqlQuery("drop collection rastest2",
+                RasUtil.adminUsername, RasUtil.adminPassword);
     }
 
     private boolean executeQuery(final Connection conn, final String query, final int line) throws SQLException{
