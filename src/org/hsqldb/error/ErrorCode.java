@@ -703,4 +703,7 @@ public interface ErrorCode {
 
     //error codes for array index parsing
     int RAS_ARRAY_DIMENSION_REQUIRED = 7016;        //Dimension literal required
+
+    //condenser errors
+    int RAS_CONDENSER_INVALID_OP = 7017;            //Invalid condenser operation
 }

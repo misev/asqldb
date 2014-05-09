@@ -2644,7 +2644,9 @@ public class ParserDQL extends ParserBase {
             case Tokens.ARRAY_AGG :
             case Tokens.MEDIAN :
                 return readAggregate();
-
+            //ras array aggregate expression
+            case Tokens.AGGREGATE:
+                return readRasAggregate();
             case Tokens.NEXT : {
                 e = readSequenceExpressionOrNull(OpTypes.SEQUENCE);
 
@@ -2784,6 +2786,39 @@ public class ParserDQL extends ParserBase {
         }
 
         return e;
+    }
+
+    private Expression readRasAggregate() {
+        read();
+        final int type;
+        switch(token.tokenType) {
+            case Tokens.PLUS:
+            case Tokens.MINUS:
+            case Tokens.MIN:
+            case Tokens.MAX:
+            case Tokens.OR:
+            case Tokens.AND:
+                type = token.tokenType;
+                read();
+                break;
+            default:
+                throw Error.error(ErrorCode.RAS_CONDENSER_INVALID_OP, token.tokenString);
+        }
+
+        readThis(Tokens.OVER);
+
+        Expression dimensions = XreadRasArrayDimensionLiteralOrNull();
+
+        readThis(Tokens.USING);
+
+        this.dimensions = (ExpressionRasElementList) dimensions;
+
+        //todo: is this the right read?
+        Expression e = XreadValueExpression();
+
+        this.dimensions = null;
+
+        return new ExpressionRasAggregate(type, dimensions, e);
     }
 
     Expression readNextvalFunction() {
@@ -5337,6 +5372,7 @@ public class ParserDQL extends ParserBase {
                 readThis(Tokens.VALUES);
 
                 dimensions = (ExpressionRasElementList) dimensionList;
+                //todo: right method for more complex expressions
                 value = XreadNumericValueExpression();
                 dimensions = null;
 
