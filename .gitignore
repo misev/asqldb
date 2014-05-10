@@ -10,3 +10,4 @@ tmp
 *.png
 *.csv
 *.tiff
+*.txt.rasql

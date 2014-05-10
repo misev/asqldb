@@ -5,8 +5,11 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.UnflaggedOption;
 import org.hsqldb.ras.RasUtil;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -62,10 +65,43 @@ public class RasTester {
 
         jsap.registerParameter(sw2);
 
+        Switch sw3 = new Switch("benchmark")
+                .setShortFlag('b')
+                .setLongFlag("benchmark");
+        jsap.registerParameter(sw3);
+
+        FlaggedOption opt2 = new FlaggedOption("count")
+                .setStringParser(JSAP.INTEGER_PARSER)
+                .setDefault("10")
+                .setRequired(false)
+                .setShortFlag('n')
+                .setLongFlag("count");
+
+        jsap.registerParameter(opt2);
+
+        UnflaggedOption opt3 = new UnflaggedOption("files")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setDefault("testrun/asqldb/benchmark.txt")
+                .setRequired(false)
+                .setGreedy(true);
+
+        jsap.registerParameter(opt3);
+
         JSAPResult config = jsap.parse(args);
 
         RasTester rasTester = new RasTester(config);
-        rasTester.test();
+        if (config.getBoolean("benchmark")) {
+            final String[] files = config.getStringArray("files");
+            System.out.println("Running benchmarks...");
+            for (String file : files) {
+                final double[] times = rasTester.benchmark(file, config.getInt("count"));
+                System.out.println(String.format(
+                        "asql: %f, rasql: %f - for %s", times[0], times[1], file));
+            }
+
+        } else {
+            rasTester.test();
+        }
 
         // check whether the command line was valid, and if it wasn't,
         // display usage information and exit.
@@ -95,11 +131,7 @@ public class RasTester {
 
 
             if (testRas) {
-                success = dropTables(conn);
-
-                //test setup:
-                success = success && createTables(conn);
-                success = success && insertValues(conn);
+                success = setUp(conn);
             }
 
             //test queries:
@@ -109,10 +141,7 @@ public class RasTester {
         }
         finally {
             if (testRas) {
-                //test cleanup:
-                dropRasCollections();
-                if (conn != null)
-                    success = success && dropTables(conn);
+                tearDown(conn);
             }
         }
 
@@ -121,6 +150,91 @@ public class RasTester {
         } else {
             out.println("Tests FAILED.");
         }
+    }
+
+    public double[] benchmark(final String file, final int n) throws SQLException{
+
+        Connection conn = null;
+        double[] executionTime = new double[]{-1, -1};
+        try {
+            conn = getConnection();
+            setUp(conn);
+
+            List<String> queries;
+            queries = Files.readAllLines(Paths.get(file), Charset.forName("UTF-8"));
+
+            //run once to "warm up" (load classes, etc) and get queries for direct rasql test
+            RasUtil.setQueryOutputStream(new PrintStream(new File(file+".rasql")));
+            benchmarkBlock(conn, queries);
+            RasUtil.setQueryOutputStream(System.out);
+
+            RasUtil.printLog = false;
+            long startTime = System.nanoTime();
+            //start benchmark
+            for (int i=0; i < n; ++i) {
+                benchmarkBlock(conn, queries);
+            }
+            //end benchmark
+            long endTime = System.nanoTime();
+            executionTime[0] = (endTime - startTime)/1000000000.0/n;
+
+
+            //direct rasql queries:
+            queries = Files.readAllLines(Paths.get(file+".rasql"), Charset.forName("UTF-8"));
+            startTime = System.nanoTime();
+            //start benchmark
+            for (int i=0; i < n; ++i) {
+                benchmarkRasqlBlock(queries);
+            }
+            //end benchmark
+            RasUtil.printLog = true;
+            endTime = System.nanoTime();
+            executionTime[1] = (endTime - startTime)/1000000000.0/n;
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException("File "+file+" could not be opened.", e);
+        }
+        finally {
+            tearDown(conn);
+        }
+        return executionTime;
+    }
+
+    private static void benchmarkBlock(final Connection conn, final List<String> queries) throws SQLException {
+        for (final String query : queries) {
+            if (query.isEmpty() || query.startsWith("-"))
+                continue;
+            Statement stmt = null;
+            try {
+                stmt = conn.createStatement();
+                stmt.executeQuery(query);
+            } finally {
+                if (stmt != null) { stmt.close(); }
+            }
+        }
+    }
+
+    private static void benchmarkRasqlBlock(final List<String> queries) throws SQLException {
+        for (final String query : queries) {
+            if (query.isEmpty() || query.startsWith("-"))
+                continue;
+            RasUtil.executeRasqlQuery(query, RasUtil.username,RasUtil.password);
+        }
+    }
+
+    private boolean setUp(final Connection conn) throws SQLException {
+        boolean success = dropTables(conn);
+        success = success && createTables(conn);
+        success = success && insertValues(conn);
+        return success;
+    }
+
+    private boolean tearDown(final Connection conn) throws SQLException {
+        dropRasCollections();
+        return conn == null || dropTables(conn);
     }
 
     public boolean createTables(final Connection conn) throws SQLException {

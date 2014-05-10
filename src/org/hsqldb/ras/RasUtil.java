@@ -41,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,6 +67,8 @@ public class RasUtil {
     private static final int RAS_MAX_ATTEMPTS = 5;
     private static final int RAS_TIMEOUT = 1000;
 
+    private static PrintStream queryOutputStream = System.out;
+
     private static String server;
     private static String database;
     private static String port;
@@ -74,6 +77,8 @@ public class RasUtil {
     public static String password;
     public static String adminUsername;
     public static String adminPassword;
+
+    public static boolean printLog = true;
 
     private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
 
@@ -152,7 +157,7 @@ public class RasUtil {
         } else {
             query = String.format("SELECT %s FROM %s WHERE %s", selector, RasArrayId.stringifyRasCollections(rasArrayIds), RasArrayId.stringifyOids(rasArrayIds));
         }
-        System.out.println(query);
+        if(printLog) queryOutputStream.println(query);
         DBag result = (DBag) executeRasqlQuery(query, username, password);
 
         final Iterator it = result.iterator();
@@ -228,24 +233,24 @@ public class RasUtil {
 
             //Try to obtain a free rasdaman server
             try {
-                log.finer("Opening database ...");
+                if(printLog) log.finer("Opening database ...");
                 db.open(database, username.equals(adminUsername)?Database.OPEN_READ_WRITE:Database.OPEN_READ_ONLY);
                 dbOpened = true;
 
-                log.finer("Starting transaction ...");
+                if(printLog) log.finer("Starting transaction ...");
                 tr = impl.newTransaction();
                 tr.begin();
 
-                log.finer("Instantiating query ...");
+                if(printLog) log.finer("Instantiating query ...");
                 OQLQuery q = impl.newOQLQuery();
 
                 //A free rasdaman server was obtained, executing query
                 try {
                     q.create(query);
-                    log.finer("Executing query "+ query);
+                    if(printLog) log.finer("Executing query "+ query);
                     ret = q.execute();
 
-                    log.finer("Committing transaction ...");
+                    if(printLog) log.finer("Committing transaction ...");
                     tr.commit();
                     queryCompleted = true;
                 } catch (QueryException ex) {
@@ -263,10 +268,10 @@ public class RasUtil {
 
                     //Done connection with rasdaman, closing database.
                     try {
-                        log.finer("Closing database ...");
+                        if(printLog) log.finer("Closing database ...");
                         db.close();
                     } catch (ODMGException ex) {
-                        log.info("Error closing database connection: ", ex);
+                        if(printLog) log.info("Error closing database connection: ", ex);
                     }
                 }
             } catch(RasConnectionFailedException ex) {
@@ -279,7 +284,7 @@ public class RasUtil {
                     try {
                         db.close();
                     } catch(ODMGException e) {
-                        log.info("Error closing database connection: ", e);
+                        if(printLog) log.info("Error closing database connection: ", e);
                     }
                 dbOpened = false;
                 if(!(attempts < RAS_MAX_ATTEMPTS))
@@ -291,7 +296,7 @@ public class RasUtil {
                 try {
                     Thread.sleep(RAS_TIMEOUT);
                 } catch(InterruptedException e) {
-                    log.error("Thread " + Thread.currentThread().getName() +
+                    if(printLog) log.error("Thread " + Thread.currentThread().getName() +
                             " was interrupted while searching a free server.");
                     throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, query);
                 }
@@ -301,7 +306,7 @@ public class RasUtil {
                 //and a connection could not be established. Return
                 //an exception indicating Rasdaman is unavailable.
 
-                log.info("A Rasdaman request could not be fulfilled since no "+
+                if(printLog) log.info("A Rasdaman request could not be fulfilled since no "+
                         "free Rasdaman server were available. Consider adjusting "+
                         "the values of rasdaman_retry_attempts and rasdaman_retry_timeout "+
                         "or adding more Rasdaman servers.",ex);
@@ -329,5 +334,9 @@ public class RasUtil {
      */
     public static Object[] stringToObjectArray(String str) {
         return new Object[]{str};
+    }
+
+    public static void setQueryOutputStream(PrintStream newStream) {
+        queryOutputStream = newStream;
     }
 }
