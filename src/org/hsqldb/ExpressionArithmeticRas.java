@@ -22,18 +22,6 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic
 
     ExpressionArithmeticRas(int type, Expression e) {
         super(type, e);
-
-        nodes       = new Expression[UNARY];
-        nodes[LEFT] = e;
-
-        switch (opType) {
-
-            case OpTypes.NEGATE :
-                return;
-
-            default :
-                throw Error.runtimeError(ErrorCode.U_S0500, "ExpressionRas");
-        }
     }
 
     @Override
