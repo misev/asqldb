@@ -744,6 +744,19 @@ examples:
 
     </target>
 
+    <target name="rasbenchmark" depends="classes16" description="Benchmarks the system.">
+        <java fork="true" classname="org.hsqldb.ras.tests.RasTester">
+            <classpath>
+                <!--<pathelement location="${servletapi.lib}"/>-->
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/JSAP-2.1.jar" />
+                <pathelement location="classes" />
+            </classpath>
+            <arg line="--benchmark"/>
+        </java>
+
+    </target>
+
 
 
     <target name="buildrun" depends="hsqldb" description="Runs the ">
