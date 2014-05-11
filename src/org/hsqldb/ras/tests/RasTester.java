@@ -96,7 +96,7 @@ public class RasTester {
             for (String file : files) {
                 final double[] times = rasTester.benchmark(file, config.getInt("count"));
                 System.out.println(String.format(
-                        "asql: %f, rasql: %f - for %s", times[0], times[1], file));
+                        "asql: %f, rasql: %f, without closing: %f - for %s", times[0], times[1], times[2], file));
             }
 
         } else {
@@ -155,7 +155,7 @@ public class RasTester {
     public double[] benchmark(final String file, final int n) throws SQLException{
 
         Connection conn = null;
-        double[] executionTime = new double[]{-1, -1};
+        double[] executionTime = new double[]{-1, -1, -1};
         try {
             conn = getConnection();
             setUp(conn);
@@ -184,12 +184,24 @@ public class RasTester {
             startTime = System.nanoTime();
             //start benchmark
             for (int i=0; i < n; ++i) {
-                benchmarkRasqlBlock(queries);
+                benchmarkRasqlBlock(queries, true);
             }
             //end benchmark
             RasUtil.printLog = true;
             endTime = System.nanoTime();
             executionTime[1] = (endTime - startTime)/1000000000.0/n;
+
+            //direct rasql queries without closing db in between
+            startTime = System.nanoTime();
+            //start benchmark
+            for (int i=0; i < n; ++i) {
+                benchmarkRasqlBlock(queries, false);
+            }
+            RasUtil.closeDatabase();
+            //end benchmark
+            RasUtil.printLog = true;
+            endTime = System.nanoTime();
+            executionTime[2] = (endTime - startTime)/1000000000.0/n;
 
 
         } catch (FileNotFoundException e) {
@@ -217,12 +229,13 @@ public class RasTester {
         }
     }
 
-    private static void benchmarkRasqlBlock(final List<String> queries) throws SQLException {
+    private static void benchmarkRasqlBlock(final List<String> queries, final boolean closeWhenDone) throws SQLException {
         for (final String query : queries) {
             if (query.isEmpty() || query.startsWith("-"))
                 continue;
-            RasUtil.executeRasqlQuery(query, RasUtil.username,RasUtil.password);
+            RasUtil.executeRasqlQuery(query, closeWhenDone, false);
         }
+
     }
 
     private boolean setUp(final Connection conn) throws SQLException {
@@ -240,28 +253,33 @@ public class RasTester {
     public boolean createTables(final Connection conn) throws SQLException {
         String createString =
                 "create table RASTEST (ID integer NOT NULL, COLL varchar(40) ARRAY NOT NULL, PRIMARY KEY (ID))";
-        return executeQuery(conn, createString, 0);
+        String createString2 =
+                "create table RASTEST2 (ID integer NOT NULL, COLL varchar(40) ARRAY NOT NULL, COLL2 varchar(40) ARRAY NOT NULL, PRIMARY KEY (ID))";
+        return executeQuery(conn, createString, 0) && executeQuery(conn, createString2, 0);
     }
 
     public boolean insertValues(final Connection conn) throws SQLException {
+        RasUtil.openDatabase(RasUtil.adminUsername, RasUtil.adminPassword, true);
         RasUtil.executeRasqlQuery("create collection rastest GreySet",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                false, false);
         RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:225] values 0c",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                false, false);
         RasUtil.executeRasqlQuery("create collection rastest2 GreySet",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                false, false);
         RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:225, 0:225] values 2c",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                true, false);
 
         String oidQuery = "select oid(c) from rastest as c";
-        String oid = RasUtil.executeRasqlQuery(oidQuery, RasUtil.username, RasUtil.password).toString();
+        String oid = RasUtil.executeRasqlQuery(oidQuery, true, false).toString();
         oid = oid.replaceAll("[\\[\\]]", "");
         oidQuery = "select oid(c) from rastest2 as c";
-        String oid2 = RasUtil.executeRasqlQuery(oidQuery, RasUtil.username, RasUtil.password).toString();
+        String oid2 = RasUtil.executeRasqlQuery(oidQuery, true, false).toString();
         oid2 = oid2.replaceAll("[\\[\\]]", "");
         String[] insertQueries = new String[]{
                 "INSERT INTO RASTEST VALUES(0, ARRAY['rastest:" + Double.valueOf(oid).intValue() + "'])",
-                "INSERT INTO RASTEST VALUES(1, ARRAY['rastest2:" + Double.valueOf(oid2).intValue() + "'])"
+                "INSERT INTO RASTEST VALUES(1, ARRAY['rastest2:" + Double.valueOf(oid2).intValue() + "'])",
+                "INSERT INTO RASTEST2 VALUES(0, ARRAY['rastest:" + Double.valueOf(oid).intValue() + "'], ARRAY['rastest2:" + Double.valueOf(oid2).intValue() + "'])",
+                "INSERT INTO RASTEST2 VALUES(1, ARRAY['rastest2:" + Double.valueOf(oid2).intValue() + "'], ARRAY['rastest:" + Double.valueOf(oid).intValue() + "'])"
         };
         for (String query : insertQueries) {
             if (!executeQuery(conn, query, 0))
@@ -316,15 +334,17 @@ public class RasTester {
     }
 
     public boolean dropTables(final Connection conn) throws SQLException {
-        String createString = "drop table if exists RASTEST";
-        return executeQuery(conn, createString, 0);
+        String dropString = "drop table if exists RASTEST";
+        String dropString2 = "drop table if exists RASTEST2";
+        return executeQuery(conn, dropString, 0) && executeQuery(conn, dropString2, 0);
     }
 
     public void dropRasCollections() {
+        RasUtil.openDatabase(RasUtil.adminUsername, RasUtil.adminPassword, true);
         RasUtil.executeRasqlQuery("drop collection rastest",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                false, true);
         RasUtil.executeRasqlQuery("drop collection rastest2",
-                RasUtil.adminUsername, RasUtil.adminPassword);
+                true, true);
     }
 
     private boolean executeQuery(final Connection conn, final String query, final int line) throws SQLException{
