@@ -59,6 +59,7 @@ import org.hsqldb.navigator.RowSetNavigatorClient;
 import org.hsqldb.persist.HsqlDatabaseProperties;
 import org.hsqldb.persist.HsqlProperties;
 import org.hsqldb.persist.PersistentStore;
+import org.hsqldb.ras.RasUtil;
 import org.hsqldb.result.Result;
 import org.hsqldb.result.ResultConstants;
 import org.hsqldb.result.ResultLob;
@@ -1005,7 +1006,13 @@ public class Session implements SessionInterface {
                 return result;
             }
             case ResultConstants.EXECDIRECT : {
-                Result result = executeDirectStatement(cmd);
+                Result result;
+                try {
+                     result = executeDirectStatement(cmd);
+                } finally {
+                    //close the Rasdaman database here
+                    RasUtil.closeDatabase();
+                }
 
                 result = performPostExecute(cmd, result);
 

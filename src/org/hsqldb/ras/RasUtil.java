@@ -120,6 +120,9 @@ public class RasUtil {
         }
     }
 
+    private static Database db = null;
+    private static RasImplementation rasImplementation = null;
+
     /**
      * Executes an Hsql multidimensional array query.
      * @param selector Selector string with rasql expressions
@@ -158,7 +161,10 @@ public class RasUtil {
             query = String.format("SELECT %s FROM %s WHERE %s", selector, RasArrayId.stringifyRasCollections(rasArrayIds), RasArrayId.stringifyOids(rasArrayIds));
         }
         if(printLog) queryOutputStream.println(query);
-        DBag result = (DBag) executeRasqlQuery(query, username, password);
+
+        //important: rasdaman database is close in the session.execute method,
+        //aka after the entire query is executed
+        DBag result = (DBag) executeRasqlQuery(query, false, false);
 
         final Iterator it = result.iterator();
         if (!(it.hasNext()))
@@ -200,97 +206,41 @@ public class RasUtil {
         }
     }
 
-    /**
-     * Execute a RasQL query with specified credentials.
-     * @param query The rasql query string.
-     * @param username rasql user
-     * @param password rasql user's password
-     * @return result object.
-     * @throws org.hsqldb.HsqlException
-     */
-    public static Object executeRasqlQuery(String query, String username, String password) throws HsqlException {
+    public static void openDatabase(final String username, final String password,
+                                    final boolean writeAccess) throws HsqlException{
+        if (db!= null)
+            closeDatabase();
+        rasImplementation = new RasImplementation("http://"+ server +":"+ port);
+        rasImplementation.setUserIdentification(username, password);
 
-        //todo: make this once per reqest
-        RasImplementation impl = new RasImplementation("http://"+ server +":"+ port);
-        impl.setUserIdentification(username, password);
-        Database db = impl.newDatabase();
+
+        db = rasImplementation.newDatabase();
         int attempts = 0;
-
-        //The result of the query will be assigned to ret
-        //Should always return a result (empty result possible)
-        //since a RasdamanException will be thrown in case of error
-        Object ret=null;
-
-        Transaction tr;
 
         //Try to connect until the maximum number of attempts is reached
         //This loop handles connection attempts to a saturated rasdaman
         //complex which will refuse the connection until a server becomes
         //available.
-        boolean queryCompleted = false, dbOpened = false;
+        boolean dbOpened = false;
 
-        while(!queryCompleted) {
+        while(!dbOpened) {
 
             //Try to obtain a free rasdaman server
             try {
                 if(printLog) log.finer("Opening database ...");
-                db.open(database, username.equals(adminUsername)?Database.OPEN_READ_WRITE:Database.OPEN_READ_ONLY);
+                db.open(database, writeAccess ? Database.OPEN_READ_WRITE : Database.OPEN_READ_ONLY);
                 dbOpened = true;
-
-                if(printLog) log.finer("Starting transaction ...");
-                tr = impl.newTransaction();
-                tr.begin();
-
-                if(printLog) log.finer("Instantiating query ...");
-                OQLQuery q = impl.newOQLQuery();
-
-                //A free rasdaman server was obtained, executing query
-                try {
-                    q.create(query);
-                    if(printLog) log.finer("Executing query "+ query);
-                    ret = q.execute();
-
-                    if(printLog) log.finer("Committing transaction ...");
-                    tr.commit();
-                    queryCompleted = true;
-                } catch (QueryException ex) {
-                    //Executing a rasdaman query failed
-                    tr.abort();
-                    throw Error.error(ex, ErrorCode.RAS_QUERY, query);
-                } catch (java.lang.Error ex) {
-                    tr.abort();
-                    throw Error.error(ErrorCode.RAS_OVERLOAD, query);
-                } catch(NullPointerException ex) {
-                    //there is a rasj bug that throws a NullPointerException for queries that retrieve scalars
-                    tr.abort();
-                    throw Error.error(ErrorCode.RAS_RASJ_BUG, query);
-                } finally {
-
-                    //Done connection with rasdaman, closing database.
-                    try {
-                        if(printLog) log.finer("Closing database ...");
-                        db.close();
-                    } catch (ODMGException ex) {
-                        if(printLog) log.info("Error closing database connection: ", ex);
-                    }
-                }
             } catch(RasConnectionFailedException ex) {
 
                 //A connection with a Rasdaman server could not be established
                 //retry shortly unless connection attempts exceeded the maximum
                 //possible connection attempts.
                 attempts++;
-                if(dbOpened)
-                    try {
-                        db.close();
-                    } catch(ODMGException e) {
-                        if(printLog) log.info("Error closing database connection: ", e);
-                    }
                 dbOpened = false;
                 if(!(attempts < RAS_MAX_ATTEMPTS))
                     //Throw a RasConnectionFailedException if the connection
                     //attempts exceeds the maximum connection attempts.
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, query);
+                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
 
                 //Sleep before trying to open another connection
                 try {
@@ -298,7 +248,7 @@ public class RasUtil {
                 } catch(InterruptedException e) {
                     if(printLog) log.error("Thread " + Thread.currentThread().getName() +
                             " was interrupted while searching a free server.");
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, query);
+                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
                 }
             } catch(ODMGException ex) {
 
@@ -310,8 +260,79 @@ public class RasUtil {
                         "free Rasdaman server were available. Consider adjusting "+
                         "the values of rasdaman_retry_attempts and rasdaman_retry_timeout "+
                         "or adding more Rasdaman servers.",ex);
-                throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, query);
+                throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
             }
+        }
+    }
+
+    public static void closeDatabase() throws HsqlException {
+        try {
+            if(printLog) log.finer("Closing database ...");
+            if (db != null)
+                db.close();
+            else
+                System.out.println("Db was already closed.");
+        } catch (ODMGException ex) {
+            if(printLog) log.info("Error closing database connection: ", ex);
+            ex.printStackTrace();
+        }
+        rasImplementation = null;
+        db = null;
+    }
+
+    /**
+     * Execute a RasQL query with specified credentials.
+     *
+     * Note: if closeWhenDone is false, you need to take care of closing the database!
+     * @param query The rasql query string.
+     * @param closeWhenDone whether the database should be close when the query is completed
+     * @param ignoreFailedQuery
+     * @return result object.
+     * @throws org.hsqldb.HsqlException
+     */
+    public static Object executeRasqlQuery(final String query, boolean closeWhenDone, boolean ignoreFailedQuery) throws HsqlException {
+
+        if (rasImplementation == null || db == null)
+            openDatabase(username, password, false);
+
+        //The result of the query will be assigned to ret
+        //Should always return a result (empty result possible)
+        //since a RasdamanException will be thrown in case of error
+        Object ret=null;
+
+        Transaction tr;
+
+        if(printLog) log.finer("Starting transaction ...");
+        tr = rasImplementation.newTransaction();
+        tr.begin();
+
+        if(printLog) log.finer("Instantiating query ...");
+        OQLQuery q = rasImplementation.newOQLQuery();
+
+        //A free rasdaman server was obtained, executing query
+        try {
+            q.create(query);
+            if(printLog) log.finer("Executing query "+ query);
+            ret = q.execute();
+
+            if(printLog) log.finer("Committing transaction ...");
+            tr.commit();
+        } catch (QueryException ex) {
+            //Executing a rasdaman query failed
+            tr.abort();
+            if (!ignoreFailedQuery)
+                throw Error.error(ex, ErrorCode.RAS_QUERY, query);
+        } catch (java.lang.Error ex) {
+            tr.abort();
+            throw Error.error(ErrorCode.RAS_OVERLOAD, query);
+        } catch(NullPointerException ex) {
+            //there is a rasj bug that throws a NullPointerException for queries that retrieve scalars
+            tr.abort();
+            throw Error.error(ErrorCode.RAS_RASJ_BUG, query);
+        }
+        finally {
+            if (closeWhenDone)
+                closeDatabase();
         }
         return ret;
     }
