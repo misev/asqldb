@@ -706,4 +706,6 @@ public interface ErrorCode {
 
     //condenser errors
     int RAS_CONDENSER_INVALID_OP = 7017;            //Invalid condenser operation
+
+    int RAS_CONNECTION = 7018;                     // Rasdaman connection error
 }

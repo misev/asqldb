@@ -295,9 +295,9 @@ public class RasUtil {
                 db.close();
             else
                 System.out.println("Db was already closed.");
-        } catch (ODMGException ex) {
+        } catch (final Exception ex) {
             if(printLog) log.info("Error closing database connection: ", ex);
-            ex.printStackTrace();
+            throw Error.error(ex, ErrorCode.RAS_CONNECTION, "Count not close database");
         }
         rasImplementation = null;
         db = null;
