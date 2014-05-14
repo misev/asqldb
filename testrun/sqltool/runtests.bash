@@ -54,6 +54,8 @@ case "$SCRIPTDIR" in *?/.) SCRIPTDIR="${SCRIPTDIR%/.}"; esac
 
 cd "$SCRIPTDIR"
 
+export CLASSPATH=$CLASSPATH:$(cd ../../lib; pwd)/rasj.jar
+
 scriptsString=
 while [ $# -gt 0 ]; do
     scriptsString="$scriptsString$1"
