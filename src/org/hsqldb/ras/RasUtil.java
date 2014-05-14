@@ -32,6 +32,7 @@ import org.odmg.ODMGException;
 import org.odmg.OQLQuery;
 import org.odmg.QueryException;
 import org.odmg.Transaction;
+import rasj.RasClientInternalException;
 import rasj.RasConnectionFailedException;
 import rasj.RasGMArray;
 import rasj.RasImplementation;
@@ -68,6 +69,9 @@ public class RasUtil {
     private static final int RAS_TIMEOUT = 1000;
 
     private static PrintStream queryOutputStream = System.out;
+
+    private static Database db = null;
+    private static RasImplementation rasImplementation = null;
 
     private static String server;
     private static String database;
@@ -119,9 +123,6 @@ public class RasUtil {
             }
         }
     }
-
-    private static Database db = null;
-    private static RasImplementation rasImplementation = null;
 
     /**
      * Executes an Hsql multidimensional array query.
@@ -261,6 +262,28 @@ public class RasUtil {
                         "the values of rasdaman_retry_attempts and rasdaman_retry_timeout "+
                         "or adding more Rasdaman servers.",ex);
                 throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+            } catch (RasClientInternalException ex) {
+                //A connection with a Rasdaman server could not be established
+                //retry shortly unless connection attempts exceeded the maximum
+                //possible connection attempts.
+                System.out.println("WARNING: internal ras client exception..., "+attempts+" attempts");
+                attempts++;
+                dbOpened = false;
+                if(!(attempts < RAS_MAX_ATTEMPTS))
+                    //Throw a RasConnectionFailedException if the connection
+                    //attempts exceeds the maximum connection attempts.
+                {
+                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts + " attempts");
+                }
+
+                //Sleep before trying to open another connection
+                try {
+                    Thread.sleep(RAS_TIMEOUT);
+                } catch(InterruptedException e) {
+                    if(printLog) log.error("Thread " + Thread.currentThread().getName() +
+                            " was interrupted while searching a free server.");
+                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+                }
             }
         }
     }
@@ -286,7 +309,7 @@ public class RasUtil {
      * Note: if closeWhenDone is false, you need to take care of closing the database!
      * @param query The rasql query string.
      * @param closeWhenDone whether the database should be close when the query is completed
-     * @param ignoreFailedQuery
+     * @param ignoreFailedQuery if true, a failed query will be silently ignored
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */

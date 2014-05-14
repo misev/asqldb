@@ -81,7 +81,7 @@ public class RasTester {
 
         UnflaggedOption opt3 = new UnflaggedOption("files")
                 .setStringParser(JSAP.STRING_PARSER)
-                .setDefault("testrun/asqldb/benchmark.txt")
+                .setDefault("testrun/asqldb/benchmark2.txt")
                 .setRequired(false)
                 .setGreedy(true);
 
@@ -93,10 +93,15 @@ public class RasTester {
         if (config.getBoolean("benchmark")) {
             final String[] files = config.getStringArray("files");
             System.out.println("Running benchmarks...");
-            for (String file : files) {
-                final double[] times = rasTester.benchmark(file, config.getInt("count"));
+            final double[][] times = new double[files.length][];
+            for (int i = 0, filesLength = files.length; i < filesLength; i++) {
+                String file = files[i];
+                times[i] = rasTester.benchmark(file, config.getInt("count"));
+            }
+            for (int i = 0, timesLength = times.length; i < timesLength; i++) {
+                final double[] time = times[i];
                 System.out.println(String.format(
-                        "asql: %f, rasql: %f, without closing: %f - for %s", times[0], times[1], times[2], file));
+                        "asql: %f, rasql: %f, without closing: %f - for %s", time[0], time[1], time[2], files[i]));
             }
 
         } else {
