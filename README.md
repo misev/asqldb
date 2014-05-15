@@ -13,16 +13,17 @@ Example
 =======
 Suppose we have a table in ASQLDB:
 
-  CREATE TABLE Arrays (
-    id INTEGER PRIMARY KEY,
-    acquired DATE,
-    array VARCHAR(20) ARRAY
-  );
+    CREATE TABLE Arrays (
+      id INTEGER PRIMARY KEY,
+      acquired DATE,
+      array VARCHAR(20) ARRAY
+    );
 
 To publish an array object in collection MYCOLL, with OID = 100, then in Arrays
 we would insert the following:
 
-  INSERT INTO Arrays VALUES (1, '2014-01-22', ARRAY['MYCOLL:100']);
+    INSERT INTO Arrays
+    VALUES (1, '2014-01-22', ARRAY['MYCOLL:100']);
 
 In SELECT queries then we can do advanced array processing on the array column,
 and even combine it with other non-array columns. The rasql syntax
