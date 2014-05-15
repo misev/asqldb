@@ -33,8 +33,14 @@ we would insert the following:
     VALUES (1, '2014-01-22', ARRAY['MYCOLL:100']);
 
 In SELECT queries then we can do advanced array processing on the array column,
-and even combine it with other non-array columns. The rasql syntax
-(http://rasdaman.org/ for more details) is mostly supported as is.
+and even combine it with other non-array columns, e.g.
+
+    SELECT acquired, avg_cells(array[0:100, 50:200]) * id
+    FROM Arrays
+
+The rasql syntax (http://rasdaman.org/ for more details) is mostly supported as
+is, with subtle keyword differences, like `ARRAY` instead of `MARRAY`, and
+`AGGREGATE` instead of `CONDENSE`.
 
 Todo
 ====
