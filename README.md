@@ -9,6 +9,13 @@ Currently only SELECT queries are supported. An array has to be inserted
 directly into rasdaman first, and then published in ASQLDB by inserting it's
 OID in a VARCHAR ARRAY column.
 
+Getting started
+===============
+* Configure the rasdaman connection: `editor config.properties`
+* Go to the build directory: `cd build`, and
+ * Build the jar file: `ant hsqldb`
+ * Run the GUI tool: `ant run`
+
 Example
 =======
 Suppose we have a table in ASQLDB:
