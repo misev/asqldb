@@ -344,7 +344,7 @@ public class RangeVariableResolver {
                 return arg1;
             }
 
-            e = new ExpressionLogical(OpTypes.OR, arg1, arg2);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.OR, arg1, arg2);
 
             return e;
         }

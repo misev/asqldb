@@ -906,7 +906,27 @@ public class Tokens {
     static final String        T_RAS_JPEG         = "JPEG";
     static final String        T_RAS_BMP          = "BMP";
 
-    static final String        T_RAS_COLVAL       = "COLVAL";
+    static final String        T_RAS_SDOM         = "SDOM";
+    static final String        T_RAS_ADD_CELLS    = "ADD_CELLS";
+    static final String        T_RAS_ALL_CELLS    = "ALL_CELLS";
+    static final String        T_RAS_AVG_CELLS    = "AVG_CELLS";
+    static final String        T_RAS_COUNT_CELLS  = "COUNT_CELLS";
+    static final String        T_RAS_MAX_CELLS    = "MAX_CELLS";
+    static final String        T_RAS_MIN_CELLS    = "MIN_CELLS";
+    static final String        T_RAS_SOME_CELLS   = "SOME_CELLS";
+    static final String        T_RAS_ARCCOS       = "ARCCOS";
+    static final String        T_RAS_ARCSIN       = "ARCSIN";
+    static final String        T_RAS_ARCTAN       = "ARCTAN";
+    static final String        T_RAS_BIT          = "BIT";
+    static final String        T_RAS_COMPLEX      = "COMPLEX";
+    static final String        T_RAS_COSH         = "COSH";
+    static final String        T_RAS_DIVIDE       = "DIVIDE";
+    static final String        T_RAS_MODULO       = "MODULO";
+    static final String        T_RAS_POW          = "POW";
+    static final String        T_RAS_SINH         = "SINH";
+    static final String        T_RAS_TANH         = "TANH";
+    static final String        T_RAS_SHIFT        = "SHIFT";
+    static final String        T_RAS_EXTEND       = "EXTEND";
 
     //
     static final String T_ISOLATION_LEVEL         = "ISOLATION_LEVEL";
@@ -1795,8 +1815,27 @@ public class Tokens {
     public static final int RAS_JPEG                   = 1003;
     public static final int RAS_BMP                    = 1004;
 
-    public static final int RAS_COLVAL                 = 1005;
-
+    public static final int RAS_SDOM                   = 1005;
+    public static final int RAS_ADD_CELLS              = 1006;
+    public static final int RAS_ALL_CELLS              = 1007;
+    public static final int RAS_AVG_CELLS              = 1008;
+    public static final int RAS_COUNT_CELLS            = 1009;
+    public static final int RAS_MAX_CELLS              = 1010;
+    public static final int RAS_MIN_CELLS              = 1011;
+    public static final int RAS_SOME_CELLS             = 1012;
+    public static final int RAS_ARCCOS                 = 1013;
+    public static final int RAS_ARCSIN                 = 1014;
+    public static final int RAS_ARCTAN                 = 1015;
+    public static final int RAS_BIT                    = 1016;
+    public static final int RAS_COMPLEX                = 1017;
+    public static final int RAS_COSH                   = 1018;
+    public static final int RAS_DIVIDE                 = 1019;
+    public static final int RAS_MODULO                 = 1020;
+    public static final int RAS_POW                    = 1021;
+    public static final int RAS_SINH                   = 1022;
+    public static final int RAS_TANH                   = 1023;
+    public static final int RAS_SHIFT                  = 1024;
+    public static final int RAS_EXTEND                 = 1025;
 
     //
     public static final int X_UNKNOWN_TOKEN = -1;
@@ -2139,7 +2178,27 @@ public class Tokens {
         reservedKeys.put(Tokens.T_RAS_JPEG, RAS_JPEG);
         reservedKeys.put(Tokens.T_RAS_BMP, RAS_BMP);
 
-        reservedKeys.put(Tokens.T_RAS_COLVAL, RAS_COLVAL);
+        reservedKeys.put(Tokens.T_RAS_SDOM, RAS_SDOM);
+        reservedKeys.put(Tokens.T_RAS_ADD_CELLS, RAS_ADD_CELLS);
+        reservedKeys.put(Tokens.T_RAS_ALL_CELLS, RAS_ALL_CELLS);
+        reservedKeys.put(Tokens.T_RAS_AVG_CELLS, RAS_AVG_CELLS);
+        reservedKeys.put(Tokens.T_RAS_COUNT_CELLS, RAS_COUNT_CELLS);
+        reservedKeys.put(Tokens.T_RAS_MAX_CELLS, RAS_MAX_CELLS);
+        reservedKeys.put(Tokens.T_RAS_MIN_CELLS, RAS_MIN_CELLS);
+        reservedKeys.put(Tokens.T_RAS_SOME_CELLS, RAS_SOME_CELLS);
+        reservedKeys.put(Tokens.T_RAS_ARCCOS, RAS_ARCCOS);
+        reservedKeys.put(Tokens.T_RAS_ARCSIN, RAS_ARCSIN);
+        reservedKeys.put(Tokens.T_RAS_ARCTAN, RAS_ARCTAN);
+        reservedKeys.put(Tokens.T_RAS_BIT, RAS_BIT);
+        reservedKeys.put(Tokens.T_RAS_COMPLEX, RAS_COMPLEX);
+        reservedKeys.put(Tokens.T_RAS_COSH, RAS_COSH);
+        reservedKeys.put(Tokens.T_RAS_DIVIDE, RAS_DIVIDE);
+        reservedKeys.put(Tokens.T_RAS_MODULO, RAS_MODULO);
+        reservedKeys.put(Tokens.T_RAS_POW, RAS_POW);
+        reservedKeys.put(Tokens.T_RAS_SINH, RAS_SINH);
+        reservedKeys.put(Tokens.T_RAS_TANH, RAS_TANH);
+        reservedKeys.put(Tokens.T_RAS_SHIFT, RAS_SHIFT);
+        reservedKeys.put(Tokens.T_RAS_EXTEND, RAS_EXTEND);
     }
 
     private static final IntValueHashMap commandSet = new IntValueHashMap(299);

@@ -284,7 +284,7 @@ public final class ExpressionLike extends ExpressionLogical {
         }
 
         if (likeObject.isEquivalentToNotNullPredicate()) {
-            Expression notNull = new ExpressionLogical(OpTypes.IS_NULL,
+            Expression notNull = createExpressionLogical(OpTypes.IS_NULL,
                 nodes[LEFT]);
 
             opType      = OpTypes.NOT;
@@ -304,7 +304,7 @@ public final class ExpressionLike extends ExpressionLogical {
 
             Expression cast = new ExpressionOp(OpTypes.PREFIX, nodes[LEFT],
                                                prefix);
-            Expression equ = new ExpressionLogical(OpTypes.EQUAL, cast,
+            Expression equ = createExpressionLogical(OpTypes.EQUAL, cast,
                                                    prefix);
 
             equ = new ExpressionLogical(OpTypes.GREATER_EQUAL_PRE,

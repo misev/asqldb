@@ -3071,7 +3071,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadAllTypesTerm(boole);
-            e = boole ? (Expression) new ExpressionLogical(type, a, e)
+            e = boole ? (Expression) ExpressionLogical.createExpressionLogical(type, a, e)
                       : ExpressionArithmetic.createBinary(type, a, e);
         }
 
@@ -3124,7 +3124,7 @@ public class ParserDQL extends ParserBase {
                 throw unexpectedToken();
             }
 
-            e = boole ? (Expression) new ExpressionLogical(type, a, e)
+            e = boole ? (Expression) ExpressionLogical.createExpressionLogical(type, a, e)
                       : ExpressionArithmetic.createBinary(type, a, e);
         }
 
@@ -3189,11 +3189,11 @@ public class ParserDQL extends ParserBase {
         }
 
         if (unknown) {
-            e = new ExpressionLogical(OpTypes.IS_NULL, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, e);
         } else if (minus) {
             e = ExpressionArithmetic.createUnary(OpTypes.NEGATE, e);
         } else if (not) {
-            e = new ExpressionLogical(OpTypes.NOT, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
         }
 
         return e;
@@ -3563,7 +3563,7 @@ public class ParserDQL extends ParserBase {
                     throw Error.error(ErrorCode.X_42568);
                 }
 
-                e = new ExpressionLogical(type, a, e);
+                e = ExpressionLogical.createExpressionLogical(type, a, e);
             }
 
             if (e == null) {
@@ -3610,7 +3610,7 @@ public class ParserDQL extends ParserBase {
                 throw unexpectedToken();
             }
 
-            e = new ExpressionLogical(type, a, e);
+            e = ExpressionLogical.createExpressionLogical(type, a, e);
         }
 
         return e;
@@ -3634,7 +3634,7 @@ public class ParserDQL extends ParserBase {
         }
 
         if (not) {
-            e = new ExpressionLogical(OpTypes.NOT, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
         }
 
         return e;
@@ -3675,11 +3675,11 @@ public class ParserDQL extends ParserBase {
         }
 
         if (unknown) {
-            e = new ExpressionLogical(OpTypes.IS_NULL, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, e);
         }
 
         if (isNot) {
-            e = new ExpressionLogical(OpTypes.NOT, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
         }
 
         return e;
@@ -3788,14 +3788,14 @@ public class ParserDQL extends ParserBase {
 
                 Expression s = XreadTableSubquery(OpTypes.EXISTS);
 
-                return new ExpressionLogical(OpTypes.EXISTS, s);
+                return ExpressionLogical.createExpressionLogical(OpTypes.EXISTS, s);
             }
             case Tokens.UNIQUE : {
                 read();
 
                 Expression s = XreadTableSubquery(OpTypes.UNIQUE);
 
-                return new ExpressionLogical(OpTypes.UNIQUE, s);
+                return ExpressionLogical.createExpressionLogical(OpTypes.UNIQUE, s);
             }
             default : {
                 Expression a = XreadRowValuePredicand();
@@ -3837,10 +3837,10 @@ public class ParserDQL extends ParserBase {
                     read();
 
                     if (hasNot) {
-                        e      = new ExpressionLogical(OpTypes.IS_NOT_NULL, l);
+                        e      = ExpressionLogical.createExpressionLogical(OpTypes.IS_NOT_NULL, l);
                         hasNot = false;
                     } else {
-                        e = new ExpressionLogical(OpTypes.IS_NULL, l);
+                        e = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, l);
                     }
 
                     break;
@@ -3851,7 +3851,7 @@ public class ParserDQL extends ParserBase {
                     readThis(Tokens.FROM);
 
                     r      = XreadRowValuePredicand();
-                    e      = new ExpressionLogical(OpTypes.NOT_DISTINCT, l, r);
+                    e      = ExpressionLogical.createExpressionLogical(OpTypes.NOT_DISTINCT, l, r);
                     hasNot = !hasNot;
 
                     break;
@@ -3912,7 +3912,7 @@ public class ParserDQL extends ParserBase {
                     default : {
                         Expression row = XreadRowValuePredicand();
 
-                        e = new ExpressionLogical(type, l, row);
+                        e = ExpressionLogical.createExpressionLogical(type, l, row);
 
                         break;
                     }
@@ -3935,7 +3935,7 @@ public class ParserDQL extends ParserBase {
         }
 
         if (hasNot) {
-            e = new ExpressionLogical(OpTypes.NOT, e);
+            e = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
         }
 
         return e;
@@ -3961,18 +3961,18 @@ public class ParserDQL extends ParserBase {
         readThis(Tokens.AND);
 
         Expression right = XreadRowValuePredicand();
-        Expression l = new ExpressionLogical(OpTypes.GREATER_EQUAL, a, left);
-        Expression r = new ExpressionLogical(OpTypes.SMALLER_EQUAL, a, right);
-        ExpressionLogical leftToRight = new ExpressionLogical(OpTypes.AND, l,
-            r);
+        Expression l = ExpressionLogical.createExpressionLogical(OpTypes.GREATER_EQUAL, a, left);
+        Expression r = ExpressionLogical.createExpressionLogical(OpTypes.SMALLER_EQUAL, a, right);
+        ExpressionLogical leftToRight = ExpressionLogical.createExpressionLogical(OpTypes.AND, l,
+                r);
 
         if (symmetric) {
-            l = new ExpressionLogical(OpTypes.SMALLER_EQUAL, a, left);
-            r = new ExpressionLogical(OpTypes.GREATER_EQUAL, a, right);
+            l = ExpressionLogical.createExpressionLogical(OpTypes.SMALLER_EQUAL, a, left);
+            r = ExpressionLogical.createExpressionLogical(OpTypes.GREATER_EQUAL, a, right);
 
-            Expression rightToLeft = new ExpressionLogical(OpTypes.AND, l, r);
+            Expression rightToLeft = ExpressionLogical.createExpressionLogical(OpTypes.AND, l, r);
 
-            return new ExpressionLogical(OpTypes.OR, leftToRight, rightToLeft);
+            return ExpressionLogical.createExpressionLogical(OpTypes.OR, leftToRight, rightToLeft);
         } else {
             return leftToRight;
         }
@@ -4031,7 +4031,7 @@ public class ParserDQL extends ParserBase {
                 readFilterClause(e);
         }
 
-        ExpressionLogical r = new ExpressionLogical(exprType, l, e);
+        ExpressionLogical r = ExpressionLogical.createExpressionLogical(exprType, l, e);
 
         r.setSubType(exprSubType);
 
@@ -4086,9 +4086,9 @@ public class ParserDQL extends ParserBase {
         ExpressionLogical r;
 
         if (isCheckOrTriggerCondition) {
-            r = new ExpressionLogical(OpTypes.IN, l, e);
+            r = ExpressionLogical.createExpressionLogical(OpTypes.IN, l, e);
         } else {
-            r = new ExpressionLogical(OpTypes.EQUAL, l, e);
+            r = ExpressionLogical.createExpressionLogical(OpTypes.EQUAL, l, e);
 
             r.setSubType(OpTypes.ANY_QUANTIFIED);
         }
@@ -4201,7 +4201,7 @@ public class ParserDQL extends ParserBase {
                                    : OpTypes.IN;
         Expression s    = XreadTableSubquery(mode);
 
-        return new ExpressionLogical(matchType, a, s);
+        return ExpressionLogical.createExpressionLogical(matchType, a, s);
     }
 
     private ExpressionLogical XreadOverlapsPredicateRightPart(Expression l) {
@@ -4226,7 +4226,7 @@ public class ParserDQL extends ParserBase {
             throw Error.error(ErrorCode.X_42564);
         }
 
-        return new ExpressionLogical(OpTypes.OVERLAPS, l, r);
+        return ExpressionLogical.createExpressionLogical(OpTypes.OVERLAPS, l, r);
     }
 
     Expression XreadRowValueExpression() {
@@ -5072,8 +5072,8 @@ public class ParserDQL extends ParserBase {
                 if (condition == null) {
                     condition = newCondition;
                 } else {
-                    condition = new ExpressionLogical(OpTypes.OR, condition,
-                                                      newCondition);
+                    condition = ExpressionLogical.createExpressionLogical(OpTypes.OR, condition,
+                            newCondition);
                 }
 
                 if (token.tokenType == Tokens.COMMA) {
@@ -5511,8 +5511,8 @@ public class ParserDQL extends ParserBase {
                 break;
             }
 
-            Expression l = new ExpressionLogical(OpTypes.NOT_DISTINCT, main,
-                                                 v);
+            Expression l = ExpressionLogical.createExpressionLogical(OpTypes.NOT_DISTINCT, main,
+                    v);
             Expression r = XreadValueExpression();
             Expression a = new ExpressionOp(OpTypes.ALTERNATIVE, r, null);
             Expression c = new ExpressionOp(OpTypes.CASEWHEN, l, a);
@@ -5685,7 +5685,7 @@ public class ParserDQL extends ParserBase {
             return r;
         }
 
-        Expression l = new ExpressionLogical(opType, e, r);
+        Expression l = ExpressionLogical.createExpressionLogical(opType, e, r);
         Expression a = new ExpressionOp(OpTypes.ALTERNATIVE, e, r);
 
         return new ExpressionOp(OpTypes.CASEWHEN, l, a);
@@ -5734,7 +5734,7 @@ public class ParserDQL extends ParserBase {
         readThis(Tokens.COMMA);
 
         Expression e           = XreadValueExpression();
-        Expression condition   = new ExpressionLogical(OpTypes.IS_NULL, c);
+        Expression condition   = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, c);
         Expression alternative = new ExpressionOp(OpTypes.ALTERNATIVE, e, c);
 
         c = new ExpressionOp(OpTypes.CASEWHEN, condition, alternative);
@@ -5769,7 +5769,7 @@ public class ParserDQL extends ParserBase {
         readThis(Tokens.COMMA);
 
         Expression e2          = XreadValueExpression();
-        Expression condition   = new ExpressionLogical(OpTypes.IS_NULL, c);
+        Expression condition   = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, c);
         Expression alternative = new ExpressionOp(OpTypes.ALTERNATIVE, e2, e1);
 
         c = new ExpressionOp(OpTypes.CASEWHEN, condition, alternative);
@@ -5802,8 +5802,8 @@ public class ParserDQL extends ParserBase {
                 break;
             }
 
-            Expression condition = new ExpressionLogical(OpTypes.IS_NULL,
-                current);
+            Expression condition = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL,
+                    current);
             Expression alternatives = new ExpressionOp(OpTypes.ALTERNATIVE,
                 new ExpressionValue((Object) null, (Type) null), current);
             Expression casewhen = new ExpressionOp(OpTypes.CASEWHEN,

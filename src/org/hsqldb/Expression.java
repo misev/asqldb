@@ -1747,7 +1747,7 @@ public class Expression implements Cloneable {
             throw Error.error(ErrorCode.X_42568);
         }
 
-        Expression condition = new ExpressionLogical(OpTypes.NOT, e);
+        Expression condition = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
 
         s.addSelectColumnExpression(EXPR_TRUE);
         s.addRangeVariable(session, range);

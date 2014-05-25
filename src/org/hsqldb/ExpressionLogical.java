@@ -224,8 +224,16 @@ public class ExpressionLogical extends Expression {
 
         Expression e = new ExpressionColumn(column);
 
-        e           = new ExpressionLogical(OpTypes.IS_NULL, e);
+        e           = createExpressionLogical(OpTypes.IS_NULL, e);
         nodes[LEFT] = e;
+    }
+
+    static ExpressionLogical createExpressionLogical(int type, Expression left, Expression right) {
+        return new ExpressionLogicalRas(type, left, right);
+    }
+
+    static ExpressionLogical createExpressionLogical(int type, Expression e) {
+        return new ExpressionLogicalRas(type, e);
     }
 
     void setEqualityMode() {
@@ -281,9 +289,9 @@ public class ExpressionLogical extends Expression {
      */
     static ExpressionLogical newNotNullCondition(Expression e) {
 
-        e = new ExpressionLogical(OpTypes.IS_NULL, e);
+        e = createExpressionLogical(OpTypes.IS_NULL, e);
 
-        return new ExpressionLogical(OpTypes.NOT, e);
+        return createExpressionLogical(OpTypes.NOT, e);
     }
 
     // logical ops
@@ -306,7 +314,7 @@ public class ExpressionLogical extends Expression {
             return e1;
         }
 
-        return new ExpressionLogical(OpTypes.AND, e1, e2);
+        return createExpressionLogical(OpTypes.AND, e1, e2);
     }
 
     static Expression orExpressions(Expression e1, Expression e2) {
@@ -323,7 +331,7 @@ public class ExpressionLogical extends Expression {
             return e1;
         }
 
-        return new ExpressionLogical(OpTypes.OR, e1, e2);
+        return createExpressionLogical(OpTypes.OR, e1, e2);
     }
 
     public void addLeftColumnsForAllAny(RangeVariable range,
@@ -729,11 +737,11 @@ public class ExpressionLogical extends Expression {
                         for (int i = 0; i < sourceNodes.length; i++) {
                             Expression node;
 
-                            node = new ExpressionLogical(OpTypes.IS_NULL,
+                            node = createExpressionLogical(OpTypes.IS_NULL,
                                                          sourceNodes[i]);
 
                             if (opType == OpTypes.IS_NOT_NULL) {
-                                node = new ExpressionLogical(OpTypes.NOT,
+                                node = createExpressionLogical(OpTypes.NOT,
                                                              node);
                             }
 
@@ -763,7 +771,7 @@ public class ExpressionLogical extends Expression {
                         if (opType == OpTypes.IS_NOT_NULL) {
                             Expression node;
 
-                            node = new ExpressionLogical(OpTypes.IS_NULL,
+                            node = createExpressionLogical(OpTypes.IS_NULL,
                                                          nodes[LEFT]);
                             nodes[LEFT] = node;
                             opType      = OpTypes.NOT;
@@ -1185,7 +1193,8 @@ public class ExpressionLogical extends Expression {
         resolveTypesForAllAny(session);
     }
 
-    public Object getValue(Session session) {
+    @Override
+    public Object getValue(final Session session, final boolean isRasRoot) {
 
         switch (opType) {
 
@@ -1892,7 +1901,7 @@ public class ExpressionLogical extends Expression {
         if (nodes[LEFT].opType == OpTypes.AND) {
             opType = OpTypes.AND;
 
-            Expression temp = new ExpressionLogical(OpTypes.OR,
+            Expression temp = createExpressionLogical(OpTypes.OR,
                 nodes[LEFT].nodes[RIGHT], nodes[RIGHT]);
 
             nodes[LEFT].opType       = OpTypes.OR;

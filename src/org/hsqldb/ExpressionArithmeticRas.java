@@ -26,6 +26,9 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic
 
     @Override
     public Object getValue(Session session, boolean isRoot) {
+        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+            return super.getValue(session, isRoot);
+        }
         switch (opType) {
             case OpTypes.VALUE :
                 return valueData;
@@ -74,77 +77,14 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic
 
     @Override
     public void resolveTypes(Session session, Expression parent) {
-
         for (Expression node : nodes) {
             if (node != null) {
                 node.resolveTypes(session, this);
             }
         }
-    }
-
-
-    public String getSQL() {
-
-        StringBuilder sb = new StringBuilder();
-
-        switch (opType) {
-
-            case OpTypes.VALUE :
-                if (valueData == null) {
-                    return Tokens.T_NULL;
-                }
-
-                if (dataType == null) {
-                    throw Error.runtimeError(ErrorCode.U_S0500, "Expression");
-                }
-
-                return dataType.convertToSQLString(valueData);
+        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+            super.resolveTypes(session, parent);
         }
-
-        String left  = getContextSQL(nodes.length > 0 ? nodes[LEFT]
-                : null);
-        String right = getContextSQL(nodes.length > 1 ? nodes[RIGHT]
-                : null);
-
-        switch (opType) {
-
-            case OpTypes.CAST :
-                sb.append(' ').append(Tokens.T_CAST).append('(');
-                sb.append(left).append(' ').append(Tokens.T_AS).append(' ');
-                sb.append(dataType.getTypeDefinition());
-                sb.append(')');
-                break;
-
-            case OpTypes.NEGATE :
-                sb.append('-').append(left);
-                break;
-
-            case OpTypes.ADD :
-                sb.append(left).append('+').append(right);
-                break;
-
-            case OpTypes.SUBTRACT :
-                sb.append(left).append('-').append(right);
-                break;
-
-            case OpTypes.MULTIPLY :
-                sb.append(left).append('*').append(right);
-                break;
-
-            case OpTypes.DIVIDE :
-                sb.append(left).append('/').append(right);
-                break;
-
-            case OpTypes.CONCAT :
-                sb.append(left).append("||").append(right);
-                break;
-
-            default :
-                throw Error.runtimeError(ErrorCode.U_S0500, "Expression");
-        }
-
-        return sb.toString();
     }
-
 
 }

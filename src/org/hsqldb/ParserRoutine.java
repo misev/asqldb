@@ -2032,8 +2032,8 @@ public class ParserRoutine extends ParserDML {
                 if (condition == null) {
                     condition = newCondition;
                 } else {
-                    condition = new ExpressionLogical(OpTypes.OR, condition,
-                                                      newCondition);
+                    condition = ExpressionLogical.createExpressionLogical(OpTypes.OR, condition,
+                            newCondition);
                 }
 
                 if (token.tokenType == Tokens.COMMA) {

@@ -97,10 +97,7 @@ public class ExpressionArithmetic extends Expression {
      * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
      */
     static ExpressionArithmetic createBinary(final int type, final Expression left, final Expression right) {
-        if (left.isArrayExpression() || right.isArrayExpression()) {
-            return new ExpressionArithmeticRas(type, left, right);
-        }
-        return new ExpressionArithmetic(type, left, right);
+        return new ExpressionArithmeticRas(type, left, right);
     }
 
     /**

@@ -1852,8 +1852,8 @@ public class RangeVariable {
                 case OpTypes.SMALLER_EQUAL : {
                     Expression e = exprList[0].getLeftNode();
 
-                    e = new ExpressionLogical(OpTypes.IS_NULL, e);
-                    e               = new ExpressionLogical(OpTypes.NOT, e);
+                    e = ExpressionLogical.createExpressionLogical(OpTypes.IS_NULL, e);
+                    e               = ExpressionLogical.createExpressionLogical(OpTypes.NOT, e);
                     indexCond[0]    = e;
                     indexEndCond[0] = indexEndCondition = exprList[0];
                     opTypeEnd       = opType;

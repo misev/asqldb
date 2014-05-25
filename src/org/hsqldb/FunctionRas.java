@@ -22,9 +22,27 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
     private static final int FUNC_RAS_JPEG              = 203;
     private static final int FUNC_RAS_BMP               = 204;
 
-    //function to get the string oid value of an array column
-    private static final int FUNC_RAS_COLVAL            = 205;
-
+    private static final int FUNC_RAS_SDOM              = 205;
+    private static final int FUNC_RAS_ADD_CELLS         = 206;
+    private static final int FUNC_RAS_ALL_CELLS         = 207;
+    private static final int FUNC_RAS_AVG_CELLS         = 208;
+    private static final int FUNC_RAS_COUNT_CELLS       = 209;
+    private static final int FUNC_RAS_MAX_CELLS         = 210;
+    private static final int FUNC_RAS_MIN_CELLS         = 211;
+    private static final int FUNC_RAS_SOME_CELLS        = 212;
+    private static final int FUNC_RAS_ARCCOS            = 213;
+    private static final int FUNC_RAS_ARCSIN            = 214;
+    private static final int FUNC_RAS_ARCTAN            = 215;
+    private static final int FUNC_RAS_BIT               = 216;
+    private static final int FUNC_RAS_COMPLEX           = 217;
+    private static final int FUNC_RAS_COSH              = 218;
+    private static final int FUNC_RAS_DIVIDE            = 219;
+    private static final int FUNC_RAS_MODULO            = 220;
+    private static final int FUNC_RAS_POW               = 221;
+    private static final int FUNC_RAS_SINH              = 222;
+    private static final int FUNC_RAS_TANH              = 223;
+    private static final int FUNC_RAS_SHIFT             = 224;
+    private static final int FUNC_RAS_EXTEND            = 225;
 
 
     static final IntKeyIntValueHashMap rasFuncMap =
@@ -37,7 +55,27 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         rasFuncMap.put(Tokens.RAS_JPEG, FUNC_RAS_JPEG);
         rasFuncMap.put(Tokens.RAS_BMP, FUNC_RAS_BMP);
 
-        rasFuncMap.put(Tokens.RAS_COLVAL, FUNC_RAS_COLVAL);
+        rasFuncMap.put(Tokens.RAS_SDOM, FUNC_RAS_SDOM);
+        rasFuncMap.put(Tokens.RAS_ADD_CELLS, FUNC_RAS_ADD_CELLS);
+        rasFuncMap.put(Tokens.RAS_ALL_CELLS, FUNC_RAS_ALL_CELLS);
+        rasFuncMap.put(Tokens.RAS_AVG_CELLS, FUNC_RAS_AVG_CELLS);
+        rasFuncMap.put(Tokens.RAS_COUNT_CELLS, FUNC_RAS_COUNT_CELLS);
+        rasFuncMap.put(Tokens.RAS_MAX_CELLS, FUNC_RAS_MAX_CELLS);
+        rasFuncMap.put(Tokens.RAS_MIN_CELLS, FUNC_RAS_MIN_CELLS);
+        rasFuncMap.put(Tokens.RAS_SOME_CELLS, FUNC_RAS_SOME_CELLS);
+        rasFuncMap.put(Tokens.RAS_ARCCOS, FUNC_RAS_ARCCOS);
+        rasFuncMap.put(Tokens.RAS_ARCSIN, FUNC_RAS_ARCSIN);
+        rasFuncMap.put(Tokens.RAS_ARCTAN, FUNC_RAS_ARCTAN);
+        rasFuncMap.put(Tokens.RAS_BIT, FUNC_RAS_BIT);
+        rasFuncMap.put(Tokens.RAS_COMPLEX, FUNC_RAS_COMPLEX);
+        rasFuncMap.put(Tokens.RAS_COSH, FUNC_RAS_COSH);
+        rasFuncMap.put(Tokens.RAS_DIVIDE, FUNC_RAS_DIVIDE);
+        rasFuncMap.put(Tokens.RAS_MODULO, FUNC_RAS_MODULO);
+        rasFuncMap.put(Tokens.RAS_POW, FUNC_RAS_POW);
+        rasFuncMap.put(Tokens.RAS_SINH, FUNC_RAS_SINH);
+        rasFuncMap.put(Tokens.RAS_TANH, FUNC_RAS_TANH);
+        rasFuncMap.put(Tokens.RAS_SHIFT, FUNC_RAS_SHIFT);
+        rasFuncMap.put(Tokens.RAS_EXTEND, FUNC_RAS_EXTEND);
     }
 
     protected FunctionRas(int id) {
@@ -50,8 +88,30 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_CSV:
             case FUNC_RAS_JPEG:
             case FUNC_RAS_BMP:
-            case FUNC_RAS_COLVAL:
+            case FUNC_RAS_SDOM:
+            case FUNC_RAS_ADD_CELLS:
+            case FUNC_RAS_ALL_CELLS:
+            case FUNC_RAS_AVG_CELLS:
+            case FUNC_RAS_COUNT_CELLS:
+            case FUNC_RAS_MAX_CELLS:
+            case FUNC_RAS_MIN_CELLS:
+            case FUNC_RAS_SOME_CELLS:
+            case FUNC_RAS_ARCCOS:
+            case FUNC_RAS_ARCSIN:
+            case FUNC_RAS_ARCTAN:
+            case FUNC_RAS_COSH:
+            case FUNC_RAS_SINH:
+            case FUNC_RAS_TANH:
                 parseList = singleParamList;
+                break;
+            case FUNC_RAS_BIT:
+            case FUNC_RAS_COMPLEX:
+            case FUNC_RAS_DIVIDE:
+            case FUNC_RAS_MODULO:
+            case FUNC_RAS_POW:
+            case FUNC_RAS_SHIFT:
+            case FUNC_RAS_EXTEND:
+                parseList = doubleParamList;
                 break;
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
@@ -74,9 +134,32 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             }
         }
 
-        switch (opType) {
-            case FUNC_RAS_COLVAL:
-                this.dataType = Type.SQL_VARCHAR;
+        switch (funcType) {
+            case FUNC_RAS_SDOM:
+            case FUNC_RAS_SHIFT:
+            case FUNC_RAS_EXTEND:
+                dataType = Type.SQL_VARCHAR;
+                break;
+            case FUNC_RAS_ADD_CELLS:
+            case FUNC_RAS_ALL_CELLS:
+            case FUNC_RAS_AVG_CELLS:
+            case FUNC_RAS_COUNT_CELLS:
+            case FUNC_RAS_MAX_CELLS:
+            case FUNC_RAS_MIN_CELLS:
+            case FUNC_RAS_SOME_CELLS:
+                dataType = Type.SQL_INTEGER;
+                break;
+            case FUNC_RAS_ARCCOS:
+            case FUNC_RAS_ARCSIN:
+            case FUNC_RAS_ARCTAN:
+            case FUNC_RAS_COSH:
+            case FUNC_RAS_SINH:
+            case FUNC_RAS_TANH:
+            case FUNC_RAS_DIVIDE:
+            case FUNC_RAS_MODULO:
+            case FUNC_RAS_POW:
+                dataType = Type.SQL_DECIMAL;
+                break;
         }
     }
 
@@ -104,11 +187,23 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_JPEG:
             case FUNC_RAS_BMP:
                 return getConversionFunctionValue(session);
+            case FUNC_RAS_ADD_CELLS:
+            case FUNC_RAS_ALL_CELLS:
+            case FUNC_RAS_AVG_CELLS:
+            case FUNC_RAS_COUNT_CELLS:
+            case FUNC_RAS_MAX_CELLS:
+            case FUNC_RAS_MIN_CELLS:
+            case FUNC_RAS_SOME_CELLS:
+            case FUNC_RAS_ARCCOS:
+            case FUNC_RAS_ARCSIN:
+            case FUNC_RAS_ARCTAN:
+            case FUNC_RAS_COSH:
+            case FUNC_RAS_SINH:
+            case FUNC_RAS_TANH:
+                return getSingleParamFunctionValue(session);
+            case FUNC_RAS_SDOM:
+                return RasUtil.executeHsqlArrayQuery("sdom("+nodes[0].getValue(session, false)+")");
 
-            case FUNC_RAS_COLVAL:
-                if (!(nodes[0] instanceof ExpressionColumn))
-                    throw Error.error(ErrorCode.RAS_INVALID_PARAMETER, nodes[0].getClass().getSimpleName()+" expected: ExpressionColumn");
-                return RasUtil.objectArrayToString(((ExpressionColumn) nodes[0]).getHsqlColumnValue(session));
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
         }
@@ -140,5 +235,69 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
 
         }
+    }
+
+    private Number getSingleParamFunctionValue(final Session session) {
+        final Object argValue = nodes[0].getValue(session, false);
+        boolean isInt = true;
+        String function = null;
+        switch(funcType) {
+            case FUNC_RAS_ADD_CELLS:
+                function = Tokens.T_RAS_ADD_CELLS;
+                break;
+            case FUNC_RAS_ALL_CELLS:
+                function = Tokens.T_RAS_ALL_CELLS;
+                break;
+            case FUNC_RAS_AVG_CELLS:
+                function = Tokens.T_RAS_AVG_CELLS;
+                isInt = false;
+                break;
+            case FUNC_RAS_COUNT_CELLS:
+                function = Tokens.T_RAS_COUNT_CELLS;
+                break;
+            case FUNC_RAS_MAX_CELLS:
+                function = Tokens.T_RAS_MAX_CELLS;
+                break;
+            case FUNC_RAS_MIN_CELLS:
+                function = Tokens.T_RAS_MIN_CELLS;
+                break;
+            case FUNC_RAS_SOME_CELLS:
+                function = Tokens.T_RAS_SOME_CELLS;
+                break;
+            case FUNC_RAS_ARCCOS:
+                function = Tokens.T_RAS_ARCCOS;
+                isInt = false;
+                break;
+            case FUNC_RAS_ARCSIN:
+                function = Tokens.T_RAS_ARCSIN;
+                isInt = false;
+                break;
+            case FUNC_RAS_ARCTAN:
+                function = Tokens.T_RAS_ARCTAN;
+                isInt = false;
+                break;
+            case FUNC_RAS_COSH:
+                function = Tokens.T_RAS_COSH;
+                isInt = false;
+                break;
+            case FUNC_RAS_SINH:
+                function = Tokens.T_RAS_SINH;
+                isInt = false;
+                break;
+            case FUNC_RAS_TANH:
+                function = Tokens.T_RAS_TANH;
+                isInt = false;
+                break;
+
+        }
+        if (function != null) {
+            final String ret = RasUtil.executeHsqlArrayQuery(String.format("%s(%s)", function, argValue),
+                    nodes[0].extractRasArrayIds(session));
+            if (isInt)
+                return Integer.valueOf(ret);
+            else
+                return Double.valueOf(ret);
+        }
+        throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function");
     }
 }

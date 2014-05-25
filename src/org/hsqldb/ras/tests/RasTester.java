@@ -277,11 +277,11 @@ public class RasTester {
         try {
             RasUtil.executeRasqlQuery("create collection rastest GreySet",
                     false, false);
-            RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:225] values 0c",
+            RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:250] values 1c",
                     false, false);
             RasUtil.executeRasqlQuery("create collection rastest2 GreySet",
                     false, false);
-            RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:225, 0:225] values 2c",
+            RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:250, 0:250] values 2c",
                     true, false);
         } catch (Exception e) {
             e.printStackTrace();

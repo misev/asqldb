@@ -3,6 +3,7 @@ package org.hsqldb;
 import org.hsqldb.ras.ExpressionRas;
 import org.hsqldb.ras.RasArrayId;
 import org.hsqldb.ras.RasUtil;
+import org.hsqldb.types.Type;
 
 import java.util.Set;
 
@@ -14,6 +15,12 @@ public class ExpressionAccessorRas extends ExpressionAccessor implements Express
 
     ExpressionAccessorRas(Expression left, Expression right) {
         super(left, right);
+    }
+
+    @Override
+    public void resolveTypes(final Session session, final Expression parent) {
+        nodes[LEFT].resolveTypes(session, this);
+        dataType = Type.SQL_VARCHAR;
     }
 
     @Override

@@ -46,7 +46,7 @@ public class ExpressionRasArrayConstructor extends Expression implements Express
                 node.resolveTypes(session, this);
             }
         }
-        dataType = new ArrayType(Type.SQL_VARCHAR, 1);
+        dataType = Type.SQL_VARCHAR;
     }
 
     @Override

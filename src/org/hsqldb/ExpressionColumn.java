@@ -103,6 +103,7 @@ public class ExpressionColumn extends Expression {
 
     //
     boolean isParam;
+    private boolean arrayColumn = false;
 
     //
 
@@ -163,6 +164,11 @@ public class ExpressionColumn extends Expression {
             columnName = rownumName.name;
             dataType   = Type.SQL_INTEGER;
         }
+    }
+
+    @Override
+    public boolean isArrayExpression() {
+        return super.isArrayExpression() || arrayColumn;
     }
 
     /**
@@ -633,6 +639,11 @@ public class ExpressionColumn extends Expression {
 
                 break;
             }
+            case OpTypes.COLUMN:
+                if (isArrayExpression()) {
+                    this.arrayColumn = true;
+                    dataType = Type.SQL_VARCHAR;
+                }
         }
     }
 
@@ -662,11 +673,10 @@ public class ExpressionColumn extends Expression {
                     //parse the rasdaman array contained in this expression
                     if (isRasRoot) {
                         final RasArrayId coid = RasArrayId.parseString(
-                                RasUtil.objectArrayToString(getHsqlColumnValue(session)), this.getColumnName());
-                        return RasUtil.stringToObjectArray(
-                                RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid));
+                                (String) getHsqlColumnValue(session), this.getColumnName());
+                        return RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid);
                     } else {
-                        return RasUtil.stringToObjectArray(this.getColumnName());
+                        return this.getColumnName();
                     }
                 }
                 return getHsqlColumnValue(session);
@@ -730,7 +740,7 @@ public class ExpressionColumn extends Expression {
                 iterators[rangeVariable.rangePosition].getCurrent(
                         columnIndex);
 
-        if (dataType != column.dataType) {
+        if (!isArrayExpression() && dataType != column.dataType) {
             value = dataType.convertToType(session, value,
                     column.dataType);
         }
@@ -746,7 +756,7 @@ public class ExpressionColumn extends Expression {
     @Override
     public java.util.Set<RasArrayId> extractRasArrayIds(Session session) {
         java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
-        if (dataType != null && dataType.isCharacterArrayType()) {
+        if (isArrayExpression()) {
             rasArrayIds.add(RasArrayId.parseString(
                     RasUtil.objectArrayToString(getHsqlColumnValue(session)), getColumnName()));
         }
