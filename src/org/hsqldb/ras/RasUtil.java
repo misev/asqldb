@@ -291,10 +291,9 @@ public class RasUtil {
     public static void closeDatabase() throws HsqlException {
         try {
             if(printLog) log.finer("Closing database ...");
-            if (db != null)
+            if (db != null) {
                 db.close();
-            else
-                System.out.println("Db was already closed.");
+            }
         } catch (final Exception ex) {
             if(printLog) log.info("Error closing database connection: ", ex);
             throw Error.error(ex, ErrorCode.RAS_CONNECTION, "Count not close database");
