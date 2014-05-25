@@ -1,0 +1,1 @@
+select sin(coll) from rastest;

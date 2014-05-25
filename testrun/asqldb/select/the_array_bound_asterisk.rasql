@@ -1,0 +1,1 @@
+select coll[ 50:*, *:200 ] from rastest;

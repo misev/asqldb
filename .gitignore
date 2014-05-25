@@ -5,7 +5,9 @@ hsqldb.iml
 classes
 out
 tmp
+testrun/sqltool/.gradle/
 
+*.DS_Store
 *.array
 *.png
 *.csv

@@ -1,0 +1,1 @@
+select scale( coll, 0.5 ) from rastest;

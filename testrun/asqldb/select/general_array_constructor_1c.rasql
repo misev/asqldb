@@ -1,0 +1,1 @@
+select array [ x(1,100), y(-50:200) ] values 1c from rastest;

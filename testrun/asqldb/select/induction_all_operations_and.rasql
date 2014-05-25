@@ -1,0 +1,1 @@
+select coll and coll2 from rastest2;

@@ -1,0 +1,1 @@
+select bit(coll, 1) from rastest;

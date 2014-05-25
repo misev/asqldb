@@ -70,6 +70,12 @@ public class RasTester {
                 .setLongFlag("benchmark");
         jsap.registerParameter(sw3);
 
+        Switch sw4 = new Switch("setup")
+                .setShortFlag(JSAP.NO_SHORTFLAG)
+                .setLongFlag("setup");
+
+        jsap.registerParameter(sw4);
+
         FlaggedOption opt2 = new FlaggedOption("count")
                 .setStringParser(JSAP.INTEGER_PARSER)
                 .setDefault("10")
@@ -81,7 +87,7 @@ public class RasTester {
 
         UnflaggedOption opt3 = new UnflaggedOption("files")
                 .setStringParser(JSAP.STRING_PARSER)
-                .setDefault("testrun/asqldb/benchmark2.txt")
+                .setDefault("testrun/asqldb/benchmark.txt")
                 .setRequired(false)
                 .setGreedy(true);
 
@@ -90,7 +96,10 @@ public class RasTester {
         JSAPResult config = jsap.parse(args);
 
         RasTester rasTester = new RasTester(config);
-        if (config.getBoolean("benchmark")) {
+        if (config.getBoolean("setup")) {
+            final Connection connection = rasTester.getConnection();
+            rasTester.setUp(connection);
+        } else if (config.getBoolean("benchmark")) {
             final String[] files = config.getStringArray("files");
             System.out.println("Running benchmarks...");
             final double[][] times = new double[files.length][];
@@ -265,14 +274,18 @@ public class RasTester {
 
     public boolean insertValues(final Connection conn) throws SQLException {
         RasUtil.openDatabase(RasUtil.adminUsername, RasUtil.adminPassword, true);
-        RasUtil.executeRasqlQuery("create collection rastest GreySet",
-                false, false);
-        RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:225] values 0c",
-                false, false);
-        RasUtil.executeRasqlQuery("create collection rastest2 GreySet",
-                false, false);
-        RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:225, 0:225] values 2c",
-                true, false);
+        try {
+            RasUtil.executeRasqlQuery("create collection rastest GreySet",
+                    false, false);
+            RasUtil.executeRasqlQuery("insert into rastest values marray x in [0:250, 0:225] values 0c",
+                    false, false);
+            RasUtil.executeRasqlQuery("create collection rastest2 GreySet",
+                    false, false);
+            RasUtil.executeRasqlQuery("insert into rastest2 values marray x in [0:225, 0:225] values 2c",
+                    true, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         String oidQuery = "select oid(c) from rastest as c";
         String oid = RasUtil.executeRasqlQuery(oidQuery, true, false).toString();
