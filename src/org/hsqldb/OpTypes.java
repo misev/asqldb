@@ -124,10 +124,12 @@ public interface OpTypes {
         ARRAY_INDEX_LIST          = 200, //rasdaman operations
         ARRAY_ELEMENT_LIST        = 201,
         ARRAY_RANGE               = 202,
-        ARRAY_DIMENSION           = 203,
-        ARRAY_DIMENSION_LIST      = 204,
-        ARRAY_CONSTRUCTOR_LITERAL = 205,
-        ARRAY_CONSTRUCTOR_VALUE   = 206,
-        ARRAY_VALUE_VARIABLE      = 207
+        ARRAY_RANGE_ASTERISK      = 203,
+        ARRAY_DIMENSION           = 204,
+        ARRAY_DIMENSION_LIST      = 205,
+        ARRAY_DIMENSION_SDOM      = 206,
+        ARRAY_CONSTRUCTOR_LITERAL = 207,
+        ARRAY_CONSTRUCTOR_VALUE   = 208,
+        ARRAY_VALUE_VARIABLE      = 209
     ;
 }

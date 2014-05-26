@@ -71,7 +71,7 @@ Non-verbose Result Key:
             // either '-jar path.jar' or 'class.Name' will be inserted here
             '--noAutoFile',
             '-Ptestvar=plval',
-            '--inlineRc=user=sa,url=jdbc:hsqldb:file:/var/hsqldb/db,password=',
+            '--inlineRc=user=sa,url=jdbc:hsqldb:file:/var/hsqldb/test/db,password=',
             null  // Sometimes we'll specify script, sometimes not
         ]
         if (useJar) {

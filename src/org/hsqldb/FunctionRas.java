@@ -141,13 +141,15 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
                 dataType = Type.SQL_VARCHAR;
                 break;
             case FUNC_RAS_ADD_CELLS:
-            case FUNC_RAS_ALL_CELLS:
             case FUNC_RAS_AVG_CELLS:
             case FUNC_RAS_COUNT_CELLS:
             case FUNC_RAS_MAX_CELLS:
             case FUNC_RAS_MIN_CELLS:
-            case FUNC_RAS_SOME_CELLS:
                 dataType = Type.SQL_INTEGER;
+                break;
+            case FUNC_RAS_ALL_CELLS:
+            case FUNC_RAS_SOME_CELLS:
+                dataType = Type.SQL_BOOLEAN;
                 break;
             case FUNC_RAS_ARCCOS:
             case FUNC_RAS_ARCSIN:
@@ -171,14 +173,20 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         return getValue(session, nodes);
     }
 
+    @Override
+    public Object getValue(Session session, boolean isRasRoot) {
+        return getValue(session, nodes, isRasRoot);
+    }
+
     /**
      * Evaluates a rasql function.
      * @param session the session
      * @param data parameter data
+     * @param isRasRoot
      * @return resulting scalar or link to file
      */
     @Override
-    Object getValue(Session session, Object[] data) {
+    Object getValue(Session session, Object[] data, boolean isRasRoot) {
 
         switch(funcType) {
             case FUNC_RAS_TIFF:
@@ -200,9 +208,13 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_COSH:
             case FUNC_RAS_SINH:
             case FUNC_RAS_TANH:
-                return getSingleParamFunctionValue(session);
+                return getSingleParamFunctionValue(session, isRasRoot);
             case FUNC_RAS_SDOM:
-                return RasUtil.executeHsqlArrayQuery("sdom("+nodes[0].getValue(session, false)+")");
+                final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
+                if (isRasRoot) {
+                    return RasUtil.executeHsqlArrayQuery(functionCall);
+                }
+                return functionCall;
 
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
@@ -237,7 +249,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         }
     }
 
-    private Number getSingleParamFunctionValue(final Session session) {
+    private Object getSingleParamFunctionValue(final Session session, boolean isRasRoot) {
         final Object argValue = nodes[0].getValue(session, false);
         boolean isInt = true;
         String function = null;
@@ -291,7 +303,11 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
 
         }
         if (function != null) {
-            final String ret = RasUtil.executeHsqlArrayQuery(String.format("%s(%s)", function, argValue),
+            final String functionCall = String.format("%s(%s)", function, argValue);
+            if (!isRasRoot) {
+                return functionCall;
+            }
+            final String ret = RasUtil.executeHsqlArrayQuery(functionCall,
                     nodes[0].extractRasArrayIds(session));
             if (isInt)
                 return Integer.valueOf(ret);

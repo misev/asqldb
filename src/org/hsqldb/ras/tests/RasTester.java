@@ -31,7 +31,7 @@ import java.util.Properties;
  */
 public class RasTester {
 
-    public static final String DEFAULT_DB_FILE = "/var/hsqldb/db";
+    public static final String DEFAULT_DB_FILE = "/var/hsqldb/test/db";
 
     private String dbFile = DEFAULT_DB_FILE;
 

@@ -563,6 +563,10 @@ public class FunctionSQL extends Expression {
     }
 
     Object getValue(Session session, Object[] data) {
+        return getValue(session, data, true);
+    }
+
+    Object getValue(Session session, Object[] data, boolean isRasRoot) {
 
         switch (funcType) {
 

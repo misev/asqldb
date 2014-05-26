@@ -2,6 +2,7 @@ package org.hsqldb;
 
 import org.hsqldb.error.*;
 import org.hsqldb.error.Error;
+import org.hsqldb.lib.HsqlArrayList;
 import org.hsqldb.ras.ExpressionRas;
 
 /**
@@ -18,6 +19,7 @@ public class ExpressionRasElementList extends Expression implements ExpressionRa
         switch (opType) {
 
             case OpTypes.ARRAY_DIMENSION_LIST:
+            case OpTypes.ARRAY_DIMENSION_SDOM:
             case OpTypes.ARRAY_ELEMENT_LIST:
                 break;
 
@@ -42,6 +44,11 @@ public class ExpressionRasElementList extends Expression implements ExpressionRa
             throw new IllegalArgumentException("An ElementList has to be the child of an ArrayConstructor" +
                     " and can't be the RasRoot.");
         }
+
+        if (opType == OpTypes.ARRAY_DIMENSION_SDOM) {
+            return nodes[0].getValue(session, false);
+        }
+
         final StringBuilder sb = new StringBuilder();
 
         if (opType == OpTypes.ARRAY_DIMENSION_LIST) {
@@ -68,8 +75,13 @@ public class ExpressionRasElementList extends Expression implements ExpressionRa
      * @return true if the token is a reference to a dimension in this list, false otherwise
      */
     public boolean isDimensionName(final Token token) {
-        if (opType != OpTypes.ARRAY_DIMENSION_LIST) {
-            throw new UnsupportedOperationException("This ElementList does not support this operation.");
+        switch(opType){
+            case OpTypes.ARRAY_DIMENSION_SDOM:
+                return token.tokenString.matches("(?i)d\\d+");
+            case OpTypes.ARRAY_DIMENSION_LIST:
+                break;
+            default:
+                throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (Expression node : nodes) {
             if (((ExpressionRasDimensionLiteral) node).getName().equals(token.tokenString)) {
@@ -85,8 +97,17 @@ public class ExpressionRasElementList extends Expression implements ExpressionRa
      * @return the index of the given dimension
      */
     public int getIndexForName(final Token token) {
-        if (opType != OpTypes.ARRAY_DIMENSION_LIST) {
-            throw new UnsupportedOperationException("This ElementList does not support this operation.");
+        switch(opType){
+            case OpTypes.ARRAY_DIMENSION_SDOM:
+                if (token.tokenString.matches("(?i)d\\d+")) {
+                    //dX is the shortcut for dimensions when sdom(array) is being used.
+                    //Should  the dimensions not match, rasdaman will throw an error
+                    return Integer.parseInt(token.tokenString.substring(1));
+                }
+            case OpTypes.ARRAY_DIMENSION_LIST:
+                break;
+            default:
+                throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
             Expression node = nodes[i];

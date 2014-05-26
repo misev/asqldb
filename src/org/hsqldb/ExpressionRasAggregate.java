@@ -29,7 +29,7 @@ public class ExpressionRasAggregate extends Expression implements ExpressionRas 
                 node.resolveTypes(session, this);
             }
         }
-        dataType = new ArrayType(Type.SQL_VARCHAR, 1);
+        dataType = Type.SQL_VARCHAR;
     }
 
     @Override

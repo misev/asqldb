@@ -10,6 +10,16 @@ import org.hsqldb.types.Type;
  */
 public class ExpressionRasIndex extends Expression implements ExpressionRas {
 
+    ExpressionRasIndex(int type) {
+        super(type);
+        switch (opType) {
+            case OpTypes.ARRAY_RANGE_ASTERISK:
+                break;
+            default :
+                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex");
+        }
+    }
+
     ExpressionRasIndex(int type, Expression left, Expression right) {
         super(type);
         nodes = new Expression[BINARY];
@@ -42,6 +52,8 @@ public class ExpressionRasIndex extends Expression implements ExpressionRas {
     public Object getValue(Session session, boolean isRasRoot) {
 
         switch(opType) {
+            case OpTypes.ARRAY_RANGE_ASTERISK:
+                return "*";
             case OpTypes.ARRAY_RANGE:
                 return nodes[LEFT].getValue(session, false)+":"+nodes[RIGHT].getValue(session, false);
             case OpTypes.ARRAY_INDEX_LIST:

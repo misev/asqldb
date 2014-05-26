@@ -871,6 +871,9 @@ public class ExpressionLogical extends Expression {
 
     private void resolveTypesForComparison(Session session,
                                            Expression parent) {
+        if (nodes[LEFT].isArrayExpression() || nodes[RIGHT].isArrayExpression()) {
+            return;
+        }
 
         if (exprSubType == OpTypes.ALL_QUANTIFIED
                 || exprSubType == OpTypes.ANY_QUANTIFIED) {

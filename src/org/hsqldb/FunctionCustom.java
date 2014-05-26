@@ -793,7 +793,7 @@ public class FunctionCustom extends FunctionSQL {
         return super.getFunctionExpression();
     }
 
-    Object getValue(Session session, Object[] data) {
+    Object getValue(Session session, Object[] data, boolean isRasRoot) {
 
         switch (funcType) {
 

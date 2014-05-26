@@ -1,1 +1,1 @@
-select aggregate or over sdom(data) using coll[d1, d2] from rastest;
+select aggregate or over sdom(data) using coll[d0, d1] from rastest;

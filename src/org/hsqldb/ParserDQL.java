@@ -2807,7 +2807,7 @@ public class ParserDQL extends ParserBase {
 
         readThis(Tokens.OVER);
 
-        Expression dimensions = XreadRasArrayDimensionLiteralOrNull();
+        Expression dimensions = XreadRasArrayDimensionOrNull();
 
         readThis(Tokens.USING);
 
@@ -3319,16 +3319,25 @@ public class ParserDQL extends ParserBase {
      * @return
      */
     Expression XreadRasArrayIndexRangeExpression() {
-        Expression e = XreadNumericValueExpression();
+
+        Expression e = XreadRasArrayIndexRangeAsteriskOrNumerical();
         if (token.tokenType == Tokens.COLON) {
             read();
 
             Expression a = e;
 
-            e = XreadNumericValueExpression();
+            e = XreadRasArrayIndexRangeAsteriskOrNumerical();
             e = new ExpressionRasIndex(OpTypes.ARRAY_RANGE, a, e);
         }
         return e;
+    }
+
+    Expression XreadRasArrayIndexRangeAsteriskOrNumerical() {
+        if (token.tokenType == Tokens.ASTERISK) {
+            readThis(Tokens.ASTERISK);
+            return new ExpressionRasIndex(OpTypes.ARRAY_RANGE_ASTERISK);
+        }
+        return XreadNumericValueExpression();
     }
 
     Expression XreadNumericValueExpression() {
@@ -5356,7 +5365,7 @@ public class ParserDQL extends ParserBase {
             //TODO: this is still the old syntax
             return XreadArrayConstructor();
         } else {
-            final Expression dimensionList = XreadRasArrayDimensionLiteralOrNull();
+            final Expression dimensionList = XreadRasArrayDimensionOrNull();
 
             if (dimensionList == null) {
                 //todo: this is for insert/update statements with ARRAY['collname:oid']
@@ -5394,6 +5403,17 @@ public class ParserDQL extends ParserBase {
         final int index = dimensions.getIndexForName(token);
         read();
         return new ExpressionRasValueVariable(index);
+    }
+
+    /**
+     * Reads dimensions for the array constructor.
+     * @return
+     */
+    private Expression XreadRasArrayDimensionOrNull() {
+        if (token.tokenType == Tokens.LEFTBRACKET) {
+            return XreadRasArrayDimensionLiteralOrNull();
+        }
+        return new ExpressionRasElementList(OpTypes.ARRAY_DIMENSION_SDOM,readColumnOrFunctionExpression());
     }
 
     /**
@@ -5897,7 +5917,7 @@ public class ParserDQL extends ParserBase {
                 case Tokens.QUESTION : {
                     Expression e = null;
 
-                    e = XreadAllTypesCommonValueExpression(false);
+                    e = XreadAllTypesCommonValueExpression(true);
 
                     exprList.add(e);
 

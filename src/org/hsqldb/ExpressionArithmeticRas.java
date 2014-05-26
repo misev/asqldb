@@ -12,8 +12,7 @@ import java.util.Set;
  * Created by Johannes on 4/17/14.
  * @author Johannes Bachhuber
  */
-public class ExpressionArithmeticRas extends ExpressionArithmetic
-                                     implements ExpressionRas {
+public class ExpressionArithmeticRas extends ExpressionArithmetic {
 
     ExpressionArithmeticRas(int type, Expression left, Expression right) {
 
@@ -26,7 +25,9 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic
 
     @Override
     public Object getValue(Session session, boolean isRoot) {
-        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+        if (nodes.length == 0 ||
+                (!nodes[LEFT].isArrayExpression() &&
+                        (nodes.length < 2 || !nodes[RIGHT].isArrayExpression()))) {
             return super.getValue(session, isRoot);
         }
         switch (opType) {
