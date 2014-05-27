@@ -37,6 +37,8 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.IntValueHashMap;
 import org.hsqldb.lib.OrderedIntHashSet;
 import org.hsqldb.map.ValuePool;
+import org.hsqldb.ras.RasArrayId;
+import org.hsqldb.ras.RasUtil;
 import org.hsqldb.types.BinaryData;
 import org.hsqldb.types.BinaryType;
 import org.hsqldb.types.BlobData;
@@ -47,6 +49,8 @@ import org.hsqldb.types.IntervalType;
 import org.hsqldb.types.NumberType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
+
+import java.util.Set;
 
 /**
  * Implementation of SQL standard function calls
@@ -554,7 +558,7 @@ public class FunctionSQL extends Expression {
         for (int i = 0; i < nodes.length; i++) {
             Expression e = nodes[i];
 
-            if (e != null) {
+            if (e != null && !e.isArrayExpression()) {
                 data[i] = e.getValue(session, e.dataType);
             }
         }
@@ -736,13 +740,19 @@ public class FunctionSQL extends Expression {
                 return newArray;
             }
             case FUNC_ABS : {
+                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                    return getSingleParamRasFunction(session, "abs", isRasRoot);
+                }
                 if (data[0] == null) {
                     return null;
                 }
-
                 return dataType.absolute(data[0]);
             }
             case FUNC_MOD : {
+                if ((nodes.length > 0 && nodes[0].isArrayExpression())
+                        || (nodes.length > 1 && nodes[1].isArrayExpression())) {
+                    return getDoubleParamRasFunction(session, "mod", isRasRoot);
+                }
                 if (data[0] == null || data[1] == null) {
                     return null;
                 }
@@ -802,6 +812,9 @@ public class FunctionSQL extends Expression {
                 return ValuePool.getDouble(Double.doubleToLongBits(val));
             }
             case FUNC_SQRT : {
+                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                    return getSingleParamRasFunction(session, "sqrt", isRasRoot);
+                }
                 if (data[0] == null) {
                     return null;
                 }
@@ -1199,6 +1212,28 @@ public class FunctionSQL extends Expression {
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionSQL");
         }
+
+
+    }
+
+    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+        final String functionCall = String.format("%s(%s)",
+                function, nodes[0].getValue(session, false));
+        if (isRasRoot) {
+            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
+        }
+        return functionCall;
+    }
+
+    private Object getDoubleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+        final String functionCall = String.format("%s(%s, %s)",
+                function, nodes[0].getValue(session, false), nodes[1].getValue(session, false));
+        if (isRasRoot) {
+            Set<RasArrayId> rasArrayIds = nodes[0].extractRasArrayIds(session);
+            rasArrayIds.addAll(nodes[1].extractRasArrayIds(session));
+            return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
+        }
+        return functionCall;
     }
 
     public void resolveTypes(Session session, Expression parent) {
@@ -1372,6 +1407,10 @@ public class FunctionSQL extends Expression {
                 break;
             }
             case FUNC_MOD : {
+                if (nodes[0].isArrayExpression() || nodes[1].isArrayExpression()) {
+                    dataType = Type.SQL_NUMERIC;
+                    break;
+                }
                 if (nodes[0].dataType == null) {
                     nodes[0].dataType = nodes[1].dataType;
                 }
@@ -1424,6 +1463,10 @@ public class FunctionSQL extends Expression {
             case FUNC_LN :
             case FUNC_EXP :
             case FUNC_SQRT : {
+                if (nodes[0].isArrayExpression()) {
+                    dataType = Type.SQL_NUMERIC;
+                    break;
+                }
                 if (nodes[0].dataType == null) {
                     nodes[0].dataType = Type.SQL_DOUBLE;
                 }
@@ -1438,6 +1481,10 @@ public class FunctionSQL extends Expression {
                 break;
             }
             case FUNC_ABS :
+                if (nodes[0].isArrayExpression()) {
+                    dataType = Type.SQL_NUMERIC;
+                    break;
+                }
                 if (nodes[0].dataType != null
                         && nodes[0].dataType.isIntervalType()) {
                     dataType = nodes[0].dataType;

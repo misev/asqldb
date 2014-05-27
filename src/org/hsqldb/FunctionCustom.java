@@ -50,6 +50,7 @@ import org.hsqldb.map.BitMap;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.persist.Crypto;
 import org.hsqldb.persist.HsqlDatabaseProperties;
+import org.hsqldb.ras.RasUtil;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.BinaryData;
 import org.hsqldb.types.BinaryType;
@@ -1420,6 +1421,9 @@ public class FunctionCustom extends FunctionSQL {
                 return new Double(java.lang.Math.atan(d));
             }
             case FUNC_COS : {
+                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                    return getSingleParamRasFunction(session, "cos", isRasRoot);
+                }
                 if (data[0] == null) {
                     return null;
                 }
@@ -1448,6 +1452,9 @@ public class FunctionCustom extends FunctionSQL {
                 return new Double(java.lang.Math.toDegrees(d));
             }
             case FUNC_SIN : {
+                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                    return getSingleParamRasFunction(session, "sin", isRasRoot);
+                }
                 if (data[0] == null) {
                     return null;
                 }
@@ -2755,13 +2762,18 @@ public class FunctionCustom extends FunctionSQL {
 
                 break;
             }
+            case FUNC_SIN :
+            case FUNC_COS :
+                if (nodes[0].isArrayExpression()) {
+                    dataType = Type.SQL_NUMERIC;
+                    break;
+                }
+            //fall through
             case FUNC_ACOS :
             case FUNC_ASIN :
             case FUNC_ATAN :
-            case FUNC_COS :
             case FUNC_COT :
             case FUNC_DEGREES :
-            case FUNC_SIN :
             case FUNC_TAN :
             case FUNC_LOG10 :
             case FUNC_RADIANS :
@@ -3430,6 +3442,15 @@ public class FunctionCustom extends FunctionSQL {
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionCustom");
         }
+    }
+
+    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+        final String functionCall = String.format("%s(%s)",
+                function, nodes[0].getValue(session, false));
+        if (isRasRoot) {
+            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
+        }
+        return functionCall;
     }
 
     public String getSQL() {

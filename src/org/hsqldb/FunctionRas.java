@@ -5,8 +5,11 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.FrameworkLogger;
 import org.hsqldb.lib.IntKeyIntValueHashMap;
 import org.hsqldb.ras.ExpressionRas;
+import org.hsqldb.ras.RasArrayId;
 import org.hsqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
+
+import java.util.Set;
 
 /**
  * Created by Johannes on 4/9/14.
@@ -43,6 +46,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
     private static final int FUNC_RAS_TANH              = 223;
     private static final int FUNC_RAS_SHIFT             = 224;
     private static final int FUNC_RAS_EXTEND            = 225;
+    private static final int FUNC_RAS_DIV               = 226;
 
 
     static final IntKeyIntValueHashMap rasFuncMap =
@@ -76,6 +80,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         rasFuncMap.put(Tokens.RAS_TANH, FUNC_RAS_TANH);
         rasFuncMap.put(Tokens.RAS_SHIFT, FUNC_RAS_SHIFT);
         rasFuncMap.put(Tokens.RAS_EXTEND, FUNC_RAS_EXTEND);
+        rasFuncMap.put(Tokens.RAS_DIV, FUNC_RAS_DIV);
     }
 
     protected FunctionRas(int id) {
@@ -111,6 +116,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_POW:
             case FUNC_RAS_SHIFT:
             case FUNC_RAS_EXTEND:
+            case FUNC_RAS_DIV:
                 parseList = doubleParamList;
                 break;
             default:
@@ -145,6 +151,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_COUNT_CELLS:
             case FUNC_RAS_MAX_CELLS:
             case FUNC_RAS_MIN_CELLS:
+            case FUNC_RAS_DIV:
                 dataType = Type.SQL_INTEGER;
                 break;
             case FUNC_RAS_ALL_CELLS:
@@ -209,6 +216,16 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_SINH:
             case FUNC_RAS_TANH:
                 return getSingleParamFunctionValue(session, isRasRoot);
+            case FUNC_RAS_BIT:
+            case FUNC_RAS_COMPLEX:
+            case FUNC_RAS_DIVIDE:
+            case FUNC_RAS_MODULO:
+            case FUNC_RAS_POW:
+            case FUNC_RAS_SHIFT:
+            case FUNC_RAS_EXTEND:
+            case FUNC_RAS_DIV:
+                return getDoubleParamFunctionValue(session, isRasRoot);
+
             case FUNC_RAS_SDOM:
                 final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
                 if (isRasRoot) {
@@ -315,5 +332,32 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
                 return Double.valueOf(ret);
         }
         throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function");
+    }
+
+    private Object getDoubleParamFunctionValue(final Session session, boolean isRasRoot) {
+        boolean isInt = true;
+        String function = null;
+        switch(funcType) {
+            case FUNC_RAS_BIT: function = "bit"; break;
+            case FUNC_RAS_COMPLEX: function = "complex"; break;
+            case FUNC_RAS_DIVIDE: function = "divide"; break;
+            case FUNC_RAS_MODULO: function = "modulo"; break;
+            case FUNC_RAS_POW: function = "pow"; break;
+            case FUNC_RAS_SHIFT: function = "shift"; break;
+            case FUNC_RAS_EXTEND: function = "extend"; break;
+            case FUNC_RAS_DIV: function = "div"; break;
+
+        }
+        if (function != null) {
+            final String functionCall = String.format("%s(%s, %s)", function,
+                    nodes[0].getValue(session, false), nodes[1].getValue(session, false));
+            if (!isRasRoot) {
+                return functionCall;
+            }
+            Set<RasArrayId> rasArrayIds = nodes[0].extractRasArrayIds(session);
+            rasArrayIds.addAll(nodes[1].extractRasArrayIds(session));
+            return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
+        }
+        throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: "+funcType);
     }
 }

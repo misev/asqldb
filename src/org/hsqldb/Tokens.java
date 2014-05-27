@@ -927,6 +927,7 @@ public class Tokens {
     static final String        T_RAS_TANH         = "TANH";
     static final String        T_RAS_SHIFT        = "SHIFT";
     static final String        T_RAS_EXTEND       = "EXTEND";
+    static final String        T_RAS_DIV          = "DIV";
 
     //
     static final String T_ISOLATION_LEVEL         = "ISOLATION_LEVEL";
@@ -1840,6 +1841,7 @@ public class Tokens {
     public static final int RAS_TANH                   = 1023;
     public static final int RAS_SHIFT                  = 1024;
     public static final int RAS_EXTEND                 = 1025;
+    public static final int RAS_DIV                    = 1026;
 
     //
     public static final int X_UNKNOWN_TOKEN = -1;
@@ -2203,6 +2205,7 @@ public class Tokens {
         reservedKeys.put(Tokens.T_RAS_TANH, RAS_TANH);
         reservedKeys.put(Tokens.T_RAS_SHIFT, RAS_SHIFT);
         reservedKeys.put(Tokens.T_RAS_EXTEND, RAS_EXTEND);
+        reservedKeys.put(Tokens.T_RAS_DIV, RAS_DIV);
     }
 
     private static final IntValueHashMap commandSet = new IntValueHashMap(299);
