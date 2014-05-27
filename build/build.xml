@@ -705,6 +705,17 @@ examples:
 
     </target>
 
+    <target name="testselect" depends="classes16" description="Runs the test files in testrun/asqldb/select">
+        <java fork="true" classname="org.hsqldb.ras.tests.RasSelectTest">
+            <classpath>
+                <pathelement location="lib/rasj.jar" />
+                <pathelement location="lib/JSAP-2.1.jar" />
+                <pathelement location="classes" />
+            </classpath>
+        </java>
+
+    </target>
+
     <target name="rastests" depends="classes16" description="Runs some ras tests">
         <java fork="true" classname="org.hsqldb.ras.tests.RasTester">
             <classpath>
