@@ -856,6 +856,20 @@ public class Scanner {
                 }
             }
 
+            //ras struct accessed by index
+            int cNext = charAt(currentPosition + 1);
+            if (cNext >= '0' && cNext <= '9') {
+                token.tokenType = Tokens.X_IDENTIFIER_WITH_STRUCT;
+                int index = 0;
+                for (c = charAt(++currentPosition);
+                        c >= '0' && c <= '9';
+                        c = charAt(++currentPosition)){
+                    index = index * 10 + c - '0';
+                }
+                token.rasStruct = Integer.toString(index);
+                return;
+            }
+
             currentPosition++;
 
             scanWhitespace();
@@ -1830,7 +1844,7 @@ public class Scanner {
 
     private void setIdentifierProperties() {
 
-        if (token.tokenType == Tokens.X_IDENTIFIER) {
+        if (token.tokenType == Tokens.X_IDENTIFIER || token.tokenType == Tokens.X_IDENTIFIER_WITH_STRUCT) {
             token.isUndelimitedIdentifier = true;
 
             if (token.namePrefix == null) {

@@ -1808,7 +1808,11 @@ public class Tokens {
     public static final int X_MALFORMED_IDENTIFIER     = 883;
     public static final int X_MALFORMED_UNICODE_ESCAPE = 884;
 
-    //rasdaman specific tokens:
+    //rasdaman token types
+    public static final int X_IDENTIFIER_WITH_STRUCT   = 885;
+
+
+    //rasdaman function tokens:
     public static final int RAS_TIFF                   = 1000;
     public static final int RAS_PNG                    = 1001;
     public static final int RAS_CSV                    = 1002;

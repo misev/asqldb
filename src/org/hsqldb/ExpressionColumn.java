@@ -95,6 +95,7 @@ public class ExpressionColumn extends Expression {
     String        schema;
     String        tableName;
     String        columnName;
+    private String rasStructName = "";
     RangeVariable rangeVariable;
 
     //
@@ -117,6 +118,15 @@ public class ExpressionColumn extends Expression {
         this.schema     = schema;
         this.tableName  = table;
         this.columnName = column;
+    }
+
+    /**
+     * Creates an Expression column, with the additional parameter of a struct name or index
+     */
+    ExpressionColumn(final String schema, final String table, final String column, final String rasStructName) {
+        this(schema, table, column);
+        this.rasStructName = rasStructName;
+        this.arrayColumn = true;
     }
 
     ExpressionColumn(ColumnSchema column) {
@@ -671,12 +681,14 @@ public class ExpressionColumn extends Expression {
             case OpTypes.COLUMN : {
                 if (isArrayExpression()) {
                     //parse the rasdaman array contained in this expression
+                    final String columnName = this.getColumnName()
+                            + (rasStructName.isEmpty() ? "" : ("." + rasStructName));
                     if (isRasRoot) {
                         final RasArrayId coid = RasArrayId.parseString(
-                                (String) getHsqlColumnValue(session), this.getColumnName());
+                                (String) getHsqlColumnValue(session), columnName);
                         return RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid);
                     } else {
-                        return this.getColumnName();
+                        return columnName;
                     }
                 }
                 return getHsqlColumnValue(session);

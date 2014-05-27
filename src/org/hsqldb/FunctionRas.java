@@ -212,7 +212,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_SDOM:
                 final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
                 if (isRasRoot) {
-                    return RasUtil.executeHsqlArrayQuery(functionCall);
+                    return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
                 }
                 return functionCall;
 

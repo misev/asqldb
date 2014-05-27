@@ -50,11 +50,6 @@ public class ExpressionRasArrayConstructor extends Expression implements Express
     }
 
     @Override
-    public Set<RasArrayId> extractRasArrayIds(final Session session) {
-        return new HashSet<RasArrayId>();
-    }
-
-    @Override
     public Object getValue(final Session session, final boolean isRasRoot) {
         final String rasql;
         switch (opType) {
@@ -72,8 +67,13 @@ public class ExpressionRasArrayConstructor extends Expression implements Express
 
         if (isRasRoot) {
             //Cache the result, since it won't change for other rows
-            if (resultCache == null)
-                resultCache = RasUtil.executeHsqlArrayQuery(rasql, new HashSet<RasArrayId>());
+            final Set<RasArrayId> rasArrayIds = extractRasArrayIds(session);
+            if (!rasArrayIds.isEmpty()) {
+                return RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
+            }
+            if (resultCache == null) {
+                resultCache = RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
+            }
             return resultCache;
         }
 

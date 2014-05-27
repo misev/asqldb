@@ -60,6 +60,9 @@ import org.hsqldb.types.NumberType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Parser for DQL statements
  *
@@ -69,7 +72,7 @@ import org.hsqldb.types.Types;
  */
 public class ParserDQL extends ParserBase {
 
-    private ExpressionRasElementList dimensions = null;
+    private Set<ExpressionRasElementList> dimensions = new HashSet<ExpressionRasElementList>();
 
     protected Database             database;
     protected Session              session;
@@ -2253,6 +2256,13 @@ public class ParserDQL extends ParserBase {
 
             case Tokens.X_DELIMITED_IDENTIFIER :
             case Tokens.X_IDENTIFIER :
+            case Tokens.X_IDENTIFIER_WITH_STRUCT :
+                e = XreadRasArrayVariableOrNull();
+
+                if (e != null) {
+                    return e;
+                }
+
                 if (!token.isHostParameter) {
                     return null;
                 }
@@ -2263,7 +2273,8 @@ public class ParserDQL extends ParserBase {
                 read();
 
                 if (token.tokenType == Tokens.X_DELIMITED_IDENTIFIER
-                        || token.tokenType == Tokens.X_IDENTIFIER) {}
+                        || token.tokenType == Tokens.X_IDENTIFIER
+                        || token.tokenType == Tokens.X_IDENTIFIER_WITH_STRUCT) {}
                 else {
                     throw unexpectedToken(Tokens.T_COLON);
                 }
@@ -2326,7 +2337,8 @@ public class ParserDQL extends ParserBase {
                 read();
 
                 if (token.tokenType == Tokens.X_DELIMITED_IDENTIFIER
-                        || token.tokenType == Tokens.X_IDENTIFIER) {}
+                        || token.tokenType == Tokens.X_IDENTIFIER
+                        || token.tokenType == Tokens.X_IDENTIFIER_WITH_STRUCT) {}
                 else {
                     throw unexpectedToken(Tokens.T_COLON);
                 }
@@ -2350,6 +2362,12 @@ public class ParserDQL extends ParserBase {
 
                 read();
 
+                return e;
+            case Tokens.X_IDENTIFIER_WITH_STRUCT :
+                checkValidCatalogName(token.namePrePrePrefix);
+                e = new ExpressionColumn(token.namePrePrefix,
+                        token.namePrefix, token.tokenString, token.rasStruct);
+                read();
                 return e;
 
             default :
@@ -2794,6 +2812,7 @@ public class ParserDQL extends ParserBase {
         switch(token.tokenType) {
             case Tokens.PLUS:
             case Tokens.MINUS:
+            case Tokens.ASTERISK:
             case Tokens.MIN:
             case Tokens.MAX:
             case Tokens.OR:
@@ -2811,12 +2830,13 @@ public class ParserDQL extends ParserBase {
 
         readThis(Tokens.USING);
 
-        this.dimensions = (ExpressionRasElementList) dimensions;
+        this.dimensions.add((ExpressionRasElementList) dimensions);
 
         //todo: is this the right read?
-        Expression e = XreadValueExpression();
+//        Expression e = XreadValueExpression();
+        Expression e = XreadNumericValueExpression();
 
-        this.dimensions = null;
+        this.dimensions.remove(dimensions);
 
         return new ExpressionRasAggregate(type, dimensions, e);
     }
@@ -3002,6 +3022,14 @@ public class ParserDQL extends ParserBase {
      *
      */
     Expression XreadValueExpression() {
+
+        if (token.tokenType == Tokens.LEFTBRACKET) {
+            read();
+            //multidimensional interval being read
+            Expression e = XreadRasArrayIndexExpression();
+            readThis(Tokens.RIGHTBRACKET);
+            return e;
+        }
 
         Expression e = XreadAllTypesCommonValueExpression(true);
 
@@ -3409,11 +3437,8 @@ public class ParserDQL extends ParserBase {
             minus = true;
         }
 
-        e = XreadRasArrayVariableOrNull();
 
-        if (e == null) {
-            e = XreadNumericPrimary();
-        }
+        e = XreadNumericPrimary();
 
         if (e == null) {
             return null;
@@ -5380,10 +5405,10 @@ public class ParserDQL extends ParserBase {
             if (token.tokenType == Tokens.VALUES) {
                 readThis(Tokens.VALUES);
 
-                dimensions = (ExpressionRasElementList) dimensionList;
+                dimensions.add((ExpressionRasElementList) dimensionList);
                 //todo: right method for more complex expressions
                 value = XreadNumericValueExpression();
-                dimensions = null;
+                dimensions.remove(dimensionList);
 
                 constructorType = OpTypes.ARRAY_CONSTRUCTOR_VALUE;
             } else {
@@ -5397,10 +5422,16 @@ public class ParserDQL extends ParserBase {
     }
 
     public Expression XreadRasArrayVariableOrNull() {
-        if (dimensions == null || !dimensions.isDimensionName(token)) {
-            return null;
+        ExpressionRasElementList dimensionList = null;
+        for (ExpressionRasElementList dimension : dimensions) {
+            if (dimension.isDimensionName(token)) {
+                dimensionList = dimension;
+                break;
+            }
         }
-        final int index = dimensions.getIndexForName(token);
+        if (dimensionList == null)
+            return null;
+        final int index = dimensionList.getIndexForName(token);
         read();
         return new ExpressionRasValueVariable(index);
     }
