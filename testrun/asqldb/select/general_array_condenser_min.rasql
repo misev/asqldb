@@ -1,1 +1,1 @@
-select csv(array [i(-1,1)] values aggregate min over [j(3,4)] using i[0] * j[0]) from rastest;
+select csv(array [i(-1:1)] values aggregate min over [j(3:4)] using i[0] * j[0]) from rastest;

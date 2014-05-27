@@ -1,1 +1,1 @@
-select max_cells(array [x(100,105), y(100,105)] values coll[ x, y ]) from rastest;
+select max_cells(array [x(100:105), y(100:105)] values coll[ x, y ]) from rastest;
