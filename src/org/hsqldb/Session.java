@@ -989,8 +989,15 @@ public class Session implements SessionInterface {
                 }
 
                 Object[] pvals = (Object[]) cmd.valueData;
-                Result result = executeCompiledStatement(cs, pvals,
-                    cmd.queryTimeout);
+
+                Result result;
+                try {
+                    result = executeCompiledStatement(cs, pvals,
+                            cmd.queryTimeout);
+                } finally {
+                    //close the Rasdaman database here
+                    RasUtil.closeDatabase();
+                }
 
                 result = performPostExecute(cmd, result);
 
@@ -999,7 +1006,13 @@ public class Session implements SessionInterface {
             case ResultConstants.BATCHEXECUTE : {
                 isBatch = true;
 
-                Result result = executeCompiledBatchStatement(cmd);
+                Result result;
+                try {
+                    result = executeCompiledBatchStatement(cmd);
+                } finally {
+                    //close the Rasdaman database here
+                    RasUtil.closeDatabase();
+                }
 
                 result = performPostExecute(cmd, result);
 
@@ -1020,8 +1033,13 @@ public class Session implements SessionInterface {
             }
             case ResultConstants.BATCHEXECDIRECT : {
                 isBatch = true;
-
-                Result result = executeDirectBatchStatement(cmd);
+                Result result;
+                try {
+                    result = executeDirectBatchStatement(cmd);
+                } finally {
+                    //close the Rasdaman database here
+                    RasUtil.closeDatabase();
+                }
 
                 result = performPostExecute(cmd, result);
 
@@ -1060,7 +1078,13 @@ public class Session implements SessionInterface {
                 return Result.updateZeroResult;
             }
             case ResultConstants.UPDATE_RESULT : {
-                Result result = this.executeResultUpdate(cmd);
+                Result result;
+                try {
+                    result = this.executeResultUpdate(cmd);
+                } finally {
+                    //close the Rasdaman database here
+                    RasUtil.closeDatabase();
+                }
 
                 result = performPostExecute(cmd, result);
 

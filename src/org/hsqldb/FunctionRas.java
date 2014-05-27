@@ -180,11 +180,6 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         return getValue(session, nodes);
     }
 
-    @Override
-    public Object getValue(Session session, boolean isRasRoot) {
-        return getValue(session, nodes, isRasRoot);
-    }
-
     /**
      * Evaluates a rasql function.
      * @param session the session

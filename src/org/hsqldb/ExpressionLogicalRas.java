@@ -20,6 +20,16 @@ public class ExpressionLogicalRas extends ExpressionLogical {
     }
 
     @Override
+    public void resolveTypes(final Session session, final Expression parent) {
+        if ((nodes[LEFT] == null || !nodes[LEFT].isArrayExpression())
+                && (nodes.length < 2 || nodes[RIGHT] == null || !nodes[RIGHT].isArrayExpression())) {
+            super.resolveTypes(session, parent);
+            return;
+        }
+        dataType = Type.SQL_BOOLEAN;
+    }
+
+    @Override
     public Object getValue(Session session, boolean isRoot) {
         if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
             return super.getValue(session, isRoot);
@@ -62,7 +72,7 @@ public class ExpressionLogicalRas extends ExpressionLogical {
                 +" "+nodes[RIGHT].getValue(session, false);
 
         if (isRoot) {//we're root, so we will execute the query
-            return RasUtil.executeHsqlArrayQuery(selector, rasArrayIds);
+            return Boolean.valueOf(RasUtil.executeHsqlArrayQuery(selector, rasArrayIds));
         }
         //someone else will be executing the query, so we just return a rasql string
         //we only need to evaluate the hsql parts

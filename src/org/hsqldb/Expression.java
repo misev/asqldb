@@ -1512,6 +1512,10 @@ public class Expression implements Cloneable {
     }
 
     Object getValue(Session session, Type type) {
+        return getValue(session, type, true);
+    }
+
+    Object getValue(Session session, Type type, boolean isRasRoot) {
 
         Object o = getValue(session);
 

@@ -108,10 +108,7 @@ public class ExpressionArithmetic extends Expression {
      * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
      */
     static ExpressionArithmetic createUnary(int type, Expression e) {
-        if (e.isArrayExpression()) {
-            return new ExpressionArithmeticRas(type, e);
-        }
-        return new ExpressionArithmetic(type, e);
+        return new ExpressionArithmeticRas(type, e);
     }
 
     public String getSQL() {

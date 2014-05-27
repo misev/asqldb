@@ -40,8 +40,11 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic {
                         .getCurrent(columnIndex);
             }
             case OpTypes.NEGATE :
-                return dataType.negate(
-                        nodes[LEFT].getValue(session, nodes[LEFT].dataType));
+                String selector = " -"+nodes[LEFT].getValue(session, false);
+                if (isRoot) {
+                    return RasUtil.executeHsqlArrayQuery(selector, nodes[LEFT].extractRasArrayIds(session));
+                }
+                return selector;
         }
 
         String operator;
@@ -83,7 +86,8 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic {
                 node.resolveTypes(session, this);
             }
         }
-        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+        if (!nodes[LEFT].isArrayExpression() &&
+                (nodes.length < 2 || !nodes[RIGHT].isArrayExpression())) {
             super.resolveTypes(session, parent);
         }
     }

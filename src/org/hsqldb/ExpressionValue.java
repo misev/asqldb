@@ -45,6 +45,8 @@ import org.hsqldb.types.Type;
  */
 public class ExpressionValue extends Expression {
 
+    private String rasType = "";
+
     /**
      * Creates a VALUE expression
      */
@@ -55,6 +57,12 @@ public class ExpressionValue extends Expression {
         nodes     = Expression.emptyArray;
         dataType  = datatype;
         valueData = o;
+    }
+
+    ExpressionValue(Object o, Type datatype, final String rasType) {
+
+        this(o, datatype);
+        this.rasType = rasType;
     }
 
     public byte getNullability() {
@@ -102,7 +110,13 @@ public class ExpressionValue extends Expression {
         }
     }
 
-    Object getValue(Session session, Type type) {
+    Object getValue(Session session, Type type, boolean isRasRoot) {
+
+        if (!rasType.isEmpty()) {
+            if (!isRasRoot) {
+                return valueData + rasType;
+            }
+        }
 
         if (dataType == type || valueData == null) {
             return valueData;

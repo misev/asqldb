@@ -548,6 +548,11 @@ public class FunctionSQL extends Expression {
         return this;
     }
 
+    @Override
+    public Object getValue(Session session, boolean isRasRoot) {
+        return getValue(session, nodes, isRasRoot);
+    }
+
     /**
      * Evaluates and returns this Function in the context of the session.<p>
      */

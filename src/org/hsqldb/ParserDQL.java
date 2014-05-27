@@ -2248,9 +2248,26 @@ public class ParserDQL extends ParserBase {
                 return e;
 
             case Tokens.X_VALUE :
-                e = new ExpressionValue(token.tokenValue, token.dataType);
+
+                final Object tokenValue = token.tokenValue;
+                final Type dataType = token.dataType;
 
                 read();
+                switch (token.tokenString) {
+                    case "C":
+                    case "D":
+                    case "F":
+                    case "L":
+                    case "O":
+                    case "S":
+                    case "UL":
+                    case "US":
+                        e = new ExpressionValue(tokenValue, dataType, token.tokenString);
+                        read();
+                        break;
+                    default:
+                        e = new ExpressionValue(tokenValue, dataType);
+                }
 
                 return e;
 
