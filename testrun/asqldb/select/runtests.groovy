@@ -80,6 +80,8 @@ Non-verbose Result Key:
         } else {
             pbParams.add(2, sqlToolClassName)
         }
+        pbParams.add(2, '.:../../../lib/rasj.jar')
+        pbParams.add(2, '-cp')
         def scripts = []
         if (params.size() > 0) {
             for (p in params) scripts << new File(p)
@@ -120,6 +122,7 @@ StringWriter eWriter
                 cPrinter.flush()
             }
             if (noRun) continue
+            println runParams.join(' ')
             sWriter  = new StringWriter()  // Unfortunately, can't re-use
             // To process stderr separately, remove the redirectErrorStream
             // call below, and add a p.consumeProcessErrorStream(eWriter)
