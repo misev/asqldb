@@ -39,8 +39,8 @@ public class ExpressionRasAggregate extends Expression implements ExpressionRas 
                 nodes[RIGHT].getValue(session, false));
 
         if (isRasRoot) {
-            final Set<RasArrayId> rasArrayIds = nodes[LEFT].extractRasArrayIds(session);
-            rasArrayIds.addAll(nodes[RIGHT].extractRasArrayIds(session));
+            final Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
+            rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
             return RasUtil.executeHsqlArrayQuery(condense, rasArrayIds);
         }
         return condense;

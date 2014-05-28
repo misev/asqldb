@@ -224,7 +224,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             case FUNC_RAS_SDOM:
                 final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
                 if (isRasRoot) {
-                    return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
+                    return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
                 }
                 return functionCall;
 
@@ -242,19 +242,19 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
         switch(funcType) {
             case FUNC_RAS_TIFF:
                 log.info("Executing function tiff: nodes[0] = "+ nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("tiff("+ argString +")", ".tiff", nodes[0].extractRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("tiff("+ argString +")", ".tiff", nodes[0].getRasArrayIds(session));
             case FUNC_RAS_PNG:
                 log.info("Executing function png: nodes[0] = "+ nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("png("+ argString +")", ".png", nodes[0].extractRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("png("+ argString +")", ".png", nodes[0].getRasArrayIds(session));
             case FUNC_RAS_CSV:
                 log.info("Executing function csv: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("csv("+ argString +")", ".csv", nodes[0].extractRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("csv("+ argString +")", ".csv", nodes[0].getRasArrayIds(session));
             case FUNC_RAS_JPEG:
                 log.info("Executing function jpeg: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("jpeg("+ argString +")", ".jpeg",nodes[0].extractRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("jpeg("+ argString +")", ".jpeg",nodes[0].getRasArrayIds(session));
             case FUNC_RAS_BMP:
                 log.info("Executing function bmp: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("bmp("+ argString +")", ".bmp", nodes[0].extractRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("bmp("+ argString +")", ".bmp", nodes[0].getRasArrayIds(session));
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
 
@@ -320,7 +320,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
                 return functionCall;
             }
             final String ret = RasUtil.executeHsqlArrayQuery(functionCall,
-                    nodes[0].extractRasArrayIds(session));
+                    nodes[0].getRasArrayIds(session));
             if (isInt)
                 return Integer.valueOf(ret);
             else
@@ -349,8 +349,8 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
             if (!isRasRoot) {
                 return functionCall;
             }
-            Set<RasArrayId> rasArrayIds = nodes[0].extractRasArrayIds(session);
-            rasArrayIds.addAll(nodes[1].extractRasArrayIds(session));
+            Set<RasArrayId> rasArrayIds = nodes[0].getRasArrayIds(session);
+            rasArrayIds.addAll(nodes[1].getRasArrayIds(session));
             return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
         }
         throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: "+funcType);

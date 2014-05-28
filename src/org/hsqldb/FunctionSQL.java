@@ -1225,7 +1225,7 @@ public class FunctionSQL extends Expression {
         final String functionCall = String.format("%s(%s)",
                 function, nodes[0].getValue(session, false));
         if (isRasRoot) {
-            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
+            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
         }
         return functionCall;
     }
@@ -1234,8 +1234,8 @@ public class FunctionSQL extends Expression {
         final String functionCall = String.format("%s(%s, %s)",
                 function, nodes[0].getValue(session, false), nodes[1].getValue(session, false));
         if (isRasRoot) {
-            Set<RasArrayId> rasArrayIds = nodes[0].extractRasArrayIds(session);
-            rasArrayIds.addAll(nodes[1].extractRasArrayIds(session));
+            Set<RasArrayId> rasArrayIds = nodes[0].getRasArrayIds(session);
+            rasArrayIds.addAll(nodes[1].getRasArrayIds(session));
             return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
         }
         return functionCall;

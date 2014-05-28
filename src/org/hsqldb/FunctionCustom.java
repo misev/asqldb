@@ -3448,7 +3448,7 @@ public class FunctionCustom extends FunctionSQL {
         final String functionCall = String.format("%s(%s)",
                 function, nodes[0].getValue(session, false));
         if (isRasRoot) {
-            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].extractRasArrayIds(session));
+            return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
         }
         return functionCall;
     }

@@ -29,8 +29,8 @@ public class ExpressionAccessorRas extends ExpressionAccessor implements Express
         final String colName = nodes[LEFT].getColumnName();
 
         if (isRasRoot) {
-            Set<RasArrayId> rasArrayIds = nodes[LEFT].extractRasArrayIds(session);
-            rasArrayIds.addAll(nodes[RIGHT].extractRasArrayIds(session));
+            Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
+            rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
             return RasUtil.executeHsqlArrayQuery(colName + index, rasArrayIds);
         }
         return colName+index;

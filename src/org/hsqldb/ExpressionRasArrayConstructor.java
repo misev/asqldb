@@ -67,7 +67,7 @@ public class ExpressionRasArrayConstructor extends Expression implements Express
 
         if (isRasRoot) {
             //Cache the result, since it won't change for other rows
-            final Set<RasArrayId> rasArrayIds = extractRasArrayIds(session);
+            final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
             if (!rasArrayIds.isEmpty()) {
                 return RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
             }

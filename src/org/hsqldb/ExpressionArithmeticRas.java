@@ -62,8 +62,8 @@ public class ExpressionArithmeticRas extends ExpressionArithmetic {
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "ExpressionRas");
         }
-        Set<RasArrayId> rasArrayIds = nodes[LEFT].extractRasArrayIds(session);
-        rasArrayIds.addAll(nodes[RIGHT].extractRasArrayIds(session));
+        Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
+        rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
 
         String selector = nodes[LEFT].getValue(session, false)+" "+operator
                 +" "+nodes[RIGHT].getValue(session, false);

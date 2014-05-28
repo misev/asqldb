@@ -766,7 +766,7 @@ public class ExpressionColumn extends Expression {
      * @return Set of 0 or 1 RasArrayIds
      */
     @Override
-    public java.util.Set<RasArrayId> extractRasArrayIds(Session session) {
+    public java.util.Set<RasArrayId> getRasArrayIds(Session session) {
         java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
         if (isArrayExpression()) {
             rasArrayIds.add(RasArrayId.parseString(
