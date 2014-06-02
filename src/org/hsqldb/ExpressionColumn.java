@@ -685,7 +685,7 @@ public class ExpressionColumn extends Expression {
                             + (rasStructName.isEmpty() ? "" : ("." + rasStructName));
                     if (isRasRoot) {
                         final RasArrayId coid = RasArrayId.parseString(
-                                (String) getHsqlColumnValue(session), columnName);
+                                RasUtil.objectArrayToString(getHsqlColumnValue(session)), columnName);
                         return RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid);
                     } else {
                         return columnName;
