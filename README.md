@@ -12,6 +12,9 @@ OID in a VARCHAR ARRAY column.
 Getting started
 ===============
 * Configure the rasdaman connection: `editor config.properties`
+* If setting up for the first time, please
+ * `mkdir -p /var/hsqldb`
+ * `chown $USER: /var/hsqldb` (assuming you run hsqldb with `$USER`)
 * Go to the build directory: `cd build`, and
  * Build the jar file: `ant hsqldb`
  * Run the GUI tool: `ant run`
