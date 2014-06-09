@@ -42,6 +42,15 @@ The rasql syntax (http://rasdaman.org/ for more details) is mostly supported as
 is, with subtle keyword differences, like `ARRAY` instead of `MARRAY`, and
 `AGGREGATE` instead of `CONDENSE`.
 
+Automated tests
+===============
+To run ASQLDB specific tests
+
+    cd build
+    ant testselect
+    
+Currently around 30% of the tests are failing, SELECT is not fully supported yet.
+
 Todo
 ====
 * Full DML support
