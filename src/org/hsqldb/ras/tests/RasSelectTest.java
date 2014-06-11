@@ -129,7 +129,7 @@ public class RasSelectTest {
         oidQuery = "select oid(c) from rgb as c";
         String oid3 = RasUtil.executeRasqlQuery(oidQuery, true, false).toString();
         oid3 = oid3.replaceAll("[\\[\\]]", "");
-
+        System.out.println(oid3);
         String[] queries = new String[]{
                 "create table RASTEST (ID integer NOT NULL, COLL varchar(40) ARRAY NOT NULL, PRIMARY KEY (ID))",
                 "create table RASTEST2 (ID integer NOT NULL, COLL varchar(40) ARRAY NOT NULL, " +

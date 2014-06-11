@@ -4531,8 +4531,9 @@ public class JDBCResultSet implements ResultSet {
         checkColumn(columnIndex);
 
         Type     type = resultMetaData.columnTypes[columnIndex - 1];
-        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
-
+//        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
+        Object data = (Object) getCurrent()[columnIndex - 1];
+        
         if (!type.isArrayType()) {
             throw JDBCUtil.sqlException(ErrorCode.X_42561);
         }
@@ -4541,7 +4542,7 @@ public class JDBCResultSet implements ResultSet {
             return null;
         }
 
-        return new JDBCArray(data, type.collectionBaseType(), type,
+        return new JDBCMArray(data, type.collectionBaseType(), type,
                              connection);
     }
 
