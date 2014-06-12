@@ -178,11 +178,11 @@ public class RasUtil {
             RasGMArray arr = (RasGMArray) obj;
             final String filename = RasArrayId.stringifyIdentifier(rasArrayIds) + arr.spatialDomain() + extension;
             writeToFile(arr, filename);
-//            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
+            //            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
         }
         //result is a scalar:
         return obj;
-//        return obj.toString();
+        //        return obj.toString();
     }
 
     private static void writeToFile(final RasGMArray arr, final String filename) throws HsqlException {
