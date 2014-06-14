@@ -91,11 +91,10 @@ public class RasArrayTest {
             ResultSet result = stmt.executeQuery(query);
             int columnsNumber = result.getMetaData().getColumnCount();
             if (query.startsWith("select")) {
-                System.out.println("Query ===========================================");
                 while (result.next()) {
                     for (int i = 1; i <= columnsNumber; i++) {
                         String colName = result.getMetaData().getColumnName(i);
-                        System.out.println("Column type: " + result.getMetaData().getColumnType(i));
+//                        System.out.println("Column type: " + result.getMetaData().getColumnType(i));
 
                         Object colVal = (Object)result.getObject(i);
                         if (colVal instanceof RasMArrayByte) {
@@ -107,13 +106,13 @@ public class RasArrayTest {
 //                            System.out.println("Structure: " + rasArray.getTypeStructure());
 //                            System.out.println("Schema: " + rasArray.getBaseTypeSchema());
 //                            System.out.println(rasArray.toString());
-                            for (int j = 0; j < array.length; j++) {
+                            /*for (int j = 0; j < array.length; j++) {
                                 System.out.print(array[j] + ", ");
-                            }
+                            }*/
                         } else {
                             System.out.println(result.getDouble(i));
                         }
-                        System.out.println();
+//                        System.out.println();
                     }
                 }
             }

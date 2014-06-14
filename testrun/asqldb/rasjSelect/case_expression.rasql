@@ -1,0 +1,1 @@
+select case when coll>0 then log(coll) else 0 end from rastest
