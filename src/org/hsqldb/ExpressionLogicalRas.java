@@ -72,7 +72,7 @@ public class ExpressionLogicalRas extends ExpressionLogical {
                 +" "+nodes[RIGHT].getValue(session, false);
 
         if (isRoot) {//we're root, so we will execute the query
-            return Boolean.valueOf(RasUtil.executeHsqlArrayQuery(selector, rasArrayIds));
+            return Boolean.valueOf(RasUtil.executeHsqlArrayQuery(selector, rasArrayIds).toString());
         }
         //someone else will be executing the query, so we just return a rasql string
         //we only need to evaluate the hsql parts

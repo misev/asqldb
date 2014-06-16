@@ -1648,9 +1648,7 @@ public class JDBCResultSet implements ResultSet {
         checkColumn(columnIndex);
 
         Type sourceType = resultMetaData.columnTypes[columnIndex - 1];
-
         switch (sourceType.typeCode) {
-
             case Types.SQL_ARRAY :
                 return getArray(columnIndex);
             case Types.SQL_DATE :
@@ -4531,18 +4529,19 @@ public class JDBCResultSet implements ResultSet {
         checkColumn(columnIndex);
 
         Type     type = resultMetaData.columnTypes[columnIndex - 1];
-        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
+        //        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
+        Object data = (Object) getCurrent()[columnIndex - 1];
 
-        if (!type.isArrayType()) {
+        /*if (!type.isArrayType()) {
             throw JDBCUtil.sqlException(ErrorCode.X_42561);
-        }
+        }*/
 
         if (trackNull(data)) {
             return null;
         }
 
-        return new JDBCArray(data, type.collectionBaseType(), type,
-                             connection);
+        return new JDBCMArray(data, type.collectionBaseType(), type,
+                connection);
     }
 
     /**

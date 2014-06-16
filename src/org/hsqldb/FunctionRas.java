@@ -320,7 +320,7 @@ public class FunctionRas extends FunctionSQL implements ExpressionRas {
                 return functionCall;
             }
             final String ret = RasUtil.executeHsqlArrayQuery(functionCall,
-                    nodes[0].getRasArrayIds(session));
+                    nodes[0].getRasArrayIds(session)).toString();
             if (isInt)
                 return Integer.valueOf(ret);
             else

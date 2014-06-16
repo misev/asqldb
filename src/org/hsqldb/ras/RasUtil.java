@@ -131,7 +131,7 @@ public class RasUtil {
      * @return String array with one element containing the path to the array file.
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
-    public static String executeHsqlArrayQuery(String selector, RasArrayId... rasArrayIds) throws HsqlException {
+    public static Object executeHsqlArrayQuery(String selector, RasArrayId... rasArrayIds) throws HsqlException {
         return executeHsqlArrayQuery(selector, new HashSet<RasArrayId>(Arrays.asList(rasArrayIds)));
     }
 
@@ -142,7 +142,7 @@ public class RasUtil {
      * @return String array with one element containing the path to the array file.
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
-    public static String executeHsqlArrayQuery(String selector, Set<RasArrayId> rasArrayIds) throws HsqlException {
+    public static Object executeHsqlArrayQuery(String selector, Set<RasArrayId> rasArrayIds) throws HsqlException {
         return executeHsqlArrayQuery(selector, ".array", rasArrayIds);
     }
 
@@ -154,7 +154,7 @@ public class RasUtil {
      * @return String array with one element containing the path to the array file.
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
-    public static String executeHsqlArrayQuery(final String selector, final String extension, final Set<RasArrayId> rasArrayIds) throws HsqlException {
+    public static Object executeHsqlArrayQuery(final String selector, final String extension, final Set<RasArrayId> rasArrayIds) throws HsqlException {
         final String query;
         if (rasArrayIds.isEmpty()) {
             query = String.format("SELECT "+ selector);
@@ -173,14 +173,16 @@ public class RasUtil {
 
         final Object obj = it.next();
 
+        //todo: allow returning scalar results
         if ((obj instanceof RasGMArray)) {
             RasGMArray arr = (RasGMArray) obj;
             final String filename = RasArrayId.stringifyIdentifier(rasArrayIds) + arr.spatialDomain() + extension;
             writeToFile(arr, filename);
-            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
+            //            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
         }
-
-        return obj.toString();
+        //result is a scalar:
+        return obj;
+        //        return obj.toString();
     }
 
     private static void writeToFile(final RasGMArray arr, final String filename) throws HsqlException {
@@ -289,9 +291,10 @@ public class RasUtil {
     public static void closeDatabase() throws HsqlException {
         try {
             if(printLog) log.finer("Closing database ...");
-            if (db != null) {
+            if (db != null)
                 db.close();
-            }
+            else
+                System.out.println("Db was already closed.");
         } catch (final Exception ex) {
             if(printLog) log.info("Error closing database connection: ", ex);
             throw Error.error(ex, ErrorCode.RAS_CONNECTION, "Count not close database");
