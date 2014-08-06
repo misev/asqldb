@@ -457,6 +457,10 @@ examples:
          <exclude name="org/hsqldb/util/*Swing.java"/>
          <exclude name="org/hsqldb/util/preprocessor/**"/>
          <exclude name="org/hsqldb/util/TableSorter.java"/>
+         <classpath>
+           <!--<pathelement location="${servletapi.lib}"/>-->
+         	 <pathelement location="lib/rasj.jar" />
+         </classpath>
       </javac>
       <copy todir="classes/org/hsqldb/util" preservelastmodified='true'>
           <fileset dir="src/org/hsqldb/util" includes='*.gif, *.png'/>
