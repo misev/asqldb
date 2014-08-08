@@ -1,4 +1,4 @@
-package org.hsqldb.ras.tests;
+package org.hsqldb.test.rastests;
 
 import com.martiansoftware.jsap.*;
 

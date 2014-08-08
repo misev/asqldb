@@ -1,4 +1,4 @@
-package org.hsqldb.ras.tests;
+package org.hsqldb.test.rastests;
 
 import java.io.PrintStream;
 import java.sql.Connection;
