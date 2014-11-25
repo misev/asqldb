@@ -2684,6 +2684,9 @@ public class ParserDQL extends ParserBase {
             case Tokens.ARRAY :
                 return readCollection(OpTypes.ARRAY);
 
+            case Tokens.MDARRAY :
+                return readMDArray(OpTypes.MDARRAY);
+
             case Tokens.ANY :
             case Tokens.SOME :
             case Tokens.EVERY :
@@ -2842,41 +2845,6 @@ public class ParserDQL extends ParserBase {
         }
 
         return e;
-    }
-
-    private Expression readRasAggregate() {
-        read();
-        final int type;
-        switch(token.tokenType) {
-            case Tokens.PLUS:
-            case Tokens.MINUS:
-            case Tokens.ASTERISK:
-            case Tokens.MIN:
-            case Tokens.MAX:
-            case Tokens.OR:
-            case Tokens.AND:
-                type = token.tokenType;
-                read();
-                break;
-            default:
-                throw Error.error(ErrorCode.RAS_CONDENSER_INVALID_OP, token.tokenString);
-        }
-
-        readThis(Tokens.OVER);
-
-        Expression dimensions = XreadMDArrayDimensionListOrNull();
-
-        readThis(Tokens.USING);
-
-        this.dimensions.add((ExpressionElementListMDA) dimensions);
-
-        //todo: is this the right read?
-//        Expression e = XreadValueExpression();
-        Expression e = XreadNumericValueExpression();
-
-        this.dimensions.remove(dimensions);
-
-        return new ExpressionAggregateMDA(type, dimensions, e);
     }
 
     Expression readNextvalFunction() {
@@ -7060,5 +7028,40 @@ public class ParserDQL extends ParserBase {
         }
         
         return e;
+    }
+
+    private Expression readRasAggregate() {
+        read();
+        final int type;
+        switch(token.tokenType) {
+            case Tokens.PLUS:
+            case Tokens.MINUS:
+            case Tokens.ASTERISK:
+            case Tokens.MIN:
+            case Tokens.MAX:
+            case Tokens.OR:
+            case Tokens.AND:
+                type = token.tokenType;
+                read();
+                break;
+            default:
+                throw Error.error(ErrorCode.RAS_CONDENSER_INVALID_OP, token.tokenString);
+        }
+
+        readThis(Tokens.OVER);
+
+        Expression dimensions = XreadMDArrayDimensionListOrNull();
+
+        readThis(Tokens.USING);
+
+        this.dimensions.add((ExpressionElementListMDA) dimensions);
+
+        //todo: is this the right read?
+//        Expression e = XreadValueExpression();
+        Expression e = XreadNumericValueExpression();
+
+        this.dimensions.remove(dimensions);
+
+        return new ExpressionAggregateMDA(type, dimensions, e);
     }
 }

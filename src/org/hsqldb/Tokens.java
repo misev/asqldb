@@ -2180,6 +2180,8 @@ public class Tokens {
         reservedKeys.put(Tokens.T_WITHOUT, WITHOUT);
         reservedKeys.put(Tokens.T_WHILE, WHILE);
         reservedKeys.put(Tokens.T_YEAR, YEAR);
+        
+        reservedKeys.put(Tokens.T_MDARRAY, MDARRAY);
 
         //rasdaman keys
         reservedKeys.put(Tokens.T_RAS_TIFF, RAS_TIFF);
