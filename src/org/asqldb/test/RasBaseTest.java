@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hsqldb.test.rastests;
+package org.asqldb.test;
 
 import org.hsqldb.ras.RasUtil;
 import java.sql.Connection;

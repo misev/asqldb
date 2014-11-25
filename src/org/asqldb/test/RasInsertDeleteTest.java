@@ -24,61 +24,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hsqldb.test.rastests;
+package org.asqldb.test;
 
 /**
- * Execute CREATE tests.
+ * INSERT/DELETE MDARRAY tests.<p>
  * 
- * @TODO: test error cases
+ * Grammar:
+ * <pre>
+<array value constructor by enumeration> ::=
+  ARRAY [ <array definition domain> ] <array element list>
+
+<array element list> ::=
+  <left bracket or trigraph> <array element list alt> <right bracket or trigraph>
+
+<array element list alt> ::= 
+  <array element list inner>
+  | <array element list> [ { <comma> <array element list> }... ]
+ 
+<array element list inner> ::= <array element> [ { <comma> <array element> }... ]
+
+<array element> ::= <value expression>
+   </pre>
  *
  * @author Dimitar Misev
  */
-public class RasCreateTest extends RasBaseTest {
+public class RasInsertDeleteTest extends RasCreateTest {
 
     public static void main(String[] args) {
         connect();
         
         final String[] createQueries = new String[]{
             "create table RASTEST1 ("
-                + "id INTEGER NOT NULL,"
-                + "a INTEGER MDARRAY[x,y],"
-                + "PRIMARY KEY (id))",
-            "create table RASTEST2 ("
-                + "a INTEGER MDARRAY[x(0:1000),y(0:1000)])",
-            "create table RASTEST3 ("
-                + "a DOUBLE MDARRAY[0:1000,0:1000])",
-            "create table RASTEST4 ("
-                + "a DOUBLE MDARRAY[0:1000,-100:1000,z(1:100)])",
-            "create table RASTEST5 ("
-                + "a DOUBLE MDARRAY[-10000:-1000,-100:1000,z(-1000:-100)])",
-            "create table RASTEST6 ("
+                + "b DOUBLE ARRAY,"
                 + "a DOUBLE MDARRAY[-10000:-1000])"};
         
         dropTables(createQueries);
-        final int failed = createTables(createQueries);
+        createTables(createQueries);
+        insertData();
         dropTables(createQueries);
         
         disconnect();
         
-        System.exit(failed);
+//        System.exit(failed);
     }
     
-    
-    public static int createTables(final String[] queries) {
-        System.out.println("\nCreating tables...");
-        return executeQueries(queries);
-    }
-    
-    /**
-     * Drop tables, assumes that the tables are called RASTEST1, RASTEST2, ...
-     * 
-     * @param queries 
-     */
-    public static void dropTables(final String[] queries) {
-        System.out.println("\nDroping tables...");
-        for (int i = 1; i <= queries.length; i++) {
-            final String table = "RASTEST" + i;
-            executeQuery("DROP TABLE " + table + " IF EXISTS");
-        }
+    public static int insertData() {
+        System.out.println("\nInserting data...");
+        final String[] insertQueries = new String[]{
+            "insert into RASTEST1(b,a) values ("
+                + "ARRAY[1.0,2.0,3.0],"
+                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"};
+        return executeQueries(insertQueries);
     }
 }

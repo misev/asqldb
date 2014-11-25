@@ -1,4 +1,4 @@
-package org.hsqldb.test.rastests;
+package org.asqldb.test;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
