@@ -110,7 +110,7 @@ public class ExpressionValue extends Expression {
         }
     }
 
-    Object getValue(Session session, Type type, boolean isRasRoot) {
+    public Object getValue(Session session, Type type, boolean isRasRoot) {
 
         if (!rasType.isEmpty()) {
             if (!isRasRoot) {

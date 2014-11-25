@@ -31,7 +31,7 @@ import com.martiansoftware.jsap.*;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.jdbc.JDBCMArray;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 import org.odmg.DBag;
 
 import rasj.RasGMArray;

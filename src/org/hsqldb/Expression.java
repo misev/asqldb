@@ -47,8 +47,8 @@ import org.hsqldb.lib.OrderedIntHashSet;
 import org.hsqldb.lib.Set;
 import org.hsqldb.navigator.RowSetNavigatorData;
 import org.hsqldb.persist.PersistentStore;
-import org.hsqldb.ras.ExpressionRas;
-import org.hsqldb.ras.RasArrayId;
+import org.asqldb.ExpressionMDA;
+import org.asqldb.ras.RasArrayId;
 import org.hsqldb.result.Result;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.CharacterType;
@@ -165,7 +165,7 @@ public class Expression implements Cloneable {
         new OrderedIntHashSet();
 
     // type
-    protected int opType;
+    public int opType;
 
     // type qualifier
     protected int exprSubType;
@@ -198,7 +198,7 @@ public class Expression implements Cloneable {
     int parameterIndex = -1;
 
     //
-    int rangePosition = -1;
+    protected int rangePosition = -1;
 
     //
     boolean isColumnCondition;
@@ -212,7 +212,7 @@ public class Expression implements Cloneable {
     //
     Collation collation;
 
-    Expression(int type) {
+    protected Expression(int type) {
         opType = type;
         nodes  = emptyArray;
     }
@@ -222,7 +222,7 @@ public class Expression implements Cloneable {
     /**
      * Creates a SUBQUERY expression.
      */
-    Expression(int type, TableDerived table) {
+    protected Expression(int type, TableDerived table) {
 
         switch (type) {
 
@@ -254,7 +254,7 @@ public class Expression implements Cloneable {
     /**
      * ROW, ARRAY etc.
      */
-    Expression(int type, Expression[] list) {
+    protected Expression(int type, Expression[] list) {
 
         this(type);
 
@@ -270,7 +270,7 @@ public class Expression implements Cloneable {
             if (node.isArrayExpression())
                 return true;
         }
-        return this instanceof ExpressionRas || (dataType != null && dataType.isCharacterArrayType());
+        return this instanceof ExpressionMDA || (dataType != null && dataType.isCharacterArrayType());
     }
 
     /**
@@ -1429,6 +1429,15 @@ public class Expression implements Cloneable {
         return getAlias();
     }
 
+    /**
+     * Returns the name of a column as string
+     *
+     * @return column name
+     */
+    public String getColumnNameString() {
+        return getAlias();
+    }
+
     public ColumnSchema getColumn() {
         return null;
     }
@@ -1436,22 +1445,22 @@ public class Expression implements Cloneable {
     /**
      * Returns the column index in the table
      */
-    int getColumnIndex() {
+    public int getColumnIndex() {
         return columnIndex;
     }
 
     /**
      * Returns the data type
      */
-    Type getDataType() {
+    public Type getDataType() {
         return dataType;
     }
 
-    byte getNullability() {
+    public byte getNullability() {
         return nullability;
     }
 
-    Type getNodeDataType(int i) {
+    public Type getNodeDataType(int i) {
 
         if (nodeDataTypes == null) {
             if (i > 0) {
@@ -1464,7 +1473,7 @@ public class Expression implements Cloneable {
         }
     }
 
-    Type[] getNodeDataTypes() {
+    public Type[] getNodeDataTypes() {
 
         if (nodeDataTypes == null) {
             return new Type[]{ dataType };
@@ -1473,7 +1482,7 @@ public class Expression implements Cloneable {
         }
     }
 
-    int getDegree() {
+    public int getDegree() {
 
         switch (opType) {
 
@@ -1511,11 +1520,11 @@ public class Expression implements Cloneable {
         }
     }
 
-    Object getValue(Session session, Type type) {
+    public Object getValue(Session session, Type type) {
         return getValue(session, type, true);
     }
 
-    Object getValue(Session session, Type type, boolean isRasRoot) {
+    public Object getValue(Session session, Type type, boolean isRasRoot) {
 
         Object o = getValue(session);
 

@@ -26,7 +26,7 @@
 
 package org.asqldb.test;
 
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

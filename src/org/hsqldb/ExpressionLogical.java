@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.ExpressionLogicalMDA;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.index.Index;
@@ -123,7 +124,7 @@ public class ExpressionLogical extends Expression {
     /**
      * Creates a binary operation expression
      */
-    ExpressionLogical(int type, Expression left, Expression right) {
+    protected ExpressionLogical(int type, Expression left, Expression right) {
 
         super(type);
 
@@ -180,7 +181,7 @@ public class ExpressionLogical extends Expression {
     /**
      * Creates a unary operation expression
      */
-    ExpressionLogical(int type, Expression e) {
+    protected ExpressionLogical(int type, Expression e) {
 
         super(type);
 
@@ -229,11 +230,11 @@ public class ExpressionLogical extends Expression {
     }
 
     static ExpressionLogical createExpressionLogical(int type, Expression left, Expression right) {
-        return new ExpressionLogicalRas(type, left, right);
+        return new ExpressionLogicalMDA(type, left, right);
     }
 
     static ExpressionLogical createExpressionLogical(int type, Expression e) {
-        return new ExpressionLogicalRas(type, e);
+        return new ExpressionLogicalMDA(type, e);
     }
 
     void setEqualityMode() {

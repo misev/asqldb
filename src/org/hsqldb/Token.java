@@ -43,7 +43,7 @@ import org.hsqldb.types.Type;
 
 public class Token {
 
-    String  tokenString = "";
+    public String  tokenString = "";
     int     tokenType   = Tokens.X_UNKNOWN_TOKEN;
     Type    dataType;
     Object  tokenValue;

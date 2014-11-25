@@ -44,8 +44,8 @@ import org.hsqldb.lib.Set;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.navigator.RangeIterator;
 import org.hsqldb.persist.PersistentStore;
-import org.hsqldb.ras.RasArrayId;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasArrayId;
+import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.HashSet;
@@ -346,7 +346,8 @@ public class ExpressionColumn extends Expression {
         }
     }
 
-    String getColumnName() {
+    @Override
+    public String getColumnName() {
 
         switch (opType) {
 

@@ -50,7 +50,7 @@ import org.hsqldb.map.BitMap;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.persist.Crypto;
 import org.hsqldb.persist.HsqlDatabaseProperties;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.BinaryData;
 import org.hsqldb.types.BinaryType;
@@ -794,7 +794,7 @@ public class FunctionCustom extends FunctionSQL {
         return super.getFunctionExpression();
     }
 
-    Object getValue(Session session, Object[] data, boolean isRasRoot) {
+    public Object getValue(Session session, Object[] data, boolean isRasRoot) {
 
         switch (funcType) {
 

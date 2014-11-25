@@ -32,7 +32,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;

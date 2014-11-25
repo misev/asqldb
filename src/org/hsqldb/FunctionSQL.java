@@ -37,8 +37,8 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.IntValueHashMap;
 import org.hsqldb.lib.OrderedIntHashSet;
 import org.hsqldb.map.ValuePool;
-import org.hsqldb.ras.RasArrayId;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasArrayId;
+import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.BinaryData;
 import org.hsqldb.types.BinaryType;
 import org.hsqldb.types.BlobData;
@@ -124,7 +124,7 @@ public class FunctionSQL extends Expression {
         Tokens.OPENBRACKET, Tokens.X_OPTION, 1, Tokens.QUESTION,
         Tokens.CLOSEBRACKET
     };
-    static final short[] singleParamList          = new short[] {
+    protected static final short[] singleParamList          = new short[] {
         Tokens.OPENBRACKET, Tokens.QUESTION, Tokens.CLOSEBRACKET
     };
     static final short[] optionalIntegerParamList = new short[] {
@@ -135,7 +135,7 @@ public class FunctionSQL extends Expression {
         Tokens.OPENBRACKET, Tokens.QUESTION, Tokens.X_OPTION, 2, Tokens.COMMA,
         Tokens.QUESTION, Tokens.CLOSEBRACKET
     };
-    static final short[] doubleParamList = new short[] {
+    protected static final short[] doubleParamList = new short[] {
         Tokens.OPENBRACKET, Tokens.QUESTION, Tokens.COMMA, Tokens.QUESTION,
         Tokens.CLOSEBRACKET
     };
@@ -229,10 +229,10 @@ public class FunctionSQL extends Expression {
     }
 
     //
-    int     funcType;
+    protected int     funcType;
     boolean isDeterministic;
     String  name;
-    short[] parseList;
+    protected short[] parseList;
     short[] parseListAlt;
     boolean isSQLValueFunction;
 
@@ -571,11 +571,11 @@ public class FunctionSQL extends Expression {
         return getValue(session, data);
     }
 
-    Object getValue(Session session, Object[] data) {
+    protected Object getValue(Session session, Object[] data) {
         return getValue(session, data, true);
     }
 
-    Object getValue(Session session, Object[] data, boolean isRasRoot) {
+    protected Object getValue(Session session, Object[] data, boolean isRasRoot) {
 
         switch (funcType) {
 

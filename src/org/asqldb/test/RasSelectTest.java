@@ -27,7 +27,7 @@
 package org.asqldb.test;
 
 import com.martiansoftware.jsap.*;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 
 import java.io.*;
 import java.sql.Connection;

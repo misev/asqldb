@@ -35,7 +35,7 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import org.hsqldb.jdbc.JDBCMArray;
-import org.hsqldb.ras.RasUtil;
+import org.asqldb.ras.RasUtil;
 
 import rasj.RasGMArray;
 import rasj.RasMArrayByte;

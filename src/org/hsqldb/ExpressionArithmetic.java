@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.ExpressionArithmeticMDA;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.HsqlList;
@@ -94,10 +95,10 @@ public class ExpressionArithmetic extends Expression {
      * @param type OpType of the operation
      * @param left left operand
      * @param right right operand
-     * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
+     * @return ExpressionArithmetic (or ExpressionArithmeticMDA for arrays) representing the operation
      */
     static ExpressionArithmetic createBinary(final int type, final Expression left, final Expression right) {
-        return new ExpressionArithmeticRas(type, left, right);
+        return new ExpressionArithmeticMDA(type, left, right);
     }
 
     /**
@@ -105,10 +106,10 @@ public class ExpressionArithmetic extends Expression {
      * Builds a Ras expression if one of the operands is an array.
      * @param type OpType of the operation
      * @param e operand
-     * @return ExpressionArithmetic (or ExpressionArithmeticRas for arrays) representing the operation
+     * @return ExpressionArithmetic (or ExpressionArithmeticMDA for arrays) representing the operation
      */
     static ExpressionArithmetic createUnary(int type, Expression e) {
-        return new ExpressionArithmeticRas(type, e);
+        return new ExpressionArithmeticMDA(type, e);
     }
 
     public String getSQL() {

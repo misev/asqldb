@@ -358,4 +358,9 @@ public class SessionContext {
     public void dropSessionTable(String name) {
         sessionTables.remove(name);
     }
+
+    public RangeIterator[] getRangeIterators() {
+        return rangeIterators;
+    }
+    
 }

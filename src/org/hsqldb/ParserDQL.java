@@ -31,6 +31,13 @@
 
 package org.hsqldb;
 
+import org.asqldb.ExpressionAggregateMDA;
+import org.asqldb.FunctionMDA;
+import org.asqldb.ExpressionValueVariableMDA;
+import org.asqldb.ExpressionElementListMDA;
+import org.asqldb.ExpressionDimensionLiteralMDA;
+import org.asqldb.ExpressionArrayConstructorMDA;
+import org.asqldb.ExpressionIndexMDA;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.HsqlNameManager.SimpleName;
 import org.hsqldb.error.Error;
@@ -72,7 +79,7 @@ import java.util.Set;
  */
 public class ParserDQL extends ParserBase {
 
-    private Set<ExpressionRasElementList> dimensions = new HashSet<ExpressionRasElementList>();
+    private Set<ExpressionElementListMDA> dimensions = new HashSet<ExpressionElementListMDA>();
 
     protected Database             database;
     protected Session              session;
@@ -2847,7 +2854,7 @@ public class ParserDQL extends ParserBase {
 
         readThis(Tokens.USING);
 
-        this.dimensions.add((ExpressionRasElementList) dimensions);
+        this.dimensions.add((ExpressionElementListMDA) dimensions);
 
         //todo: is this the right read?
 //        Expression e = XreadValueExpression();
@@ -2855,7 +2862,7 @@ public class ParserDQL extends ParserBase {
 
         this.dimensions.remove(dimensions);
 
-        return new ExpressionRasAggregate(type, dimensions, e);
+        return new ExpressionAggregateMDA(type, dimensions, e);
     }
 
     Expression readNextvalFunction() {
@@ -3353,7 +3360,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadRasArrayIndexRangeExpression();
-            e = new ExpressionRasIndex(OpTypes.ARRAY_INDEX_LIST, a, e);
+            e = new ExpressionIndexMDA(OpTypes.ARRAY_INDEX_LIST, a, e);
         }
 
         return e;
@@ -3372,7 +3379,7 @@ public class ParserDQL extends ParserBase {
             Expression a = e;
 
             e = XreadRasArrayIndexRangeAsteriskOrNumerical();
-            e = new ExpressionRasIndex(OpTypes.ARRAY_RANGE, a, e);
+            e = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE, a, e);
         }
         return e;
     }
@@ -3380,7 +3387,7 @@ public class ParserDQL extends ParserBase {
     Expression XreadRasArrayIndexRangeAsteriskOrNumerical() {
         if (token.tokenType == Tokens.ASTERISK) {
             readThis(Tokens.ASTERISK);
-            return new ExpressionRasIndex(OpTypes.ARRAY_RANGE_ASTERISK);
+            return new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
         }
         return XreadNumericValueExpression();
     }
@@ -5284,7 +5291,7 @@ public class ParserDQL extends ParserBase {
             }
 
             if (function == null) {
-                function = FunctionRas.newRasFunction(token.tokenType);
+                function = FunctionMDA.newRasFunction(token.tokenType);
             }
 
             if (function != null) {
@@ -5422,7 +5429,7 @@ public class ParserDQL extends ParserBase {
             if (token.tokenType == Tokens.VALUES) {
                 readThis(Tokens.VALUES);
 
-                dimensions.add((ExpressionRasElementList) dimensionList);
+                dimensions.add((ExpressionElementListMDA) dimensionList);
                 //todo: right method for more complex expressions
                 value = XreadNumericValueExpression();
                 dimensions.remove(dimensionList);
@@ -5434,13 +5441,13 @@ public class ParserDQL extends ParserBase {
                 constructorType = OpTypes.ARRAY_CONSTRUCTOR_LITERAL;
             }
 
-            return new ExpressionRasArrayConstructor(constructorType, dimensionList, value);
+            return new ExpressionArrayConstructorMDA(constructorType, dimensionList, value);
         }
     }
 
     public Expression XreadRasArrayVariableOrNull() {
-        ExpressionRasElementList dimensionList = null;
-        for (ExpressionRasElementList dimension : dimensions) {
+        ExpressionElementListMDA dimensionList = null;
+        for (ExpressionElementListMDA dimension : dimensions) {
             if (dimension.isDimensionName(token)) {
                 dimensionList = dimension;
                 break;
@@ -5450,7 +5457,7 @@ public class ParserDQL extends ParserBase {
             return null;
         final int index = dimensionList.getIndexForName(token);
         read();
-        return new ExpressionRasValueVariable(index);
+        return new ExpressionValueVariableMDA(index);
     }
 
     /**
@@ -5461,7 +5468,7 @@ public class ParserDQL extends ParserBase {
         if (token.tokenType == Tokens.LEFTBRACKET) {
             return XreadRasArrayDimensionLiteralOrNull();
         }
-        return new ExpressionRasElementList(OpTypes.ARRAY_DIMENSION_SDOM,readColumnOrFunctionExpression());
+        return new ExpressionElementListMDA(OpTypes.ARRAY_DIMENSION_SDOM,readColumnOrFunctionExpression());
     }
 
     /**
@@ -5499,7 +5506,7 @@ public class ParserDQL extends ParserBase {
 
             readThis(Tokens.CLOSEBRACKET);
 
-            final Expression dimension = new ExpressionRasDimensionLiteral(name, i, range);
+            final Expression dimension = new ExpressionDimensionLiteralMDA(name, i, range);
             list.add(dimension);
 
         }
@@ -5508,13 +5515,13 @@ public class ParserDQL extends ParserBase {
 
         list.toArray(array);
 
-        return new ExpressionRasElementList(OpTypes.ARRAY_DIMENSION_LIST, array);
+        return new ExpressionElementListMDA(OpTypes.ARRAY_DIMENSION_LIST, array);
     }
 
     /**
-     * Reads an ExpressionRasElementList containing the value part of an array literal.
-     * Elements are either more ExpressionRasElementList objects, or numerical expressions.
-     * @return ExpressionRasElementList with containing array values or further dimensions.
+     * Reads an ExpressionElementListMDA containing the value part of an array literal.
+     * Elements are either more ExpressionElementListMDA objects, or numerical expressions.
+     * @return ExpressionElementListMDA with containing array values or further dimensions.
      */
     private Expression XreadRasArrayLiteral() {
         if (token.tokenType == Tokens.LEFTBRACKET) {
@@ -5541,7 +5548,7 @@ public class ParserDQL extends ParserBase {
 
             list.toArray(array);
 
-            return new ExpressionRasElementList(OpTypes.ARRAY_ELEMENT_LIST, array);
+            return new ExpressionElementListMDA(OpTypes.ARRAY_ELEMENT_LIST, array);
         }
         return XreadNumericValueExpression();
     }
