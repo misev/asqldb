@@ -26,15 +26,18 @@
 
 package org.asqldb;
 
+import java.util.Iterator;
 import org.hsqldb.error.ErrorCode;
 import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.Set;
+import org.hsqldb.ColumnSchema;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
+import rasj.odmg.RasBag;
 
 /**
  * @author Johannes Bachhuber
@@ -43,14 +46,15 @@ import org.hsqldb.Session;
 public class ExpressionArrayConstructorMDA extends Expression implements ExpressionMDA {
 
     private Object resultCache = null;
+    private ColumnSchema insertColumn = null;
 
-    public ExpressionArrayConstructorMDA(final int type, final Expression dimensions, final Expression values) {
+    public ExpressionArrayConstructorMDA(final int type, final Expression domain, final Expression values) {
         super(type);
         nodes = new Expression[BINARY];
-        nodes[LEFT] = dimensions;
+        nodes[LEFT] = domain;
         nodes[RIGHT] = values;
 
-        if (dimensions.opType != OpTypes.ARRAY_DIMENSION_LIST) {
+        if (domain.opType != OpTypes.ARRAY_DIMENSION_LIST) {
             throw new IllegalArgumentException("Left operands must be of OpType ARRAY_DIMENSION_LIST");
         }
 
@@ -90,8 +94,24 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex (type = "+opType+")");
         }
 
-
-        if (isRasRoot) {
+        if (insertColumn != null) {
+            String collName = insertColumn.getRasdamanCollectionName();
+            int type = insertColumn.dataType.typeCode;
+            String suffix = "d";
+            String left = nodes[LEFT].getValue(session, false).toString();
+            String right = nodes[RIGHT].getValue(session, false).toString();
+            right = right.replaceAll("(\\-?\\d+\\.\\d+)", "$1" + suffix);
+            String insertQuery = "INSERT INTO " + collName + " VALUES < " + left + " " + right + " >";
+            if (resultCache == null) {
+                RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
+                Iterator it = res.iterator();
+                while (it.hasNext()) {
+                    resultCache = it.next();
+                    break;
+                }
+            }
+            return resultCache;
+        } else if (isRasRoot) {
             //Cache the result, since it won't change for other rows
             final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
             if (!rasArrayIds.isEmpty()) {
@@ -104,6 +124,10 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
         }
 
         return rasql;
+    }
+
+    public void setInsertColumnName(ColumnSchema insertColumn) {
+        this.insertColumn = insertColumn;
     }
 
 }

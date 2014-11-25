@@ -872,6 +872,7 @@ public class ExpressionLogical extends Expression {
 
     private void resolveTypesForComparison(Session session,
                                            Expression parent) {
+// -- ASQLDB @TODO
         if (nodes[LEFT].isArrayExpression() || nodes[RIGHT].isArrayExpression()) {
             return;
         }

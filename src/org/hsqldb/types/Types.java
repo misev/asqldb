@@ -91,6 +91,7 @@ public class Types {
     public static final int SQL_BLOB              = 30;             // different in JDBC
     public static final int SQL_CLOB              = 40;             // different in JDBC
     public static final int SQL_ARRAY             = 50;             // different in JDBC - not predefined
+    public static final int SQL_MDARRAY           = 51;             // different in JDBC - not predefined
     public static final int SQL_MULTISET = 55;                      //
     public static final int SQL_BINARY   = 60;                      // different in JDBC -in SQL post-2003
     public static final int SQL_VARBINARY = 61;                     // different in JDBC - in SQL post-2003

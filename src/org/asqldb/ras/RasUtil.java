@@ -90,8 +90,8 @@ public class RasUtil {
 
     private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
 
-    static {//load properties from config file
-
+    //load properties from config file
+    static {
         final Properties prop = new Properties();
         InputStream input = null;
 
@@ -317,10 +317,30 @@ public class RasUtil {
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */
-    public static Object executeRasqlQuery(final String query, boolean closeWhenDone, boolean ignoreFailedQuery) throws HsqlException {
+    public static Object executeRasqlQuery(final String query, boolean ignoreFailedQuery) throws HsqlException {
+        return executeRasqlQuery(query, ignoreFailedQuery, false);
+    }
 
+    /**
+     * Execute a RasQL query with specified credentials.
+     *
+     * Note: if closeWhenDone is false, you need to take care of closing the database!
+     * @param query The rasql query string.
+     * @param closeWhenDone whether the database should be close when the query is completed
+     * @param ignoreFailedQuery if true, a failed query will be silently ignored
+     * @param writeAccess open database with write access
+     * @return result object.
+     * @throws org.hsqldb.HsqlException
+     */
+    public static Object executeRasqlQuery(final String query, boolean ignoreFailedQuery, boolean writeAccess) throws HsqlException {
+        String user = username;
+        String pass = password;
+        if (writeAccess) {
+            user = adminUsername;
+            pass = adminPassword;
+        }
         if (rasImplementation == null || db == null)
-            openDatabase(username, password, false);
+            openDatabase(user, pass, writeAccess);
 
         //The result of the query will be assigned to ret
         //Should always return a result (empty result possible)
@@ -357,11 +377,33 @@ public class RasUtil {
             tr.abort();
             throw Error.error(ErrorCode.RAS_RASJ_BUG, query);
         }
-        finally {
-            if (closeWhenDone)
-                closeDatabase();
+        return ret;
+    }
+    
+    /**
+     * Convert rasj DBag of char arrays to a set of Strings
+     */
+    public static Set<String> dbagArrayToSetString(Object dbag) {
+        Set<String> ret = new HashSet<String>();
+        if (dbag != null) {
+            Iterator it = ((DBag) dbag).iterator();
+            while (it.hasNext()) {
+                RasGMArray rasArray = (RasGMArray) it.next();
+                String javaVal = new String(rasArray.getArray());
+                javaVal = javaVal.trim();
+                ret.add(javaVal);
+            }
         }
         return ret;
+    }
+    
+    /**
+     * @return true if coll exists, false otherwise.
+     */
+    public static boolean rasqlCollectionExists(String coll) {
+        Set<String> colls = RasUtil.dbagArrayToSetString(
+                RasUtil.executeRasqlQuery("select c from RAS_COLLECTIONNAMES as c", false, true));
+        return colls.contains(coll);
     }
 
     /**

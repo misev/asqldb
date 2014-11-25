@@ -53,6 +53,7 @@ public class Tokens {
     public static final String T_ANY              = "ANY";
     public static final String        T_ARE              = "ARE";
     public static final String T_ARRAY            = "ARRAY";
+    public static final String T_MDARRAY          = "MDARRAY";
     public static final String T_ARRAY_AGG        = "ARRAY_AGG";
     public static final String T_AS               = "AS";
     public static final String        T_ASENSITIVE       = "ASENSITIVE";
@@ -1812,6 +1813,9 @@ public class Tokens {
     //rasdaman token types
     public static final int X_IDENTIFIER_WITH_STRUCT   = 885;
 
+    //
+    //SQL 201n Standard reserved keywords - full set
+    public static final int MDARRAY                    = 999;
 
     //rasdaman function tokens:
     public static final int RAS_TIFF                   = 1000;

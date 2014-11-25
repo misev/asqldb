@@ -212,6 +212,7 @@ implements RowOutputInterface {
                 break;
 
             case Types.SQL_INTEGER :
+            case Types.SQL_MDARRAY :
                 writeInteger((Number) o);
                 break;
 

@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.ExpressionArrayConstructorMDA;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.ParserDQL.CompileContext;
 import org.hsqldb.error.Error;
@@ -916,6 +917,9 @@ public class StatementDML extends StatementDMQL {
         for (int i = 0; i < rowArgs.length; i++) {
             Expression e        = rowArgs[i];
             int        colIndex = insertColumnMap[i];
+            if (e instanceof ExpressionArrayConstructorMDA) {
+                ((ExpressionArrayConstructorMDA)e).setInsertColumnName(baseTable.getColumn(colIndex));
+            }
 
             if (e.opType == OpTypes.DEFAULT) {
                 if (baseTable.identityColumn == colIndex) {

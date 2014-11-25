@@ -1132,6 +1132,10 @@ public class Table extends TableBase implements SchemaObject {
         return hasLobColumn;
     }
 
+    public boolean hasMDArrayColumn() {
+        return hasMDArrayColumn;
+    }
+
     public boolean hasIdentityColumn() {
         return identityColumn != -1;
     }
@@ -1706,6 +1710,10 @@ public class Table extends TableBase implements SchemaObject {
 
         if (dataType.isLobType()) {
             hasLobColumn = true;
+        }
+        
+        if (dataType.isMDArrayType()) {
+            hasMDArrayColumn = true;
         }
 
         colTypes[i]         = dataType;

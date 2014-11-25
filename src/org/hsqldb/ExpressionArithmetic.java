@@ -89,6 +89,7 @@ public class ExpressionArithmetic extends Expression {
         }
     }
 
+// -- ASQLDB @TODO
     /**
      * Factory method for binary arithmetic expression.
      * Builds a Ras expression if one of the operands is an array.

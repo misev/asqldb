@@ -66,7 +66,7 @@ public abstract class Type implements SchemaObject, Cloneable {
     public UserTypeModifier userTypeModifier;
 
     //
-    Type(int typeGroup, int type, long precision, int scale) {
+    public Type(int typeGroup, int type, long precision, int scale) {
 
         this.typeComparisonGroup = typeGroup;
         this.typeCode            = type;
@@ -76,6 +76,25 @@ public abstract class Type implements SchemaObject, Cloneable {
                                                         : typeCode;
     }
 
+    public final String getRasqlType() {
+        switch (typeCode) {
+            case Types.SQL_BOOLEAN:
+                return "bool";
+            case Types.SQL_CHAR:
+                return "char";
+            case Types.SQL_SMALLINT:
+                return "short";
+            case Types.SQL_INTEGER:
+            case Types.SQL_BIGINT:
+                return "long";
+            case Types.SQL_FLOAT:
+                return "float";
+            case Types.SQL_DOUBLE:
+                return "double";
+            default:
+                return null;
+        }
+    }
     // interface specific methods
     public final int getType() {
 
@@ -370,6 +389,10 @@ public abstract class Type implements SchemaObject, Cloneable {
         return false;
     }
 
+    public boolean isMDArrayType() {
+        return false;
+    }
+
     public boolean isMultisetType() {
         return false;
     }
@@ -548,7 +571,7 @@ public abstract class Type implements SchemaObject, Cloneable {
         return 0;
     }
 
-    int hashCode(Object a) {
+    public int hashCode(Object a) {
 
         if (a == null) {
             return 0;
@@ -1233,6 +1256,8 @@ public abstract class Type implements SchemaObject, Cloneable {
      * Method to determine whether this Type is an array of characters.
      * This is used to determine which columns contains rasdaman oids.
      * @return
+     * 
+     * @TODO: remove probably
      */
     public boolean isCharacterArrayType() {
         return this.isArrayType() && ((ArrayType) this).dataType.isCharacterType();

@@ -51,7 +51,7 @@ public class ColumnBase {
     protected byte    parameterMode;
     protected boolean isIdentity;
     protected byte    nullability = SchemaObject.Nullability.NULLABLE;
-    protected Type    dataType;
+    public    Type    dataType;
 
     ColumnBase() {}
 

@@ -39,10 +39,12 @@ import org.hsqldb.lib.HsqlArrayList;
 import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.navigator.RowIterator;
+import org.asqldb.ras.RasUtil;
 import org.hsqldb.result.Result;
 import org.hsqldb.rights.Grantee;
 import org.hsqldb.rights.GranteeManager;
 import org.hsqldb.rights.Right;
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.types.Charset;
 import org.hsqldb.types.Collation;
 import org.hsqldb.types.Type;
@@ -1193,6 +1195,29 @@ public class StatementSchema extends Statement {
 
                             session.sessionData.adjustLobUsageCount(table,
                                     data, 1);
+                        }
+                    }
+                    
+                    // create rasdaman collections for array columns
+                    for (int i = 0; i < table.columnCount; i++) {
+                        ColumnSchema column = table.getColumn(i);
+                        Type dataType = column.getDataType();
+                        if (dataType instanceof MDArrayType) {
+                            String rasqlCreateStatement = null;
+                            try {
+                                rasqlCreateStatement = column.getRasqlCreateStatement();
+                            } catch (RuntimeException ex) {
+                                ex.printStackTrace();
+                            }
+                            if (rasqlCreateStatement != null) {
+                                try {
+                                    if (!RasUtil.rasqlCollectionExists(column.getRasdamanCollectionName())) {
+                                        RasUtil.executeRasqlQuery(rasqlCreateStatement, true, true);
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
                         }
                     }
 

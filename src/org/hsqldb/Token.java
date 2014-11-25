@@ -53,7 +53,7 @@ public class Token {
     String  charsetSchema;
     String  charsetName;
     String  fullString;
-    String     rasStruct;
+    String  rasStruct;
     int     lobMultiplierType = Tokens.X_UNKNOWN_TOKEN;
     boolean isDelimiter;
     boolean isDelimitedIdentifier;

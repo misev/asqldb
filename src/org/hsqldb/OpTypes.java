@@ -121,7 +121,7 @@ public interface OpTypes {
         USER_AGGREGATE       = 98,
         ARRAY_ACCESS         = 99,
         ARRAY_SUBQUERY       = 100,
-        ARRAY_INDEX_LIST          = 200, //rasdaman operations
+        ARRAY_INDEX_LIST          = 200,   // MDARRAY operations
         ARRAY_ELEMENT_LIST        = 201,
         ARRAY_RANGE               = 202,
         ARRAY_RANGE_ASTERISK      = 203,
@@ -130,6 +130,7 @@ public interface OpTypes {
         ARRAY_DIMENSION_SDOM      = 206,
         ARRAY_CONSTRUCTOR_LITERAL = 207,
         ARRAY_CONSTRUCTOR_VALUE   = 208,
-        ARRAY_VALUE_VARIABLE      = 209
+        ARRAY_VALUE_VARIABLE      = 209,
+        MDARRAY                   = 210
     ;
 }

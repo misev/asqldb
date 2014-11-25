@@ -53,6 +53,7 @@ import org.hsqldb.result.Result;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.CharacterType;
 import org.hsqldb.types.Collation;
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.types.NullType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
@@ -261,16 +262,17 @@ public class Expression implements Cloneable {
         this.nodes = list;
     }
 
+// -- ASQLDB @TODO rename to isExpressionMDA
     /**
-     * Checks whether this expression (or any of its children) is an array expression.
-     * @return true if it's an array expression
+     * Checks whether this expression (or any of its children) is an
+     * MDARRAY expression.
      */
     public boolean isArrayExpression() {
         for (Expression node: nodes) {
             if (node.isArrayExpression())
                 return true;
         }
-        return this instanceof ExpressionMDA || (dataType != null && dataType.isCharacterArrayType());
+        return this instanceof ExpressionMDA;
     }
 
     /**
@@ -1240,6 +1242,34 @@ public class Expression implements Cloneable {
 
                 return;
             }
+
+            case OpTypes.MDARRAY : {
+                Type nodeDataType = null;
+
+                for (int i = 0; i < nodes.length; i++) {
+                    nodeDataType = Type.getAggregateType(nodeDataType,
+                                                         nodes[i].dataType);
+                }
+
+                for (int i = 0; i < nodes.length; i++) {
+                    nodes[i].dataType = nodeDataType;
+                }
+
+                if (nodeDataType != null) {
+                    for (int i = 0; i < nodes.length; i++) {
+                        if (nodes[i].valueData != null) {
+                            nodes[i].valueData =
+                                nodeDataType.convertToDefaultType(
+                                    session, nodes[i].valueData);
+                        }
+                    }
+                }
+
+                // @TODO: definition domain should be also calculated here
+                dataType = new MDArrayType(nodeDataType);
+
+                return;
+            }
             case OpTypes.ARRAY_SUBQUERY : {
                 QueryExpression queryExpression = table.queryExpression;
 
@@ -2203,4 +2233,5 @@ public class Expression implements Cloneable {
     public void setCollation(Collation collation) {
         this.collation = collation;
     }
+    
 }

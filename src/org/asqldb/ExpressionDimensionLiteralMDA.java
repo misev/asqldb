@@ -30,7 +30,7 @@ import org.hsqldb.Expression;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
-import org.hsqldb.types.ArrayType;
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.types.Type;
 
 /**
@@ -55,7 +55,7 @@ public class ExpressionDimensionLiteralMDA extends Expression implements Express
         if (nodes[LEFT] != null) {
             nodes[LEFT].resolveTypes(session, this);
         }
-        dataType = new ArrayType(Type.SQL_VARCHAR, 1);
+        dataType = new MDArrayType(Type.SQL_VARCHAR);
     }
 
     @Override

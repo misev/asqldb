@@ -46,6 +46,7 @@ import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.lib.StringConverter;
 import org.hsqldb.lib.WrapperIterator;
 import org.hsqldb.navigator.RowIterator;
+import org.asqldb.ras.RasUtil;
 import org.hsqldb.rights.Grantee;
 import org.hsqldb.types.Charset;
 import org.hsqldb.types.Collation;
@@ -998,6 +999,16 @@ public class SchemaManager {
                 Object[] data = row.getData();
 
                 session.sessionData.adjustLobUsageCount(table, data, -1);
+            }
+        }
+        
+        if (table.hasMDArrayColumn) {
+            for (int j = 0; j < table.columnCount; j++) {
+                if (table.colTypes[j].isMDArrayType()) {
+                    ColumnSchema column = table.getColumn(j);
+                    String collName = column.getRasdamanCollectionName();
+                    RasUtil.executeRasqlQuery("drop collection " + collName, true, true);
+                }
             }
         }
 

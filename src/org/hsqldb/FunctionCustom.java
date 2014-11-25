@@ -1421,6 +1421,7 @@ public class FunctionCustom extends FunctionSQL {
                 return new Double(java.lang.Math.atan(d));
             }
             case FUNC_COS : {
+// -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isArrayExpression()) {
                     return getSingleParamRasFunction(session, "cos", isRasRoot);
                 }
@@ -1452,6 +1453,7 @@ public class FunctionCustom extends FunctionSQL {
                 return new Double(java.lang.Math.toDegrees(d));
             }
             case FUNC_SIN : {
+// -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isArrayExpression()) {
                     return getSingleParamRasFunction(session, "sin", isRasRoot);
                 }
@@ -2762,6 +2764,7 @@ public class FunctionCustom extends FunctionSQL {
 
                 break;
             }
+// -- ASQLDB @TODO
             case FUNC_SIN :
             case FUNC_COS :
                 if (nodes[0].isArrayExpression()) {
@@ -3444,6 +3447,7 @@ public class FunctionCustom extends FunctionSQL {
         }
     }
 
+// -- ASQLDB @TODO
     private Object getSingleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
         final String functionCall = String.format("%s(%s)",
                 function, nodes[0].getValue(session, false));

@@ -38,6 +38,7 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.Iterator;
 import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.rights.Grantee;
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
@@ -61,6 +62,7 @@ public final class ColumnSchema extends ColumnBase implements SchemaObject {
     private OrderedHashSet references;
     private OrderedHashSet generatedColumnReferences;
     private Expression     accessor;
+    private String         rasdamanCollectionName;
 
     /**
      * Creates a column defined in DDL statement.
@@ -75,7 +77,26 @@ public final class ColumnSchema extends ColumnBase implements SchemaObject {
         this.isPrimaryKey      = isPrimaryKey;
         this.defaultExpression = defaultExpression;
 
+        if (type instanceof MDArrayType) {
+            rasdamanCollectionName = name.getSchemaQualifiedStatementName();
+            rasdamanCollectionName = rasdamanCollectionName.replace('.', '_');
+        }
         setReferences();
+    }
+
+    public String getRasdamanCollectionName() {
+        return rasdamanCollectionName;
+    }
+    
+    public String getRasqlCreateStatement() {
+        String ret = null;
+        if (dataType instanceof MDArrayType) {
+            String rasqlCollectionType = ((MDArrayType)dataType).getRasqlCollectionType();
+            ret = "create collection " + rasdamanCollectionName + " " + rasqlCollectionType;
+        } else {
+            throw new RuntimeException("Not an array column.");
+        }
+        return ret;
     }
 
     public int getType() {

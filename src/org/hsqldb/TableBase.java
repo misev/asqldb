@@ -109,6 +109,7 @@ public class TableBase {
     protected boolean isLogged;
     private boolean   isTransactional = true;
     boolean           hasLobColumn;
+    boolean           hasMDArrayColumn;
 
     //
     TableBase() {}

@@ -65,6 +65,13 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
         }
     }
 
+    public ExpressionIndexMDA() {
+        super(OpTypes.ARRAY_RANGE);
+        nodes = new Expression[BINARY];
+        nodes[LEFT] = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
+        nodes[RIGHT] = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
+    }
+
     @Override
     public void resolveTypes(Session session, Expression parent) {
         for (Expression node : nodes) {

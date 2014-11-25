@@ -176,6 +176,7 @@ public class ExpressionColumn extends Expression {
         }
     }
 
+// -- ASQLDB @TODO
     @Override
     public boolean isArrayExpression() {
         return super.isArrayExpression() || arrayColumn;
@@ -651,6 +652,7 @@ public class ExpressionColumn extends Expression {
                 break;
             }
             case OpTypes.COLUMN:
+// -- ASQLDB @TODO
                 if (isArrayExpression()) {
                     this.arrayColumn = true;
                     dataType = Type.SQL_VARCHAR;
@@ -680,6 +682,7 @@ public class ExpressionColumn extends Expression {
                     .triggerArguments[rangeVariable.rangePosition][columnIndex];
             }
             case OpTypes.COLUMN : {
+// -- ASQLDB @TODO
                 if (isArrayExpression()) {
                     //parse the rasdaman array contained in this expression
                     final String columnName = this.getColumnName()
@@ -734,6 +737,7 @@ public class ExpressionColumn extends Expression {
         }
     }
 
+// -- ASQLDB @TODO
     /**
      * Retrieves the value of this column.
      *

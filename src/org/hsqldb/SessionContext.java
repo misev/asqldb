@@ -359,8 +359,10 @@ public class SessionContext {
         sessionTables.remove(name);
     }
 
+// -- ASQLDB start
     public RangeIterator[] getRangeIterators() {
         return rangeIterators;
     }
+// -- ASQLDB end
     
 }

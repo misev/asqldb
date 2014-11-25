@@ -1648,7 +1648,9 @@ public class JDBCResultSet implements ResultSet {
         checkColumn(columnIndex);
 
         Type sourceType = resultMetaData.columnTypes[columnIndex - 1];
+
         switch (sourceType.typeCode) {
+
             case Types.SQL_ARRAY :
                 return getArray(columnIndex);
             case Types.SQL_DATE :
