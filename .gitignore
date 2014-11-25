@@ -6,6 +6,7 @@ classes
 out
 tmp
 testrun/sqltool/.gradle/
+lib/.gradle/
 
 *.DS_Store
 *.array
