@@ -55,8 +55,8 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
     @Override
     public Object getValue(Session session, boolean isRoot) {
         if (nodes.length == 0 ||
-                (!nodes[LEFT].isArrayExpression() &&
-                        (nodes.length < 2 || !nodes[RIGHT].isArrayExpression()))) {
+                (!nodes[LEFT].isExpressionMDA() &&
+                        (nodes.length < 2 || !nodes[RIGHT].isExpressionMDA()))) {
             return super.getValue(session, isRoot);
         }
         switch (opType) {
@@ -112,7 +112,7 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
                 node.resolveTypes(session, this);
             }
         }
-        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+        if (!nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA()) {
             super.resolveTypes(session, parent);
         }
     }

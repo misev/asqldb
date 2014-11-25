@@ -1,9 +1,8 @@
 asqldb
 ======
 
-ASQLDB is an Array SQL implementation based on HSQLDB and rasdaman. Array SQL
-is an unofficial extension of standard SQL with advanced query support for
-multidimensional arrays.
+ASQLDB is an SQL/MDA implementation based on HSQLDB and rasdaman. The SQL/MDA
+Part 15 of ISO SQL adds advanced query support for multidimensional arrays.
 
 Currently only SELECT queries are supported. An array has to be inserted
 directly into rasdaman first, and then published in ASQLDB by inserting it's

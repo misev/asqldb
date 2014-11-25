@@ -178,8 +178,8 @@ public class ExpressionColumn extends Expression {
 
 // -- ASQLDB @TODO
     @Override
-    public boolean isArrayExpression() {
-        return super.isArrayExpression() || arrayColumn;
+    public boolean isExpressionMDA() {
+        return super.isExpressionMDA() || arrayColumn;
     }
 
     /**
@@ -653,7 +653,7 @@ public class ExpressionColumn extends Expression {
             }
             case OpTypes.COLUMN:
 // -- ASQLDB @TODO
-                if (isArrayExpression()) {
+                if (isExpressionMDA()) {
                     this.arrayColumn = true;
                     dataType = Type.SQL_VARCHAR;
                 }
@@ -683,7 +683,7 @@ public class ExpressionColumn extends Expression {
             }
             case OpTypes.COLUMN : {
 // -- ASQLDB @TODO
-                if (isArrayExpression()) {
+                if (isExpressionMDA()) {
                     //parse the rasdaman array contained in this expression
                     final String columnName = this.getColumnName()
                             + (rasStructName.isEmpty() ? "" : ("." + rasStructName));
@@ -757,7 +757,7 @@ public class ExpressionColumn extends Expression {
                 iterators[rangeVariable.rangePosition].getCurrent(
                         columnIndex);
 
-        if (!isArrayExpression() && dataType != column.dataType) {
+        if (!isExpressionMDA() && dataType != column.dataType) {
             value = dataType.convertToType(session, value,
                     column.dataType);
         }
@@ -773,7 +773,7 @@ public class ExpressionColumn extends Expression {
     @Override
     public java.util.Set<RasArrayId> getRasArrayIds(Session session) {
         java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
-        if (isArrayExpression()) {
+        if (isExpressionMDA()) {
             rasArrayIds.add(RasArrayId.parseString(
                     RasUtil.objectArrayToString(getHsqlColumnValue(session)), getColumnName()));
         }

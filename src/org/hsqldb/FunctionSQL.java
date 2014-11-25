@@ -564,7 +564,7 @@ public class FunctionSQL extends Expression {
             Expression e = nodes[i];
 
 // -- ASQLDB @TODO
-            if (e != null && !e.isArrayExpression()) {
+            if (e != null && !e.isExpressionMDA()) {
                 data[i] = e.getValue(session, e.dataType);
             }
         }
@@ -747,7 +747,7 @@ public class FunctionSQL extends Expression {
             }
             case FUNC_ABS : {
 // -- ASQLDB @TODO
-                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
                     return getSingleParamRasFunction(session, "abs", isRasRoot);
                 }
                 if (data[0] == null) {
@@ -758,8 +758,8 @@ public class FunctionSQL extends Expression {
             }
             case FUNC_MOD : {
 // -- ASQLDB @TODO
-                if ((nodes.length > 0 && nodes[0].isArrayExpression())
-                        || (nodes.length > 1 && nodes[1].isArrayExpression())) {
+                if ((nodes.length > 0 && nodes[0].isExpressionMDA())
+                        || (nodes.length > 1 && nodes[1].isExpressionMDA())) {
                     return getDoubleParamRasFunction(session, "mod", isRasRoot);
                 }
                 if (data[0] == null || data[1] == null) {
@@ -822,7 +822,7 @@ public class FunctionSQL extends Expression {
             }
             case FUNC_SQRT : {
 // -- ASQLDB @TODO
-                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
                     return getSingleParamRasFunction(session, "sqrt", isRasRoot);
                 }
                 if (data[0] == null) {
@@ -1419,7 +1419,7 @@ public class FunctionSQL extends Expression {
             }
             case FUNC_MOD : {
 // -- ASQLDB @TODO
-                if (nodes[0].isArrayExpression() || nodes[1].isArrayExpression()) {
+                if (nodes[0].isExpressionMDA() || nodes[1].isExpressionMDA()) {
                     dataType = Type.SQL_NUMERIC;
                     break;
                 }
@@ -1476,7 +1476,7 @@ public class FunctionSQL extends Expression {
             case FUNC_EXP :
             case FUNC_SQRT : {
 // -- ASQLDB @TODO
-                if (nodes[0].isArrayExpression()) {
+                if (nodes[0].isExpressionMDA()) {
                     dataType = Type.SQL_NUMERIC;
                     break;
                 }
@@ -1495,7 +1495,7 @@ public class FunctionSQL extends Expression {
             }
             case FUNC_ABS :
 // -- ASQLDB @TODO
-                if (nodes[0].isArrayExpression()) {
+                if (nodes[0].isExpressionMDA()) {
                     dataType = Type.SQL_NUMERIC;
                     break;
                 }

@@ -213,7 +213,7 @@ public class Expression implements Cloneable {
     //
     Collation collation;
 
-    protected Expression(int type) {
+    public Expression(int type) {
         opType = type;
         nodes  = emptyArray;
     }
@@ -267,9 +267,9 @@ public class Expression implements Cloneable {
      * Checks whether this expression (or any of its children) is an
      * MDARRAY expression.
      */
-    public boolean isArrayExpression() {
+    public boolean isExpressionMDA() {
         for (Expression node: nodes) {
-            if (node.isArrayExpression())
+            if (node.isExpressionMDA())
                 return true;
         }
         return this instanceof ExpressionMDA;

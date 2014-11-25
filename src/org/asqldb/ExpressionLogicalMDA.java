@@ -52,8 +52,8 @@ public class ExpressionLogicalMDA extends ExpressionLogical {
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        if ((nodes[LEFT] == null || !nodes[LEFT].isArrayExpression())
-                && (nodes.length < 2 || nodes[RIGHT] == null || !nodes[RIGHT].isArrayExpression())) {
+        if ((nodes[LEFT] == null || !nodes[LEFT].isExpressionMDA())
+                && (nodes.length < 2 || nodes[RIGHT] == null || !nodes[RIGHT].isExpressionMDA())) {
             super.resolveTypes(session, parent);
             return;
         }
@@ -62,7 +62,7 @@ public class ExpressionLogicalMDA extends ExpressionLogical {
 
     @Override
     public Object getValue(Session session, boolean isRoot) {
-        if (!nodes[LEFT].isArrayExpression() && !nodes[RIGHT].isArrayExpression()) {
+        if (!nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA()) {
             return super.getValue(session, isRoot);
         }
 

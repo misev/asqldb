@@ -1422,7 +1422,7 @@ public class FunctionCustom extends FunctionSQL {
             }
             case FUNC_COS : {
 // -- ASQLDB @TODO
-                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
                     return getSingleParamRasFunction(session, "cos", isRasRoot);
                 }
                 if (data[0] == null) {
@@ -1454,7 +1454,7 @@ public class FunctionCustom extends FunctionSQL {
             }
             case FUNC_SIN : {
 // -- ASQLDB @TODO
-                if (nodes.length > 0 && nodes[0].isArrayExpression()) {
+                if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
                     return getSingleParamRasFunction(session, "sin", isRasRoot);
                 }
                 if (data[0] == null) {
@@ -2767,7 +2767,7 @@ public class FunctionCustom extends FunctionSQL {
 // -- ASQLDB @TODO
             case FUNC_SIN :
             case FUNC_COS :
-                if (nodes[0].isArrayExpression()) {
+                if (nodes[0].isExpressionMDA()) {
                     dataType = Type.SQL_NUMERIC;
                     break;
                 }
