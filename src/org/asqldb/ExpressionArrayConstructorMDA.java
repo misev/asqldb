@@ -80,7 +80,7 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
     }
 
     @Override
-    public Object getValue(final Session session, final boolean isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
         final String rasql;
         switch (opType) {
             case OpTypes.ARRAY_CONSTRUCTOR_LITERAL:
@@ -111,7 +111,7 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 }
             }
             return resultCache;
-        } else if (isRasRoot) {
+        } else if (isMDARootNode) {
             //Cache the result, since it won't change for other rows
             final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
             if (!rasArrayIds.isEmpty()) {

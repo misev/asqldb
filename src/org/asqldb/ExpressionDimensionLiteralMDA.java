@@ -59,8 +59,8 @@ public class ExpressionDimensionLiteralMDA extends Expression implements Express
     }
 
     @Override
-    public Object getValue(Session session, boolean isRasRoot) {
-        if (isRasRoot) {
+    public Object getValue(Session session, boolean isMDARootNode) {
+        if (isMDARootNode) {
             throw new IllegalArgumentException("An ElementList has to be the child of an ExpressionRasElementList"
                     +" and can't be the RasRoot.");
         }

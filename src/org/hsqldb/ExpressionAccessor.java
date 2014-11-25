@@ -116,7 +116,7 @@ public class ExpressionAccessor extends Expression {
         }
     }
 
-    public Object getValue(Session session, boolean isRasRoot) {
+    public Object getValue(Session session, boolean isMDARootNode) {
 
         Object[] array = (Object[]) nodes[LEFT].getValue(session);
 

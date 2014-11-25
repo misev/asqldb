@@ -69,7 +69,7 @@ public class RasArrayId {
                 || coid.length() < 3 // COID too short
                 || idx == 0 // Separator at the beginning
                 || idx == coid.length()-1 ) { //separator at the end
-            throw org.hsqldb.error.Error.error(ErrorCode.RAS_INVALID_COLL_OID, coid);
+            throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_COLL_OID, coid);
         }
         final String coll = coid.substring(0, idx);
         final Integer oid = Integer.parseInt(coid.substring(idx + 1));

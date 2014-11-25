@@ -69,8 +69,8 @@ public class RasUtil {
     private static final String DEFAULT_ADMIN_USER = "rasadmin";
     private static final String DEFAULT_ADMIN_PASSWD = "rasadmin";
 
-    private static final int RAS_MAX_ATTEMPTS = 5;
-    private static final int RAS_TIMEOUT = 1000;
+    private static final int MDA_MAX_ATTEMPTS = 5;
+    private static final int MDA_TIMEOUT = 1000;
 
     private static PrintStream queryOutputStream = System.out;
 
@@ -173,7 +173,7 @@ public class RasUtil {
 
         final Iterator it = result.iterator();
         if (!(it.hasNext()))
-            throw Error.error(ErrorCode.RAS_OIDNOTFOUND, query);
+            throw Error.error(ErrorCode.MDA_OIDNOTFOUND, query);
 
         final Object obj = it.next();
 
@@ -196,16 +196,16 @@ public class RasUtil {
             out = new FileOutputStream(filename);
             out.write(dataToWrite);
         } catch (FileNotFoundException ex) {
-            throw Error.error(ex, ErrorCode.RAS_IOERROR, filename);
+            throw Error.error(ex, ErrorCode.MDA_IOERROR, filename);
         } catch (IOException ex) {
-            throw Error.error(ex, ErrorCode.RAS_IOERROR, "write error");
+            throw Error.error(ex, ErrorCode.MDA_IOERROR, "write error");
         } finally {
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException ex) {
                     //noinspection ThrowFromFinallyBlock
-                    throw Error.error(ex, ErrorCode.RAS_IOERROR, "close error");
+                    throw Error.error(ex, ErrorCode.MDA_IOERROR, "close error");
                 }
             }
         }
@@ -242,18 +242,18 @@ public class RasUtil {
                 //possible connection attempts.
                 attempts++;
                 dbOpened = false;
-                if(!(attempts < RAS_MAX_ATTEMPTS))
+                if(!(attempts < MDA_MAX_ATTEMPTS))
                     //Throw a RasConnectionFailedException if the connection
                     //attempts exceeds the maximum connection attempts.
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+                    throw Error.error(ex, ErrorCode.MDA_UNAVAILABLE, attempts+" attempts");
 
                 //Sleep before trying to open another connection
                 try {
-                    Thread.sleep(RAS_TIMEOUT);
+                    Thread.sleep(MDA_TIMEOUT);
                 } catch(InterruptedException e) {
                     if(printLog) log.error("Thread " + Thread.currentThread().getName() +
                             " was interrupted while searching a free server.");
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+                    throw Error.error(ex, ErrorCode.MDA_UNAVAILABLE, attempts+" attempts");
                 }
             } catch(ODMGException ex) {
 
@@ -265,7 +265,7 @@ public class RasUtil {
                         "free Rasdaman server were available. Consider adjusting "+
                         "the values of rasdaman_retry_attempts and rasdaman_retry_timeout "+
                         "or adding more Rasdaman servers.",ex);
-                throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+                throw Error.error(ex, ErrorCode.MDA_UNAVAILABLE, attempts+" attempts");
             } catch (RasClientInternalException ex) {
                 //A connection with a Rasdaman server could not be established
                 //retry shortly unless connection attempts exceeded the maximum
@@ -273,20 +273,20 @@ public class RasUtil {
                 System.out.println("WARNING: internal ras client exception..., "+attempts+" attempts");
                 attempts++;
                 dbOpened = false;
-                if(!(attempts < RAS_MAX_ATTEMPTS))
+                if(!(attempts < MDA_MAX_ATTEMPTS))
                     //Throw a RasConnectionFailedException if the connection
                     //attempts exceeds the maximum connection attempts.
                 {
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts + " attempts");
+                    throw Error.error(ex, ErrorCode.MDA_UNAVAILABLE, attempts + " attempts");
                 }
 
                 //Sleep before trying to open another connection
                 try {
-                    Thread.sleep(RAS_TIMEOUT);
+                    Thread.sleep(MDA_TIMEOUT);
                 } catch(InterruptedException e) {
                     if(printLog) log.error("Thread " + Thread.currentThread().getName() +
                             " was interrupted while searching a free server.");
-                    throw Error.error(ex, ErrorCode.RAS_UNAVAILABLE, attempts+" attempts");
+                    throw Error.error(ex, ErrorCode.MDA_UNAVAILABLE, attempts+" attempts");
                 }
             }
         }
@@ -301,7 +301,7 @@ public class RasUtil {
                 System.out.println("Db was already closed.");
         } catch (final Exception ex) {
             if(printLog) log.info("Error closing database connection: ", ex);
-            throw Error.error(ex, ErrorCode.RAS_CONNECTION, "Count not close database");
+            throw Error.error(ex, ErrorCode.MDA_CONNECTION, "Count not close database");
         }
         rasImplementation = null;
         db = null;
@@ -368,14 +368,14 @@ public class RasUtil {
             //Executing a rasdaman query failed
             tr.abort();
             if (!ignoreFailedQuery)
-                throw Error.error(ex, ErrorCode.RAS_QUERY, query);
+                throw Error.error(ex, ErrorCode.MDA_QUERY, query);
         } catch (java.lang.Error ex) {
             tr.abort();
-            throw Error.error(ErrorCode.RAS_OVERLOAD, query);
+            throw Error.error(ErrorCode.MDA_OVERLOAD, query);
         } catch(NullPointerException ex) {
             //there is a rasj bug that throws a NullPointerException for queries that retrieve scalars
             tr.abort();
-            throw Error.error(ErrorCode.RAS_RASJ_BUG, query);
+            throw Error.error(ErrorCode.MDA_RASJ_BUG, query);
         }
         return ret;
     }

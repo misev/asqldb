@@ -794,7 +794,7 @@ public class FunctionCustom extends FunctionSQL {
         return super.getFunctionExpression();
     }
 
-    public Object getValue(Session session, Object[] data, boolean isRasRoot) {
+    public Object getValue(Session session, Object[] data, boolean isMDARootNode) {
 
         switch (funcType) {
 
@@ -1423,7 +1423,7 @@ public class FunctionCustom extends FunctionSQL {
             case FUNC_COS : {
 // -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
-                    return getSingleParamRasFunction(session, "cos", isRasRoot);
+                    return getSingleParamRasFunction(session, "cos", isMDARootNode);
                 }
                 if (data[0] == null) {
                     return null;
@@ -1455,7 +1455,7 @@ public class FunctionCustom extends FunctionSQL {
             case FUNC_SIN : {
 // -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
-                    return getSingleParamRasFunction(session, "sin", isRasRoot);
+                    return getSingleParamRasFunction(session, "sin", isMDARootNode);
                 }
                 if (data[0] == null) {
                     return null;
@@ -3448,10 +3448,10 @@ public class FunctionCustom extends FunctionSQL {
     }
 
 // -- ASQLDB @TODO
-    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isMDARootNode) {
         final String functionCall = String.format("%s(%s)",
                 function, nodes[0].getValue(session, false));
-        if (isRasRoot) {
+        if (isMDARootNode) {
             return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
         }
         return functionCall;

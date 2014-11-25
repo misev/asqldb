@@ -179,7 +179,7 @@ public class ExpressionTable extends Expression {
         }
     }
 
-    public Object getValue(Session session, Type type, boolean isRasRoot) {
+    public Object getValue(Session session, Type type, boolean isMDARootNode) {
 
         switch (opType) {
 

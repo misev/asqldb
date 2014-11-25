@@ -84,7 +84,7 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
 
 
     @Override
-    public Object getValue(Session session, boolean isRasRoot) {
+    public Object getValue(Session session, boolean isMDARootNode) {
 
         switch(opType) {
             case OpTypes.ARRAY_RANGE_ASTERISK:

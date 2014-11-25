@@ -1554,7 +1554,7 @@ public class Expression implements Cloneable {
         return getValue(session, type, true);
     }
 
-    public Object getValue(Session session, Type type, boolean isRasRoot) {
+    public Object getValue(Session session, Type type, boolean isMDARootNode) {
 
         Object o = getValue(session);
 
@@ -1614,10 +1614,10 @@ public class Expression implements Cloneable {
      * The first RasExpression, which is passed the value 'true' for this flag, will execute the rasdaman query
      * after gathering the subqueries by propagating the flag as 'false'.
      * @param session current session
-     * @param isRasRoot true if there are no RasExpressions above this one
+     * @param isMDARootNode true if there are no RasExpressions above this one
      * @return Result object
      */
-    public Object getValue(Session session, boolean isRasRoot) {
+    public Object getValue(Session session, boolean isMDARootNode) {
 
         switch (opType) {
 

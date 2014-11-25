@@ -292,7 +292,7 @@ public class RasMArrayTest {
 
         final Iterator it = dbag.iterator();
         if (!(it.hasNext()))
-            throw Error.error(ErrorCode.RAS_OIDNOTFOUND, query);
+            throw Error.error(ErrorCode.MDA_OIDNOTFOUND, query);
 
         final Object obj = it.next();
 

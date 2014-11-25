@@ -549,8 +549,8 @@ public class FunctionSQL extends Expression {
     }
 
     @Override
-    public Object getValue(Session session, boolean isRasRoot) {
-        return getValue(session, nodes, isRasRoot);
+    public Object getValue(Session session, boolean isMDARootNode) {
+        return getValue(session, nodes, isMDARootNode);
     }
 
     /**
@@ -576,7 +576,7 @@ public class FunctionSQL extends Expression {
         return getValue(session, data, true);
     }
 
-    protected Object getValue(Session session, Object[] data, boolean isRasRoot) {
+    protected Object getValue(Session session, Object[] data, boolean isMDARootNode) {
 
         switch (funcType) {
 
@@ -748,7 +748,7 @@ public class FunctionSQL extends Expression {
             case FUNC_ABS : {
 // -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
-                    return getSingleParamRasFunction(session, "abs", isRasRoot);
+                    return getSingleParamRasFunction(session, "abs", isMDARootNode);
                 }
                 if (data[0] == null) {
                     return null;
@@ -760,7 +760,7 @@ public class FunctionSQL extends Expression {
 // -- ASQLDB @TODO
                 if ((nodes.length > 0 && nodes[0].isExpressionMDA())
                         || (nodes.length > 1 && nodes[1].isExpressionMDA())) {
-                    return getDoubleParamRasFunction(session, "mod", isRasRoot);
+                    return getDoubleParamRasFunction(session, "mod", isMDARootNode);
                 }
                 if (data[0] == null || data[1] == null) {
                     return null;
@@ -823,7 +823,7 @@ public class FunctionSQL extends Expression {
             case FUNC_SQRT : {
 // -- ASQLDB @TODO
                 if (nodes.length > 0 && nodes[0].isExpressionMDA()) {
-                    return getSingleParamRasFunction(session, "sqrt", isRasRoot);
+                    return getSingleParamRasFunction(session, "sqrt", isMDARootNode);
                 }
                 if (data[0] == null) {
                     return null;
@@ -1227,19 +1227,19 @@ public class FunctionSQL extends Expression {
     }
 
 // -- ASQLDB @TODO
-    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+    private Object getSingleParamRasFunction(final Session session, final String function, final boolean isMDARootNode) {
         final String functionCall = String.format("%s(%s)",
                 function, nodes[0].getValue(session, false));
-        if (isRasRoot) {
+        if (isMDARootNode) {
             return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
         }
         return functionCall;
     }
 
-    private Object getDoubleParamRasFunction(final Session session, final String function, final boolean isRasRoot) {
+    private Object getDoubleParamRasFunction(final Session session, final String function, final boolean isMDARootNode) {
         final String functionCall = String.format("%s(%s, %s)",
                 function, nodes[0].getValue(session, false), nodes[1].getValue(session, false));
-        if (isRasRoot) {
+        if (isMDARootNode) {
             Set<RasArrayId> rasArrayIds = nodes[0].getRasArrayIds(session);
             rasArrayIds.addAll(nodes[1].getRasArrayIds(session));
             return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);

@@ -661,7 +661,7 @@ public class ExpressionColumn extends Expression {
     }
 
     @Override
-    public Object getValue(final Session session, final boolean isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
 
         switch (opType) {
 
@@ -687,7 +687,7 @@ public class ExpressionColumn extends Expression {
                     //parse the rasdaman array contained in this expression
                     final String columnName = this.getColumnName()
                             + (rasStructName.isEmpty() ? "" : ("." + rasStructName));
-                    if (isRasRoot) {
+                    if (isMDARootNode) {
                         final RasArrayId coid = RasArrayId.parseString(
                                 RasUtil.objectArrayToString(getHsqlColumnValue(session)), columnName);
                         return RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid);

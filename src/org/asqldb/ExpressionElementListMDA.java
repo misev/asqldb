@@ -66,8 +66,8 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
     }
 
     @Override
-    public Object getValue(final Session session, final boolean isRasRoot) {
-        if (isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
+        if (isMDARootNode) {
             throw new IllegalArgumentException("An ElementList has to be the child of an ArrayConstructor" +
                     " and can't be the RasRoot.");
         }
@@ -142,6 +142,6 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
                 return i;
             }
         }
-        throw Error.error(ErrorCode.RAS_ARRAY_DIMENSION_REQUIRED);
+        throw Error.error(ErrorCode.MDA_ARRAY_DIMENSION_REQUIRED);
     }
 }

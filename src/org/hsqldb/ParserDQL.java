@@ -2404,7 +2404,7 @@ public class ParserDQL extends ParserBase {
             case Tokens.X_IDENTIFIER_WITH_STRUCT :
                 checkValidCatalogName(token.namePrePrePrefix);
                 e = new ExpressionColumn(token.namePrePrefix,
-                        token.namePrefix, token.tokenString, token.rasStruct);
+                        token.namePrefix, token.tokenString, token.mdaStruct);
                 read();
                 return e;
 
@@ -2703,9 +2703,8 @@ public class ParserDQL extends ParserBase {
             case Tokens.ARRAY_AGG :
             case Tokens.MEDIAN :
                 return readAggregate();
-            //ras array aggregate expression
             case Tokens.AGGREGATE:
-                return readRasAggregate();
+                return readMDArrayAggregate();
             case Tokens.NEXT : {
                 e = readSequenceExpressionOrNull(OpTypes.SEQUENCE);
 
@@ -5278,7 +5277,7 @@ public class ParserDQL extends ParserBase {
             }
 
             if (function == null) {
-                function = FunctionMDA.newRasFunction(token.tokenType);
+                function = FunctionMDA.newFunctionMDA(token.tokenType);
             }
 
             if (function != null) {
@@ -7030,7 +7029,7 @@ public class ParserDQL extends ParserBase {
         return e;
     }
 
-    private Expression readRasAggregate() {
+    private Expression readMDArrayAggregate() {
         read();
         final int type;
         switch(token.tokenType) {
@@ -7045,7 +7044,7 @@ public class ParserDQL extends ParserBase {
                 read();
                 break;
             default:
-                throw Error.error(ErrorCode.RAS_CONDENSER_INVALID_OP, token.tokenString);
+                throw Error.error(ErrorCode.MDA_CONDENSER_INVALID_OP, token.tokenString);
         }
 
         readThis(Tokens.OVER);
@@ -7056,7 +7055,7 @@ public class ParserDQL extends ParserBase {
 
         this.dimensions.add((ExpressionElementListMDA) dimensions);
 
-        //todo: is this the right read?
+        // @TODO: is this the right read?
 //        Expression e = XreadValueExpression();
         Expression e = XreadNumericValueExpression();
 

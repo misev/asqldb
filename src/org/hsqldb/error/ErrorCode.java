@@ -687,25 +687,25 @@ public interface ErrorCode {
     int X_HY093 = 6800;                            // CLI-specific condition: invalid datalink value
 
     //additional error codes for Array SQL (errors propagated from rasdaman through rasj)
-    int RAS_QUERY = 7000;                           // Error executing the rasdaman query
-    int RAS_OVERLOAD = 7001;                        // Requested more data than the rasdaman server can handle at once.
-    int RAS_UNAVAILABLE = 7002;                     // Unable to get a free rasdaman server.
-    int RAS_RASJ_BUG = 7003;                        // Query failed due to known rasj bug. Will be fixed in future versions.
+    int MDA_QUERY = 7000;                           // Error executing the rasdaman query
+    int MDA_OVERLOAD = 7001;                        // Requested more data than the rasdaman server can handle at once.
+    int MDA_UNAVAILABLE = 7002;                     // Unable to get a free rasdaman server.
+    int MDA_RASJ_BUG = 7003;                        // Query failed due to known rasj bug. Will be fixed in future versions.
 
     //error codes for ras oid retrieval
-    int RAS_OIDNOTFOUND = 7011;                     //Unable to find OID in given collection.
-    int RAS_NOARRAY = 7012;                         //Attempting to perform array operation on non-array.
-    int RAS_IOERROR = 7013;                         //Could not write array to file
-    int RAS_INVALID_COLL_OID = 7014;                //The coll oid provides is not formatted correctly
+    int MDA_OIDNOTFOUND = 7011;                     //Unable to find OID in given collection.
+    int MDA_NOARRAY = 7012;                         //Attempting to perform array operation on non-array.
+    int MDA_IOERROR = 7013;                         //Could not write array to file
+    int MDA_INVALID_COLL_OID = 7014;                //The coll oid provides is not formatted correctly
 
     //error codes for function evaluation
-    int RAS_INVALID_PARAMETER = 7015;               //The parameter passed to this function is valid.
+    int MDA_INVALID_PARAMETER = 7015;               //The parameter passed to this function is valid.
 
     //error codes for array index parsing
-    int RAS_ARRAY_DIMENSION_REQUIRED = 7016;        //Dimension literal required
+    int MDA_ARRAY_DIMENSION_REQUIRED = 7016;        //Dimension literal required
 
     //condenser errors
-    int RAS_CONDENSER_INVALID_OP = 7017;            //Invalid condenser operation
+    int MDA_CONDENSER_INVALID_OP = 7017;            //Invalid condenser operation
 
-    int RAS_CONNECTION = 7018;                     // Rasdaman connection error
+    int MDA_CONNECTION = 7018;                     // Rasdaman connection error
 }

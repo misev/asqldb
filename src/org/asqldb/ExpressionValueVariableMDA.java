@@ -51,9 +51,9 @@ public class ExpressionValueVariableMDA extends Expression implements Expression
     }
 
     @Override
-    public Object getValue(final Session session, final boolean isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
 
-        if (isRasRoot) {
+        if (isMDARootNode) {
             throw new IllegalArgumentException("This Expression cannot be a rasRoot");
         }
 

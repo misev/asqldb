@@ -1199,7 +1199,7 @@ public class ExpressionLogical extends Expression {
     }
 
     @Override
-    public Object getValue(final Session session, final boolean isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
 
         switch (opType) {
 

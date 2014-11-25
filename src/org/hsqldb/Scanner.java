@@ -866,7 +866,7 @@ public class Scanner {
                         c = charAt(++currentPosition)){
                     index = index * 10 + c - '0';
                 }
-                token.rasStruct = Integer.toString(index);
+                token.mdaStruct = Integer.toString(index);
                 return;
             }
 

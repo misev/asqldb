@@ -110,10 +110,10 @@ public class ExpressionValue extends Expression {
         }
     }
 
-    public Object getValue(Session session, Type type, boolean isRasRoot) {
+    public Object getValue(Session session, Type type, boolean isMDARootNode) {
 
         if (!rasType.isEmpty()) {
-            if (!isRasRoot) {
+            if (!isMDARootNode) {
                 return valueData + rasType;
             }
         }

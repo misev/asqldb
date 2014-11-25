@@ -631,7 +631,7 @@ public class ExpressionArithmetic extends Expression {
         }
     }
 
-    public Object getValue(final Session session, final boolean isRasRoot) {
+    public Object getValue(final Session session, final boolean isMDARootNode) {
 
         switch (opType) {
 
