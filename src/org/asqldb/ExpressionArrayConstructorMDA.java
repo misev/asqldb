@@ -33,6 +33,7 @@ import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.Set;
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.ColumnSchema;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
@@ -95,19 +96,21 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
         }
 
         if (insertColumn != null) {
-            String collName = insertColumn.getRasdamanCollectionName();
-            int type = insertColumn.dataType.typeCode;
-            String suffix = "d";
-            String left = nodes[LEFT].getValue(session, false).toString();
-            String right = nodes[RIGHT].getValue(session, false).toString();
-            right = right.replaceAll("(\\-?\\d+\\.\\d+)", "$1" + suffix);
-            String insertQuery = "INSERT INTO " + collName + " VALUES < " + left + " " + right + " >";
-            if (resultCache == null) {
-                RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
-                Iterator it = res.iterator();
-                while (it.hasNext()) {
-                    resultCache = it.next();
-                    break;
+            if (opType == OpTypes.ARRAY_CONSTRUCTOR_LITERAL) {
+                String collName = insertColumn.getRasdamanCollectionName();
+                Type type = insertColumn.dataType.collectionBaseType();
+                String suffix = type.getRasqlSuffix();
+                String left = nodes[LEFT].getValue(session, false).toString();
+                String right = nodes[RIGHT].getValue(session, false).toString();
+                right = right.replaceAll("(\\-?\\d+\\.\\d+)", "$1" + suffix);
+                String insertQuery = "INSERT INTO " + collName + " VALUES < " + left + " " + right + " >";
+                if (resultCache == null) {
+                    RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
+                    Iterator it = res.iterator();
+                    while (it.hasNext()) {
+                        resultCache = it.next();
+                        break;
+                    }
                 }
             }
             return resultCache;

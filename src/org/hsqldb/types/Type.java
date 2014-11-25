@@ -96,6 +96,29 @@ public abstract class Type implements SchemaObject, Cloneable {
                 return null;
         }
     }
+
+    /**
+     * @TODO: cover more types, this is not extensive 
+     */
+    public final String getRasqlSuffix() {
+        switch (typeCode) {
+            case Types.SQL_BOOLEAN:
+                return "";
+            case Types.SQL_CHAR:
+                return "c";
+            case Types.SQL_SMALLINT:
+                return "s";
+            case Types.SQL_INTEGER:
+            case Types.SQL_BIGINT:
+                return "l";
+            case Types.SQL_FLOAT:
+                return "f";
+            case Types.SQL_DOUBLE:
+                return "d";
+            default:
+                return null;
+        }
+    }
     // interface specific methods
     public final int getType() {
 
