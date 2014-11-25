@@ -76,7 +76,7 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 node.resolveTypes(session, this);
             }
         }
-        dataType = Type.SQL_VARCHAR;
+        dataType = Type.SQL_MDARRAY_ALL_TYPES;
     }
 
     @Override

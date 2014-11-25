@@ -112,8 +112,14 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
                 node.resolveTypes(session, this);
             }
         }
-        if (!nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA()) {
-            super.resolveTypes(session, parent);
+        if (nodes.length > 1) {
+            if (!nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA()) {
+                super.resolveTypes(session, parent);
+            }
+        } else if (nodes.length > 0) {
+            if (!nodes[LEFT].isExpressionMDA()) {
+                super.resolveTypes(session, parent);
+            }
         }
     }
 

@@ -26,6 +26,11 @@
 
 package org.asqldb.test;
 
+import java.util.Iterator;
+import org.asqldb.ras.RasUtil;
+import org.odmg.DBag;
+import rasj.RasMArrayByte;
+
 /**
  * INSERT/DELETE MDARRAY tests.<p>
  * 
@@ -55,12 +60,12 @@ public class InsertDeleteTest extends CreateTest {
         
         final String[] createQueries = new String[]{
             "create table RASTEST1 ("
-                + "b DOUBLE ARRAY,"
                 + "a DOUBLE MDARRAY[-10000:-1000])"};
         
         dropTables(createQueries);
         createTables(createQueries);
         insertData();
+        checkInsertedData();
         dropTables(createQueries);
         
         disconnect();
@@ -71,9 +76,30 @@ public class InsertDeleteTest extends CreateTest {
     public static int insertData() {
         System.out.println("\nInserting data...");
         final String[] insertQueries = new String[]{
-            "insert into RASTEST1(b,a) values ("
-                + "ARRAY[1.0,2.0,3.0],"
+            "insert into RASTEST1(a) values ("
                 + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"};
         return executeQueries(insertQueries);
+    }
+    
+    public static boolean checkInsertedData() {
+        System.out.print("Checking inserted data... ");
+        boolean ret = true;
+        Object res = RasUtil.executeRasqlQuery("select csv(c) from PUBLIC_RASTEST1_A as c", true);
+        if (res instanceof DBag) {
+            DBag b = (DBag) res;
+            Iterator it = b.iterator();
+            Object o = it.next();
+            if (o instanceof RasMArrayByte) {
+                RasMArrayByte m = (RasMArrayByte) o;
+                String csv = new String(m.getArray());
+                ret = csv.equals("{1,2.3,-9.88832}");
+            } else {
+                ret = false;
+            }
+        } else {
+            ret = false;
+        }
+        printCheck(ret);
+        return ret;
     }
 }

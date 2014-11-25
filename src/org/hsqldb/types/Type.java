@@ -31,6 +31,7 @@
 
 package org.hsqldb.types;
 
+import org.asqldb.types.MDArrayType;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.SchemaObject;
@@ -822,6 +823,14 @@ public abstract class Type implements SchemaObject, Cloneable {
     public static ArrayType getDefaultArrayType(int type) {
         return new ArrayType(getDefaultType(type),
                              ArrayType.defaultArrayCardinality);
+    }
+
+    //
+    public static final MDArrayType SQL_MDARRAY_ALL_TYPES =
+        new MDArrayType(SQL_ALL_TYPES);
+
+    public static MDArrayType getDefaultMDArrayType(int type) {
+        return new MDArrayType(getDefaultType(type));
     }
 
     public static Type getDefaultType(int type) {

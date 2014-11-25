@@ -126,4 +126,12 @@ public class BaseTest {
         }
         return ret;
     }
+    
+    public static void printCheck(boolean res) {
+        if (res) {
+            System.out.println("ok.");
+        } else {
+            System.out.println("failed.");
+        }
+    }
 }

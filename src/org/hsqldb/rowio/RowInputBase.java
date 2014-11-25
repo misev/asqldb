@@ -186,6 +186,7 @@ abstract class RowInputBase extends HsqlByteArrayInputStream {
                 break;
 
             case Types.SQL_INTEGER :
+            case Types.SQL_MDARRAY :
                 o = readInteger();
                 break;
 
