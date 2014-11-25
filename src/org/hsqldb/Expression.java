@@ -2233,5 +2233,9 @@ public class Expression implements Cloneable {
     public void setCollation(Collation collation) {
         this.collation = collation;
     }
+
+    public Expression[] getNodes() {
+        return nodes;
+    }
     
 }

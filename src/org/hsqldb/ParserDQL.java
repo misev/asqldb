@@ -84,7 +84,7 @@ import java.util.Set;
  */
 public class ParserDQL extends ParserBase {
 
-    private Set<ExpressionElementListMDA> dimensions = new HashSet<ExpressionElementListMDA>();
+    private Set<ExpressionDimensionLiteralMDA> dimensions = new HashSet<ExpressionDimensionLiteralMDA>();
 
     protected Database             database;
     protected Session              session;
@@ -6876,8 +6876,9 @@ public class ParserDQL extends ParserBase {
     Expression readMDArray(int type) {
 
         read();
-
-        final Expression domain = XreadMDArrayDimensionListOrNull();
+        
+        Set<ExpressionDimensionLiteralMDA> dimensionsTmp = new HashSet<ExpressionDimensionLiteralMDA>();
+        final Expression domain = XreadMDArrayDimensionListOrNull(dimensionsTmp);
         if (domain == null || domain.nodes.length == 0) {
             throw unexpectedToken();
         }
@@ -6888,10 +6889,9 @@ public class ParserDQL extends ParserBase {
             // @TODO: 
             readThis(Tokens.VALUES);
 
-//                dimensions.add((ExpressionRasElementList) dimensionList);
-            //todo: right method for more complex expressions
+            dimensions.addAll(dimensionsTmp);
             value = XreadNumericValueExpression();
-//                dimensions.remove(dimensionList);
+            dimensions.removeAll(dimensionsTmp);
 
             constructorType = OpTypes.ARRAY_CONSTRUCTOR_VALUE;
         } else {
@@ -6907,16 +6907,17 @@ public class ParserDQL extends ParserBase {
      * @TODO
      */
     public Expression XreadMDArrayVariableOrNull() {
-        ExpressionElementListMDA dimensionList = null;
-//        for (ExpressionElementListMDA dimension : dimensions) {
-//            if (dimension.isDimensionName(token)) {
-//                dimensionList = dimension;
-//                break;
-//            }
-//        }
-        if (dimensionList == null)
+        ExpressionDimensionLiteralMDA dimensionToken = null;
+        for (ExpressionDimensionLiteralMDA dimension : dimensions) {
+            if (dimension.getName().equals(token.tokenString)) {
+                dimensionToken = dimension;
+                break;
+            }
+        }
+        if (dimensionToken == null)
             return null;
-        final int index = dimensionList.getIndexForName(token);
+        
+        final int index = dimensionToken.getIndex();
         read();
         return new ExpressionValueVariableMDA(index);
     }
@@ -6924,7 +6925,7 @@ public class ParserDQL extends ParserBase {
     /**
      * Reads a list of dimensions for the array constructor.
      */
-    private Expression XreadMDArrayDimensionListOrNull() {
+    private Expression XreadMDArrayDimensionListOrNull(Set<ExpressionDimensionLiteralMDA> dimensions) {
         readThis(Tokens.LEFTBRACKET);
 
         final HsqlArrayList dimensionList = new HsqlArrayList();
@@ -6979,13 +6980,14 @@ public class ParserDQL extends ParserBase {
                         isDelimitedIdentifier());
             }
 
-            final Expression dimension = new ExpressionDimensionLiteralMDA(dimensionName, i, range);
+            final ExpressionDimensionLiteralMDA dimension = new ExpressionDimensionLiteralMDA(dimensionName, i, range);
             dimensionList.add(dimension);
+            dimensions.add(dimension);
         }
 
-        final Expression[] dimensions = new Expression[dimensionList.size()];
-        dimensionList.toArray(dimensions);
-        return new ExpressionElementListMDA(OpTypes.ARRAY_DIMENSION_LIST, dimensions);
+        final Expression[] dims = new Expression[dimensionList.size()];
+        dimensionList.toArray(dims);
+        return new ExpressionElementListMDA(OpTypes.ARRAY_DIMENSION_LIST, dims);
     }
 
     /**
@@ -7049,17 +7051,14 @@ public class ParserDQL extends ParserBase {
 
         readThis(Tokens.OVER);
 
-        Expression dimensions = XreadMDArrayDimensionListOrNull();
+        Set<ExpressionDimensionLiteralMDA> dimensionsTmp = new HashSet<ExpressionDimensionLiteralMDA>();
+        Expression dimensions = XreadMDArrayDimensionListOrNull(dimensionsTmp);
 
         readThis(Tokens.USING);
 
-        this.dimensions.add((ExpressionElementListMDA) dimensions);
-
-        // @TODO: is this the right read?
-//        Expression e = XreadValueExpression();
+        this.dimensions.addAll(dimensionsTmp);
         Expression e = XreadNumericValueExpression();
-
-        this.dimensions.remove(dimensions);
+        this.dimensions.removeAll(dimensionsTmp);
 
         return new ExpressionAggregateMDA(type, dimensions, e);
     }

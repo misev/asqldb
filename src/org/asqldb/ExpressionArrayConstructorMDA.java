@@ -96,24 +96,49 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
         }
 
         if (insertColumn != null) {
+            String collName = insertColumn.getRasdamanCollectionName();
+            Type type = insertColumn.dataType.collectionBaseType();
+            String left = nodes[LEFT].getValue(session, false).toString();
+            String right = nodes[RIGHT].getValue(session, false).toString();
+            String insertQuery = "INSERT INTO " + collName + " VALUES ";
+            
             if (opType == OpTypes.ARRAY_CONSTRUCTOR_LITERAL) {
-                String collName = insertColumn.getRasdamanCollectionName();
-                Type type = insertColumn.dataType.collectionBaseType();
                 String suffix = type.getRasqlSuffix();
-                String left = nodes[LEFT].getValue(session, false).toString();
-                String right = nodes[RIGHT].getValue(session, false).toString();
                 right = right.replaceAll("(\\-?\\d+\\.\\d+)", "$1" + suffix);
-                String insertQuery = "INSERT INTO " + collName + " VALUES < " + left + " " + right + " >";
-                if (resultCache == null) {
-                    RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
-                    Iterator it = res.iterator();
-                    while (it.hasNext()) {
-                        resultCache = it.next();
-                        break;
+                insertQuery += "< " + left + " " + right + " >";
+                
+            } else if (opType == OpTypes.ARRAY_CONSTRUCTOR_VALUE) {
+                ExpressionElementListMDA el = (ExpressionElementListMDA) nodes[LEFT];
+                Expression[] dims = el.getNodes();
+                
+                insertQuery += "MARRAY x IN [";
+                for (int i = 0; i < dims.length; i++) {
+                    ExpressionDimensionLiteralMDA dim = (ExpressionDimensionLiteralMDA) dims[i];
+                    
+                    // append range
+                    final String range = dim.getNodes()[0].getValue(session, false).toString();
+                    insertQuery += range;
+                    if (i < dims.length - 1) {
+                        insertQuery += ", ";
                     }
+                    
+                    // replace dimension name references with rasql equivalents in the values clause
+                    final String name = dim.getName();
+                    final String replName = "x[" + i + "]";
+                    right = right.replaceAll(name, replName);
+                }
+                insertQuery += "] VALUES " + right;
+            }
+            if (resultCache == null) {
+                RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
+                Iterator it = res.iterator();
+                while (it.hasNext()) {
+                    resultCache = it.next();
+                    break;
                 }
             }
             return resultCache;
+            
         } else if (isMDARootNode) {
             //Cache the result, since it won't change for other rows
             final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);

@@ -63,9 +63,14 @@ public class InsertDeleteTest extends CreateTest {
                 + "a DOUBLE MDARRAY[-10000:-1000])"};
         
         dropTables(createQueries);
+//        createTables(createQueries);
+//        insertArrayLiteral();
+//        checkInsertedArrayLiteral();
+//        dropTables(createQueries);
+        
         createTables(createQueries);
-        insertData();
-        checkInsertedData();
+        insertArrayValues();
+        checkInsertedArrayValues();
         dropTables(createQueries);
         
         disconnect();
@@ -73,15 +78,23 @@ public class InsertDeleteTest extends CreateTest {
 //        System.exit(failed);
     }
     
-    public static int insertData() {
-        System.out.println("\nInserting data...");
+    public static int insertArrayLiteral() {
+        System.out.println("\nInserting array literal...");
         final String[] insertQueries = new String[]{
             "insert into RASTEST1(a) values ("
                 + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"};
         return executeQueries(insertQueries);
     }
     
-    public static boolean checkInsertedData() {
+    public static int insertArrayValues() {
+        System.out.println("\nInserting array values...");
+        final String[] insertQueries = new String[]{
+            "insert into RASTEST1(a) values ("
+                + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))"};
+        return executeQueries(insertQueries);
+    }
+    
+    public static boolean checkInsertedArrayLiteral() {
         System.out.print("Checking inserted data... ");
         boolean ret = true;
         Object res = RasUtil.executeRasqlQuery("select csv(c) from PUBLIC_RASTEST1_A as c", true);
@@ -93,6 +106,28 @@ public class InsertDeleteTest extends CreateTest {
                 RasMArrayByte m = (RasMArrayByte) o;
                 String csv = new String(m.getArray());
                 ret = csv.equals("{1,2.3,-9.88832}");
+            } else {
+                ret = false;
+            }
+        } else {
+            ret = false;
+        }
+        printCheck(ret);
+        return ret;
+    }
+    
+    public static boolean checkInsertedArrayValues() {
+        System.out.print("Checking inserted data... ");
+        boolean ret = true;
+        Object res = RasUtil.executeRasqlQuery("select csv(c) from PUBLIC_RASTEST1_A as c", true);
+        if (res instanceof DBag) {
+            DBag b = (DBag) res;
+            Iterator it = b.iterator();
+            Object o = it.next();
+            if (o instanceof RasMArrayByte) {
+                RasMArrayByte m = (RasMArrayByte) o;
+                String csv = new String(m.getArray());
+                ret = csv.equals("{-9999,-9998,-9997}");
             } else {
                 ret = false;
             }
