@@ -38,7 +38,7 @@ import java.util.Properties;
  *
  * @author Dimitar Misev
  */
-public class RasBaseTest {
+public class BaseTest {
 
     public static final String DEFAULT_DB_FILE = "/var/hsqldb/test/db";
     
