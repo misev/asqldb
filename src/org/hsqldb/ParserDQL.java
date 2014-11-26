@@ -2956,7 +2956,7 @@ public class ParserDQL extends ParserBase {
                             if (e1.getType() == OpTypes.SUBTRACT) {
                                 e1.dataType = type;
                             } else {
-                                e1 = new ExpressionOp(e1, type);
+                                e1 = ExpressionOp.createExpressionOp(e1, type);
                             }
                         }
                     }
@@ -2977,7 +2977,7 @@ public class ParserDQL extends ParserBase {
                 if (e.getType() == OpTypes.SUBTRACT) {
                     e.dataType = type;
                 } else {
-                    e = new ExpressionOp(e, type);
+                    e = ExpressionOp.createExpressionOp(e, type);
                 }
 
                 break;
@@ -5242,7 +5242,7 @@ public class ParserDQL extends ParserBase {
         if (e.isUnresolvedParam()) {
             e.setDataType(session, typeObject);
         } else {
-            e = new ExpressionOp(e, typeObject);
+            e = ExpressionOp.createExpressionOp(e, typeObject);
         }
 
         readThis(Tokens.CLOSEBRACKET);
@@ -6886,7 +6886,6 @@ public class ParserDQL extends ParserBase {
         final Expression value;
         final int constructorType;
         if (token.tokenType == Tokens.VALUES) {
-            // @TODO: 
             readThis(Tokens.VALUES);
 
             dimensions.addAll(dimensionsTmp);

@@ -83,19 +83,33 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
     @Override
     public Object getValue(final Session session, final boolean isMDARootNode) {
         final String rasql;
-        switch (opType) {
-            case OpTypes.ARRAY_CONSTRUCTOR_LITERAL:
-                rasql = String.format("< %s %s >", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
-                break;
-            case OpTypes.ARRAY_CONSTRUCTOR_VALUE:
-                rasql = String.format("(marray x in %s values %s)", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
-                break;
+        
+        if (insertColumn == null) {
+            switch (opType) {
+                case OpTypes.ARRAY_CONSTRUCTOR_LITERAL:
+                    rasql = String.format("< %s %s >", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
+                    break;
+                case OpTypes.ARRAY_CONSTRUCTOR_VALUE:
+                    rasql = String.format("(marray x in %s values %s)", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
+                    break;
 
-            default:
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex (type = "+opType+")");
-        }
-
-        if (insertColumn != null) {
+                default:
+                    throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex (type = "+opType+")");
+            }
+            if (isMDARootNode) {
+                // Cache the result, since it won't change for other rows
+                final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
+                if (!rasArrayIds.isEmpty()) {
+                    return RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
+                }
+                if (resultCache == null) {
+                    resultCache = RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
+                }
+                return resultCache;
+            }
+            
+        } else {
+            
             String collName = insertColumn.getRasdamanCollectionName();
             Type type = insertColumn.dataType.collectionBaseType();
             String left = nodes[LEFT].getValue(session, false).toString();
@@ -136,17 +150,6 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                     resultCache = it.next();
                     break;
                 }
-            }
-            return resultCache;
-            
-        } else if (isMDARootNode) {
-            //Cache the result, since it won't change for other rows
-            final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
-            if (!rasArrayIds.isEmpty()) {
-                return RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
-            }
-            if (resultCache == null) {
-                resultCache = RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
             }
             return resultCache;
         }

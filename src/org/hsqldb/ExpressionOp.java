@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.ExpressionOpMDA;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.ArrayUtil;
@@ -111,7 +112,7 @@ public class ExpressionOp extends Expression {
     /**
      * creates a CAST expression
      */
-    ExpressionOp(Expression e, Type dataType) {
+    public ExpressionOp(Expression e, Type dataType) {
 
         super(OpTypes.CAST);
 
@@ -169,6 +170,10 @@ public class ExpressionOp extends Expression {
         }
 
         this.alias = e.alias;
+    }
+
+    static ExpressionOp createExpressionOp(Expression e, Type dataType) {
+        return new ExpressionOpMDA(e, dataType);
     }
 
     public static Expression getCastExpression(Session session, Expression e,
