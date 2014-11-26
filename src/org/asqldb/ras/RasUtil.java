@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+import rasj.RasMArrayByte;
 
 /**
  * Rasdaman utility classes - execute queries, etc.
@@ -404,6 +405,27 @@ public class RasUtil {
         Set<String> colls = RasUtil.dbagArrayToSetString(
                 RasUtil.executeRasqlQuery("select c from RAS_COLLECTIONNAMES as c", false, true));
         return colls.contains(coll);
+    }
+    
+    /**
+     * @param table ASQLDB table name
+     * @param field column name
+     * @return collection contents as csv, or null in case of an error
+     */
+    public static String collectionAsCsv(String table, String field) {
+        String ret = null;
+        String coll = "PUBLIC_" + table.toUpperCase() + "_" + field.toUpperCase();
+        Object res = RasUtil.executeRasqlQuery("select csv(c) from " + coll + " as c", true);
+        if (res instanceof DBag) {
+            DBag b = (DBag) res;
+            Iterator it = b.iterator();
+            Object o = it.next();
+            if (o instanceof RasMArrayByte) {
+                RasMArrayByte m = (RasMArrayByte) o;
+                ret = new String(m.getArray());
+            }
+        }
+        return ret;
     }
 
     /**

@@ -218,6 +218,8 @@ class TransactionManagerCommon {
 
             try {
                 action.store.commitRow(session, row, type, txModel);
+                // ASQLDB
+                action.store.commitRowRas(session, row, type);
 
                 if (txModel == TransactionManager.LOCKS
                         || action.table.tableType == TableBase.TEMP_TABLE) {

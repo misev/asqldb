@@ -108,6 +108,8 @@ public interface PersistentStore {
     void indexRow(Session session, Row row);
 
     void commitRow(Session session, Row row, int changeAction, int txModel);
+    
+    void commitRowRas(Session session, Row row, int changeAction);
 
     void rollbackRow(Session session, Row row, int changeAction, int txModel);
 

@@ -32,6 +32,7 @@
 package org.hsqldb.persist;
 
 import java.util.concurrent.atomic.AtomicLong;
+import org.asqldb.ras.RasUtil;
 
 import org.hsqldb.ColumnSchema;
 import org.hsqldb.Database;
@@ -149,7 +150,7 @@ public abstract class RowStoreAVL implements PersistentStore {
     public abstract void commitPersistence(CachedObject object);
 
     public void postCommitAction(Session session, RowAction action) {}
-
+    
     public abstract DataFileCache getCache();
 
     public TableSpaceManager getSpaceManager() {
@@ -653,5 +654,27 @@ public abstract class RowStoreAVL implements PersistentStore {
         NodeAVL  root = (NodeAVL) accessorList[0];
 
         idx.unlinkNodes(root);
+    }
+
+    @Override
+    public void commitRowRas(Session session, Row row, int changeAction) {
+        final Object[] data = row.getData();
+        if (table instanceof Table) {
+            Table t = (Table) table;
+            final Type[] columnTypes = table.getColumnTypes();
+
+            if (changeAction == RowAction.ACTION_DELETE) {
+                for (int i = 0; i < data.length; i++) {
+                    if (columnTypes[i].isMDArrayType()) {
+                        final Object oid = data[i];
+                        if (oid instanceof Integer) {
+                            final String coll = t.getColumn(i).getRasdamanCollectionName();
+                            final String rasql = "DELETE FROM " + coll + " AS c WHERE oid(c) = " + oid;
+                            RasUtil.executeRasqlQuery(rasql, true, true);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

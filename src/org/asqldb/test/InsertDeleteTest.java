@@ -56,6 +56,9 @@ import rasj.RasMArrayByte;
 public class InsertDeleteTest extends CreateTest {
 
     public static void main(String[] args) {
+        boolean result = true;
+        int exitValue = 0;
+        
         connect();
         
         final String[] createQueries = new String[]{
@@ -63,78 +66,46 @@ public class InsertDeleteTest extends CreateTest {
                 + "a DOUBLE MDARRAY[-10000:-1000])"};
         
         dropTables(createQueries);
-//        createTables(createQueries);
-//        insertArrayLiteral();
-//        checkInsertedArrayLiteral();
-//        dropTables(createQueries);
-        
-        createTables(createQueries);
-        insertArrayValues();
-        checkInsertedArrayValues();
+        exitValue += createTables(createQueries);
+        result = result && testInsertArrayLiteral();
+        result = result && testInsertArrayValues();
         dropTables(createQueries);
         
         disconnect();
         
-//        System.exit(failed);
+        exitValue += (result ? 0 : 1);
+        System.exit(exitValue);
     }
     
-    public static int insertArrayLiteral() {
-        System.out.println("\nInserting array literal...");
-        final String[] insertQueries = new String[]{
-            "insert into RASTEST1(a) values ("
-                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"};
-        return executeQueries(insertQueries);
-    }
-    
-    public static int insertArrayValues() {
-        System.out.println("\nInserting array values...");
-        final String[] insertQueries = new String[]{
-            "insert into RASTEST1(a) values ("
-                + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))"};
-        return executeQueries(insertQueries);
-    }
-    
-    public static boolean checkInsertedArrayLiteral() {
-        System.out.print("Checking inserted data... ");
+    public static boolean testInsertArrayLiteral() {
+        System.out.println("\nTest inserting array literal...");
         boolean ret = true;
-        Object res = RasUtil.executeRasqlQuery("select csv(c) from PUBLIC_RASTEST1_A as c", true);
-        if (res instanceof DBag) {
-            DBag b = (DBag) res;
-            Iterator it = b.iterator();
-            Object o = it.next();
-            if (o instanceof RasMArrayByte) {
-                RasMArrayByte m = (RasMArrayByte) o;
-                String csv = new String(m.getArray());
-                ret = csv.equals("{1,2.3,-9.88832}");
-            } else {
-                ret = false;
-            }
-        } else {
-            ret = false;
-        }
+        
+        ret = ret && executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])");
+        
+        String csv = RasUtil.collectionAsCsv("RASTEST1", "A");
+        ret = ret && "{1,2.3,-9.88832}".equals(csv);
         printCheck(ret);
+        
+        ret = ret && executeQuery("DELETE FROM RASTEST1");
+        
         return ret;
     }
     
-    public static boolean checkInsertedArrayValues() {
-        System.out.print("Checking inserted data... ");
+    public static boolean testInsertArrayValues() {
+        System.out.println("\nTest inserting array values...");
         boolean ret = true;
-        Object res = RasUtil.executeRasqlQuery("select csv(c) from PUBLIC_RASTEST1_A as c", true);
-        if (res instanceof DBag) {
-            DBag b = (DBag) res;
-            Iterator it = b.iterator();
-            Object o = it.next();
-            if (o instanceof RasMArrayByte) {
-                RasMArrayByte m = (RasMArrayByte) o;
-                String csv = new String(m.getArray());
-                ret = csv.equals("{-9999,-9998,-9997}");
-            } else {
-                ret = false;
-            }
-        } else {
-            ret = false;
-        }
+        
+        ret = ret && executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))");
+        
+        String csv = RasUtil.collectionAsCsv("RASTEST1", "A");
+        ret = ret && "{-9999,-9998,-9997}".equals(csv);
         printCheck(ret);
+        
+        ret = ret && executeQuery("DELETE FROM RASTEST1");
+        
         return ret;
     }
 }

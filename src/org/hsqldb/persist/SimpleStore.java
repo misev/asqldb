@@ -212,4 +212,9 @@ public abstract class SimpleStore implements PersistentStore {
                             int txModel) {}
 
     public void postCommitAction(Session session, RowAction rowAction) {}
+
+    @Override
+    public void commitRowRas(Session session, Row row, int changeAction) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
