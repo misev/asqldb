@@ -50,7 +50,7 @@ public class SelectTest extends InsertDeleteTest {
         
         final String[] createQueries = insertTestData();
         
-//        result = result && testSingleArraySelect();
+        result = result && testSingleArraySelect();
         result = result && testSingleArrayEncode();
         
         dropTables(createQueries);
