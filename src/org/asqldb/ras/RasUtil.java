@@ -522,4 +522,19 @@ public class RasUtil {
     public static void setQueryOutputStream(PrintStream newStream) {
         queryOutputStream = newStream;
     }
+    
+    /**
+     * @return the first element of a DBag, or null if bag is empty.
+     */
+    public static Object head(Object bag) {
+        Object ret = null;
+        if (bag instanceof DBag) {
+            DBag dbag = (DBag) bag;
+            Iterator it = dbag.iterator();
+            if (it.hasNext()) {
+                ret = it.next();
+            }
+        }
+        return ret;
+    }
 }

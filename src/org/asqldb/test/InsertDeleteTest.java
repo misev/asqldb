@@ -27,13 +27,7 @@
 package org.asqldb.test;
 
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.asqldb.ras.RasUtil;
-import org.hsqldb.jdbc.JDBCBlob;
 
 /**
  * INSERT/DELETE MDARRAY tests.<p>
@@ -65,14 +59,8 @@ public class InsertDeleteTest extends CreateTest {
         
         connect();
         
-        final String[] createQueries = new String[]{
-            "create table RASTEST1 ("
-                + "a DOUBLE MDARRAY[-10000:-1000])",
-            "create table RASTEST2 ("
-                + "a CHAR MDARRAY[x, y])"};
+        final String[] createQueries = insertTestData();
         
-        dropTables(createQueries);
-        exitValue += createTables(createQueries);
         result = result && testInsertArrayLiteral();
         result = result && testInsertArrayValues();
         result = result && testInsertDecode();
@@ -82,6 +70,24 @@ public class InsertDeleteTest extends CreateTest {
         
         exitValue += (result ? 0 : 1);
         System.exit(exitValue);
+    }
+    
+    public static String[] insertTestData() {
+        final String[] createQueries = new String[]{
+            "create table RASTEST1 ("
+                + "a DOUBLE MDARRAY[-10000:-1000])",
+            "create table RASTEST2 ("
+                + "a CHAR MDARRAY[x, y])"};
+        dropTables(createQueries);
+        createTables(createQueries);
+        
+        executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])");
+        
+        final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
+        executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
+        
+        return createQueries;
     }
     
     public static boolean testInsertArrayLiteral() {
@@ -122,21 +128,13 @@ public class InsertDeleteTest extends CreateTest {
         System.out.println("\nTest inserting decode...");
         boolean ret = true;
         
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "insert into RASTEST2(a) values (mdarray_decode(?))");
-            final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
-            statement.setBlob(1, is);
-            int rows = statement.executeUpdate();
-            is.close();
-            
-            System.out.print("  check inserted data... ");
-            String sdom = RasUtil.collectionAsSdom("RASTEST2", "A");
-            ret = ret && "[0:255,0:210]".equals(sdom);
-            printCheck(ret);
-        } catch (Exception ex) {
-            ret = false;
-        }
+        final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
+        executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
+        System.out.print("  check inserted data... ");
+        String sdom = RasUtil.collectionAsSdom("RASTEST2", "A");
+        ret = ret && "[0:255,0:210]".equals(sdom);
+        printCheck(ret);
+        
         ret = ret && executeQuery("DELETE FROM RASTEST2");
         
         return ret;

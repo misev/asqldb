@@ -179,7 +179,7 @@ public class ExpressionColumn extends Expression {
 // -- ASQLDB @TODO
     @Override
     public boolean isExpressionMDA() {
-        return super.isExpressionMDA() || arrayColumn;
+        return super.isExpressionMDA() || arrayColumn || (dataType != null && dataType.isMDArrayType());
     }
 
     /**
@@ -655,7 +655,7 @@ public class ExpressionColumn extends Expression {
 // -- ASQLDB @TODO
                 if (isExpressionMDA()) {
                     this.arrayColumn = true;
-                    dataType = Type.SQL_VARCHAR;
+                    dataType = Type.SQL_MDARRAY_ALL_TYPES;
                 }
         }
     }
@@ -688,9 +688,9 @@ public class ExpressionColumn extends Expression {
                     final String columnName = this.getColumnName()
                             + (rasStructName.isEmpty() ? "" : ("." + rasStructName));
                     if (isMDARootNode) {
-                        final RasArrayId coid = RasArrayId.parseString(
-                                RasUtil.objectArrayToString(getHsqlColumnValue(session)), columnName);
-                        return RasUtil.executeHsqlArrayQuery(this.getColumnName(), coid);
+                        final Integer oid = (Integer) getHsqlColumnValue(session);
+                        final String rasql = "select c from " + column.getRasdamanCollectionName() + " as c where oid(c) = " + oid;
+                        return RasUtil.executeRasqlQuery(rasql, false);
                     } else {
                         return columnName;
                     }
@@ -749,17 +749,15 @@ public class ExpressionColumn extends Expression {
      * @return the real hsql value of the column
      */
     public Object getHsqlColumnValue(Session session) {
-        if (opType != OpTypes.COLUMN)
-            throw new RuntimeException("Method getHsqlColumnValue can only be called with opType "+OpTypes.COLUMN+", found: "+opType);
-        RangeIterator[] iterators =
-                session.sessionContext.rangeIterators;
-        Object value =
-                iterators[rangeVariable.rangePosition].getCurrent(
-                        columnIndex);
+        if (opType != OpTypes.COLUMN) {
+            throw new RuntimeException("Method getHsqlColumnValue can only be called with opType " + 
+                    OpTypes.COLUMN + ", found: " + opType);
+        }
+        RangeIterator[] iterators = session.sessionContext.rangeIterators;
+        Object value = iterators[rangeVariable.rangePosition].getCurrent(columnIndex);
 
         if (!isExpressionMDA() && dataType != column.dataType) {
-            value = dataType.convertToType(session, value,
-                    column.dataType);
+            value = dataType.convertToType(session, value, column.dataType);
         }
         return value;
     }

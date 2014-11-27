@@ -26,9 +26,12 @@
 
 package org.asqldb.test;
 
+import java.io.InputStream;
 import org.asqldb.ras.RasUtil;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -97,7 +100,36 @@ public class BaseTest {
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
-            stmt.executeQuery(query);
+            final ResultSet rs = stmt.executeQuery(query);
+        } catch (SQLException e) {
+            System.out.println(" ... failed.");
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+        System.out.println(" ... ok.");
+        return true;
+    }
+
+    /**
+     * Execute the given query, return true if passed, false otherwise.
+     */
+    public static boolean executeUpdateQuery(final String query, final InputStream is) {
+        System.out.print("Executing update query: " + query);
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(query);
+            stmt.setBlob(1, is);
+            int rows = stmt.executeUpdate();
+            if (rows <= 0) {
+                System.out.println(" ... failed.");
+            }
         } catch (SQLException e) {
             System.out.println(" ... failed.");
             e.printStackTrace();
