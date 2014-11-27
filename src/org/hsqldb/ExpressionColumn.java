@@ -54,6 +54,7 @@ import java.util.HashSet;
  * Implementation of column, variable, parameter, etc. access operations.
  *
  * @author Fred Toussi (fredt@users dot sourceforge.net)
+ * @author Dimitar Misev
  * @version 2.3.0
  * @since 1.9.0
  */
@@ -682,7 +683,6 @@ public class ExpressionColumn extends Expression {
                     .triggerArguments[rangeVariable.rangePosition][columnIndex];
             }
             case OpTypes.COLUMN : {
-// -- ASQLDB @TODO
                 if (isExpressionMDA()) {
                     //parse the rasdaman array contained in this expression
                     final String columnName = this.getColumnName()
@@ -737,13 +737,13 @@ public class ExpressionColumn extends Expression {
         }
     }
 
-// -- ASQLDB @TODO
     /**
      * Retrieves the value of this column.
      *
      * Note: this method evaluates to the value actually contained in the column.
      *       This will return the same value as getValue(session) for non array data types.
-     *       For array data types, this method skips the rasql evaluation.
+     *       For array data types, this method returns the OID of the array,
+     *       which is the value actually stored.
      *
      * @param session current session
      * @return the real hsql value of the column
