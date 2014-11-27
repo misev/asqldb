@@ -60,15 +60,18 @@ public class ExpressionAggregateMDA extends Expression implements ExpressionMDA 
 
     @Override
     public Object getValue(final Session session, final boolean isMDARootNode) {
-        final String condense = String.format("CONDENSE %s OVER x in %s USING %s",
-                Tokens.getKeyword(opType), nodes[LEFT].getValue(session, false),
-                nodes[RIGHT].getValue(session, false));
+        if (nodes != null && nodes.length > 1) {
+            final String condense = String.format("CONDENSE %s OVER x in %s USING %s",
+                    Tokens.getKeyword(opType), nodes[LEFT].getValue(session, false),
+                    nodes[RIGHT].getValue(session, false));
 
-        if (isMDARootNode) {
-            final Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-            rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
-            return RasUtil.executeHsqlArrayQuery(condense, rasArrayIds);
+            if (isMDARootNode) {
+                final Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
+                rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery(condense, rasArrayIds);
+            }
+            return condense;
         }
-        return condense;
+        return null;
     }
 }

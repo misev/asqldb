@@ -47,7 +47,6 @@ import rasj.odmg.RasBag;
 public class ExpressionArrayConstructorMDA extends Expression implements ExpressionMDA {
 
     private Object resultCache = null;
-    private ColumnSchema insertColumn = null;
 
     public ExpressionArrayConstructorMDA(final int type, final Expression domain, final Expression values) {
         super(type);
@@ -144,21 +143,13 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 insertQuery += "] VALUES " + right;
             }
             if (resultCache == null) {
-                RasBag res = (RasBag) RasUtil.executeRasqlQuery(insertQuery, false, true);
-                Iterator it = res.iterator();
-                while (it.hasNext()) {
-                    resultCache = it.next();
-                    break;
-                }
+                final Object result = RasUtil.executeRasqlQuery(insertQuery, false, true);
+                resultCache = RasUtil.dbagToOid(result);
             }
             return resultCache;
         }
 
         return rasql;
-    }
-
-    public void setInsertColumnName(ColumnSchema insertColumn) {
-        this.insertColumn = insertColumn;
     }
 
 }

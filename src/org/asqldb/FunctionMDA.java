@@ -26,6 +26,8 @@
 
 package org.asqldb;
 
+import java.io.IOException;
+import java.io.InputStream;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.FrameworkLogger;
@@ -35,10 +37,14 @@ import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hsqldb.Expression;
 import org.hsqldb.FunctionSQL;
 import org.hsqldb.Session;
 import org.hsqldb.Tokens;
+import org.hsqldb.types.BlobDataID;
+import rasj.RasGMArray;
 
 /**
  * @author Johannes Bachhuber
@@ -76,6 +82,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
     private static final int FUNC_MDA_SHIFT             = 224;
     private static final int FUNC_MDA_EXTEND            = 225;
     private static final int FUNC_MDA_DIV               = 226;
+    
+    private static final int FUNC_MDA_DECODE            = 250;
+    private static final int FUNC_MDA_ENCODE            = 251;
 
 
     static final IntKeyIntValueHashMap mdaFuncMap =
@@ -110,6 +119,8 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         mdaFuncMap.put(Tokens.MDA_SHIFT, FUNC_MDA_SHIFT);
         mdaFuncMap.put(Tokens.MDA_EXTEND, FUNC_MDA_EXTEND);
         mdaFuncMap.put(Tokens.MDA_DIV, FUNC_MDA_DIV);
+        mdaFuncMap.put(Tokens.MDA_DECODE, FUNC_MDA_DECODE);
+        mdaFuncMap.put(Tokens.MDA_ENCODE, FUNC_MDA_ENCODE);
     }
 
     protected FunctionMDA(int id) {
@@ -136,6 +147,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_COSH:
             case FUNC_MDA_SINH:
             case FUNC_MDA_TANH:
+            case FUNC_MDA_DECODE:
                 parseList = singleParamList;
                 break;
             case FUNC_MDA_BIT:
@@ -146,6 +158,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_SHIFT:
             case FUNC_MDA_EXTEND:
             case FUNC_MDA_DIV:
+            case FUNC_MDA_ENCODE:
                 parseList = doubleParamList;
                 break;
             default:
@@ -198,6 +211,13 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_POW:
                 dataType = Type.SQL_DECIMAL;
                 break;
+            case FUNC_MDA_DECODE:
+                nodes[LEFT].setDataType(Type.SQL_BLOB);
+                dataType = Type.SQL_MDARRAY_ALL_TYPES;
+                break;
+            case FUNC_MDA_ENCODE:
+                dataType = Type.SQL_BLOB;
+                break;
         }
     }
 
@@ -225,6 +245,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_CSV:
             case FUNC_MDA_JPEG:
             case FUNC_MDA_BMP:
+            case FUNC_MDA_ENCODE:
                 return getConversionFunctionValue(session);
             case FUNC_MDA_ADD_CELLS:
             case FUNC_MDA_ALL_CELLS:
@@ -239,6 +260,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_COSH:
             case FUNC_MDA_SINH:
             case FUNC_MDA_TANH:
+            case FUNC_MDA_DECODE:
                 return getSingleParamFunctionValue(session, isMDARootNode);
             case FUNC_MDA_BIT:
             case FUNC_MDA_COMPLEX:
@@ -258,7 +280,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 return functionCall;
 
             default:
-                throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
+                throw Error.runtimeError(ErrorCode.U_S0500, "FunctionMDA");
         }
     }
 
@@ -284,6 +306,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_BMP:
                 log.info("Executing function bmp: nodes[0] = " + nodes[0]);
                 return RasUtil.executeHsqlArrayQuery("bmp("+ argString +")", ".bmp", nodes[0].getRasArrayIds(session));
+            case FUNC_MDA_ENCODE:
+                log.info("Executing function encode: nodes[0] = " + nodes[0]);
+                return RasUtil.executeHsqlArrayQuery("encode("+ argString + "," +  ")", ".unknown", nodes[0].getRasArrayIds(session));
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
 
@@ -341,9 +366,19 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 function = Tokens.T_MDA_TANH;
                 isInt = false;
                 break;
-
         }
-        if (function != null) {
+        if (funcType == FUNC_MDA_DECODE) {
+            if (insertColumn != null) {
+                if (argValue != null && argValue instanceof BlobDataID) {
+                    final BlobDataID blob = (BlobDataID) argValue;
+                    final byte[] bis = blob.getBytes(session, 0, (int) blob.length(session));
+                    final RasGMArray blobArray = RasUtil.convertBlobToArray(bis);
+                    final String rasql = "INSERT INTO " + insertColumn.getRasdamanCollectionName() + " VALUES decode($1)";
+                    final Object result = RasUtil.executeRasqlQuery(rasql, true, true, blobArray);
+                    return RasUtil.dbagToOid(result);
+                }
+            }
+        } else if (function != null) {
             final String functionCall = String.format("%s(%s)", function, argValue);
             if (!isMDARootNode) {
                 return functionCall;

@@ -212,6 +212,10 @@ public class Expression implements Cloneable {
 
     //
     Collation collation;
+    
+    // @TODO: this should be a list
+    // rasdaman column to be inserted
+    protected ColumnSchema insertColumn = null;
 
     public Expression(int type) {
         opType = type;
@@ -1486,6 +1490,10 @@ public class Expression implements Cloneable {
         return dataType;
     }
 
+    public void setDataType(Type dataType) {
+        this.dataType = dataType;
+    }
+
     public byte getNullability() {
         return nullability;
     }
@@ -2236,6 +2244,10 @@ public class Expression implements Cloneable {
 
     public Expression[] getNodes() {
         return nodes;
+    }
+
+    public void setInsertColumnName(ColumnSchema insertColumn) {
+        this.insertColumn = insertColumn;
     }
     
 }

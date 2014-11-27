@@ -2234,7 +2234,7 @@ public class ParserDQL extends ParserBase {
     }
 
     // returns null
-    // <unsigned literl> | <general value specification>
+    // <unsigned literal> | <general value specification>
     Expression XreadUnsignedValueSpecificationOrNull() {
 
         Expression e;

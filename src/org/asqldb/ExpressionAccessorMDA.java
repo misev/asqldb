@@ -47,20 +47,25 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        nodes[LEFT].resolveTypes(session, this);
+        if (nodes != null && nodes.length > 0) {
+            nodes[LEFT].resolveTypes(session, this);
+        }
         dataType = Type.SQL_VARCHAR;
     }
 
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
-        final String index = (nodes[RIGHT]==null)?"":("[" + nodes[RIGHT].getValue(session, false) + "]");
-        final String colName = nodes[LEFT].getColumnNameString();
+        if (nodes != null && nodes.length > 1) {
+            final String index = (nodes[RIGHT]==null)?"":("[" + nodes[RIGHT].getValue(session, false) + "]");
+            final String colName = nodes[LEFT].getColumnNameString();
 
-        if (isMDARootNode) {
-            Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-            rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
-            return RasUtil.executeHsqlArrayQuery(colName + index, rasArrayIds);
+            if (isMDARootNode) {
+                Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
+                rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery(colName + index, rasArrayIds);
+            }
+            return colName+index;
         }
-        return colName+index;
+        return null;
     }
 }

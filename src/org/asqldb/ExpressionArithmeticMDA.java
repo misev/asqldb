@@ -54,9 +54,9 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
 
     @Override
     public Object getValue(Session session, boolean isRoot) {
-        if (nodes.length == 0 ||
-                (!nodes[LEFT].isExpressionMDA() &&
-                        (nodes.length < 2 || !nodes[RIGHT].isExpressionMDA()))) {
+        if (nodes.length == 0 || nodes.length > 2 ||
+                (nodes.length == 1 && !nodes[LEFT].isExpressionMDA()) ||
+                (nodes.length == 2 && !nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA())) {
             return super.getValue(session, isRoot);
         }
         switch (opType) {

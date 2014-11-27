@@ -1211,7 +1211,7 @@ public class StatementSchema extends Statement {
                             }
                             if (rasqlCreateStatement != null) {
                                 try {
-                                    if (!RasUtil.rasqlCollectionExists(column.getRasdamanCollectionName())) {
+                                    if (!RasUtil.collectionExists(column.getRasdamanCollectionName())) {
                                         RasUtil.executeRasqlQuery(rasqlCreateStatement, true, true);
                                     }
                                 } catch (Exception ex) {

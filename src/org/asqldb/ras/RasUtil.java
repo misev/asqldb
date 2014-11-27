@@ -52,7 +52,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import rasj.RasIndexOutOfBoundsException;
 import rasj.RasMArrayByte;
+import rasj.RasMInterval;
+import rasj.RasSInterval;
 
 /**
  * Rasdaman utility classes - execute queries, etc.
@@ -311,9 +316,7 @@ public class RasUtil {
     /**
      * Execute a RasQL query with specified credentials.
      *
-     * Note: if closeWhenDone is false, you need to take care of closing the database!
      * @param query The rasql query string.
-     * @param closeWhenDone whether the database should be close when the query is completed
      * @param ignoreFailedQuery if true, a failed query will be silently ignored
      * @return result object.
      * @throws org.hsqldb.HsqlException
@@ -325,15 +328,26 @@ public class RasUtil {
     /**
      * Execute a RasQL query with specified credentials.
      *
-     * Note: if closeWhenDone is false, you need to take care of closing the database!
      * @param query The rasql query string.
-     * @param closeWhenDone whether the database should be close when the query is completed
      * @param ignoreFailedQuery if true, a failed query will be silently ignored
      * @param writeAccess open database with write access
      * @return result object.
      * @throws org.hsqldb.HsqlException
      */
     public static Object executeRasqlQuery(final String query, boolean ignoreFailedQuery, boolean writeAccess) throws HsqlException {
+        return executeRasqlQuery(query, ignoreFailedQuery, writeAccess, null);
+    }
+
+    /**
+     * Execute a RasQL query with specified credentials.
+     *
+     * @param query The rasql query string.
+     * @param ignoreFailedQuery if true, a failed query will be silently ignored
+     * @param writeAccess open database with write access
+     * @return result object.
+     * @throws org.hsqldb.HsqlException
+     */
+    public static Object executeRasqlQuery(final String query, boolean ignoreFailedQuery, boolean writeAccess, Object data) throws HsqlException {
         String user = username;
         String pass = password;
         if (writeAccess) {
@@ -360,6 +374,10 @@ public class RasUtil {
         //A free rasdaman server was obtained, executing query
         try {
             q.create(query);
+            if (data != null) {
+                q.bind(data);
+            }
+            
             if(printLog) log.finer("Executing query "+ query);
             ret = q.execute();
 
@@ -381,6 +399,19 @@ public class RasUtil {
         return ret;
     }
     
+    public static RasGMArray convertBlobToArray(byte[] data) {
+        RasMInterval domain = new RasMInterval(1);
+        try {
+            domain.setItem(0, new RasSInterval(0, data.length - 1));
+        } catch (Exception ex) {
+            throw Error.error(ErrorCode.MDA_INVALID_PARAMETER, ex);
+        }
+        RasGMArray ret = new RasGMArray(domain, 1);
+        ret.setArray(data);
+        ret.setObjectTypeName("GreyString");
+        return ret;
+    }
+    
     /**
      * Convert rasj DBag of char arrays to a set of Strings
      */
@@ -399,9 +430,28 @@ public class RasUtil {
     }
     
     /**
+     * @return the first OID in a set of OIDs. The returned OID is -1 if no
+     * oid is returned.
+     */
+    public static Integer dbagToOid(Object dbag) {
+        Integer ret = -1;
+        if (dbag != null) {
+            Iterator it = ((DBag) dbag).iterator();
+            while (it.hasNext()) {
+                Object o = it.next();
+                if (o instanceof Integer) {
+                    ret = (Integer) o;
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+    
+    /**
      * @return true if coll exists, false otherwise.
      */
-    public static boolean rasqlCollectionExists(String coll) {
+    public static boolean collectionExists(String coll) {
         Set<String> colls = RasUtil.dbagArrayToSetString(
                 RasUtil.executeRasqlQuery("select c from RAS_COLLECTIONNAMES as c", false, true));
         return colls.contains(coll);
@@ -413,9 +463,28 @@ public class RasUtil {
      * @return collection contents as csv, or null in case of an error
      */
     public static String collectionAsCsv(String table, String field) {
+        return collectionAsFunction(table, field, "csv");
+    }
+    
+    /**
+     * @param table ASQLDB table name
+     * @param field column name
+     * @return collection contents as sdom, or null in case of an error
+     */
+    public static String collectionAsSdom(String table, String field) {
+        return collectionAsFunction(table, field, "sdom");
+    }
+    
+    /**
+     * @param table ASQLDB table name
+     * @param field column name
+     * @param func rasql function to apply to the given collection
+     * @return collection contents as string, or null in case of an error
+     */
+    public static String collectionAsFunction(String table, String field, String func) {
         String ret = null;
         String coll = "PUBLIC_" + table.toUpperCase() + "_" + field.toUpperCase();
-        Object res = RasUtil.executeRasqlQuery("select csv(c) from " + coll + " as c", true);
+        Object res = RasUtil.executeRasqlQuery("select " + func + "(c) from " + coll + " as c", true);
         if (res instanceof DBag) {
             DBag b = (DBag) res;
             Iterator it = b.iterator();
@@ -423,6 +492,8 @@ public class RasUtil {
             if (o instanceof RasMArrayByte) {
                 RasMArrayByte m = (RasMArrayByte) o;
                 ret = new String(m.getArray());
+            } else {
+                ret = o.toString();
             }
         }
         return ret;
