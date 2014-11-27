@@ -68,8 +68,7 @@ public class ExpressionOpMDA extends ExpressionOp {
 
             // this is the rasql root node, so it has to be executed
             if (isRoot) {
-                Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-                return RasUtil.executeHsqlArrayQuery(rasqlQuery, rasArrayIds);
+                return RasUtil.executeHsqlArrayQuery(rasqlQuery, getRasArrayIds(session));
             }
             return rasqlQuery;
         } else {

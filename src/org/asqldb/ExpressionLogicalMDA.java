@@ -98,14 +98,12 @@ public class ExpressionLogicalMDA extends ExpressionLogical {
             default :
                 throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRas");
         }
-        Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-        rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
-
-        String selector = nodes[LEFT].getValue(session, false)+" "+operator
-                +" "+nodes[RIGHT].getValue(session, false);
+        String selector = nodes[LEFT].getValue(session, false) + " " + operator
+                + " " + nodes[RIGHT].getValue(session, false);
 
         if (isRoot) {//we're root, so we will execute the query
-            return Boolean.valueOf(RasUtil.executeHsqlArrayQuery(selector, rasArrayIds).toString());
+            return Boolean.valueOf(RasUtil.executeHsqlArrayQuery(
+                    selector, getRasArrayIds(session)).toString());
         }
         //someone else will be executing the query, so we just return a rasql string
         //we only need to evaluate the hsql parts

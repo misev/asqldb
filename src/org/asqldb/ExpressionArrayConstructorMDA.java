@@ -26,19 +26,16 @@
 
 package org.asqldb;
 
-import java.util.Iterator;
 import org.hsqldb.error.ErrorCode;
 import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.Set;
-import org.asqldb.types.MDArrayType;
-import org.hsqldb.ColumnSchema;
+import org.asqldb.ras.RasArrayIdSet;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
-import rasj.odmg.RasBag;
 
 /**
  * @author Johannes Bachhuber
@@ -97,7 +94,7 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
             }
             if (isMDARootNode) {
                 // Cache the result, since it won't change for other rows
-                final Set<RasArrayId> rasArrayIds = getRasArrayIds(session);
+                final RasArrayIdSet rasArrayIds = getRasArrayIds(session);
                 if (!rasArrayIds.isEmpty()) {
                     return RasUtil.executeHsqlArrayQuery(rasql, rasArrayIds);
                 }

@@ -59,6 +59,7 @@ import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
 import java.util.HashSet;
+import org.asqldb.ras.RasArrayIdSet;
 
 /**
  * Expression class.
@@ -284,8 +285,8 @@ public class Expression implements Cloneable {
      * @param session current session
      * @return Set of all OIDs used in this subtree
      */
-    public java.util.Set<RasArrayId> getRasArrayIds(Session session) {
-        java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
+    public RasArrayIdSet getRasArrayIds(Session session) {
+        RasArrayIdSet rasArrayIds = new RasArrayIdSet();
         for (Expression node: nodes) {
             rasArrayIds.addAll(node.getRasArrayIds(session));
         }

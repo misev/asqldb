@@ -142,7 +142,7 @@ public class RasUtil {
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
     public static Object executeHsqlArrayQuery(String selector, RasArrayId... rasArrayIds) throws HsqlException {
-        return executeHsqlArrayQuery(selector, new HashSet<RasArrayId>(Arrays.asList(rasArrayIds)));
+        return executeHsqlArrayQuery(selector, new RasArrayIdSet(Arrays.asList(rasArrayIds)));
     }
 
     /**
@@ -152,7 +152,7 @@ public class RasUtil {
      * @return String array with one element containing the path to the array file.
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
-    public static Object executeHsqlArrayQuery(String selector, Set<RasArrayId> rasArrayIds) throws HsqlException {
+    public static Object executeHsqlArrayQuery(String selector, RasArrayIdSet rasArrayIds) throws HsqlException {
         return executeHsqlArrayQuery(selector, ".array", rasArrayIds);
     }
 
@@ -164,12 +164,12 @@ public class RasUtil {
      * @return String array with one element containing the path to the array file.
      * @throws HsqlException If any error occurs processing the query, this exception is thrown.
      */
-    public static Object executeHsqlArrayQuery(final String selector, final String extension, final Set<RasArrayId> rasArrayIds) throws HsqlException {
+    public static Object executeHsqlArrayQuery(final String selector, final String extension, final RasArrayIdSet rasArrayIds) throws HsqlException {
         final String query;
         if (rasArrayIds.isEmpty()) {
             query = String.format("SELECT "+ selector);
         } else {
-            query = String.format("SELECT %s FROM %s WHERE %s", selector, RasArrayId.stringifyRasCollections(rasArrayIds), RasArrayId.stringifyOids(rasArrayIds));
+            query = String.format("SELECT %s FROM %s WHERE %s", selector, rasArrayIds.stringifyRasColls(), rasArrayIds.stringifyOids());
         }
         if(printLog) queryOutputStream.println(query);
 
@@ -186,13 +186,12 @@ public class RasUtil {
         //todo: allow returning scalar results
         if ((obj instanceof RasGMArray)) {
             RasGMArray arr = (RasGMArray) obj;
-            final String filename = RasArrayId.stringifyIdentifier(rasArrayIds) + arr.spatialDomain() + extension;
+            final String filename = rasArrayIds.stringifyIdentifier() + extension;
             writeToFile(arr, filename);
             //            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
         }
-        //result is a scalar:
+        //result is a scalar
         return obj;
-        //        return obj.toString();
     }
 
     private static void writeToFile(final RasGMArray arr, final String filename) throws HsqlException {

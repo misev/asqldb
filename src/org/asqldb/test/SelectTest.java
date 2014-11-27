@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.asqldb.ras.RasUtil;
 import static org.asqldb.test.BaseTest.connection;
+import rasj.RasMArrayByte;
 import rasj.RasMArrayDouble;
 
 /**
@@ -49,7 +50,9 @@ public class SelectTest extends InsertDeleteTest {
         
         final String[] createQueries = insertTestData();
         
-        result = result && testSimpleSelect();
+//        result = result && testSingleArraySelect();
+        result = result && testSingleArrayEncode();
+        
         dropTables(createQueries);
         
         disconnect();
@@ -58,33 +61,28 @@ public class SelectTest extends InsertDeleteTest {
         System.exit(exitValue);
     }
     
-    public static boolean testSimpleSelect() {
-        System.out.print("\nTest pure array select...");
+    public static boolean testSingleArraySelect() {
+        System.out.println("\nTest pure array select...");
         boolean ret = true;
         
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            final ResultSet rs = stmt.executeQuery("select c.a from RASTEST1 as c");
-            while (rs.next()) {
-                Object o = RasUtil.head(rs.getObject(1));
-                RasMArrayDouble ma = (RasMArrayDouble) o;
-                double[] d = ma.getDoubleArray();
-                ret = ret && d.length == 3;
-                printCheck(ret);
-            }
-        } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
+        Object dbag = executeQuerySingleResult("select c.a from RASTEST1 as c");
+        RasMArrayDouble res = (RasMArrayDouble) RasUtil.head(dbag);
+        double[] d = res.getDoubleArray();
+        ret = ret && d.length == 3;
+        printCheck(ret, "  check result");
+        
+        return ret;
+    }
+    
+    public static boolean testSingleArrayEncode() {
+        System.out.println("\nTest pure array encode...");
+        boolean ret = true;
+        
+        Object dbag = executeQuerySingleResult("select mdarray_encode(c.a, 'PNG') from RASTEST2 as c");
+        RasMArrayByte res = (RasMArrayByte) RasUtil.head(dbag);
+        byte[] d = res.getArray();
+        ret = ret && d.length == 22624;
+        printCheck(ret, "  check result");
         
         return ret;
     }

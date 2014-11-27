@@ -34,7 +34,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import rasj.RasMArrayDouble;
 
 /**
  * Base class for MDARRAY tests.
@@ -118,6 +121,51 @@ public class BaseTest {
     }
 
     /**
+     * Execute the given query.
+     * @return the first column of the first returned row, as an object.
+     */
+    public static Object executeQuerySingleResult(final String query) {
+        List<Object> res = executeQuerySingleResult(query, 1);
+        if (res.isEmpty()) {
+            return null;
+        } else {
+            return res.get(0);
+        }
+    }
+
+    /**
+     * Execute the given query.
+     * @param columnCount number of columns per row returned by the query.
+     * @return a list of the results from the first returned row, as objects.
+     */
+    public static List<Object> executeQuerySingleResult(final String query, int columnCount) {
+        System.out.print("Executing query: " + query);
+        List<Object> ret = new ArrayList<Object>();
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            final ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    ret.add(rs.getObject(i));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(" ... failed.");
+            e.printStackTrace();
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+        System.out.println(" ... ok.");
+        return ret;
+    }
+
+    /**
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeUpdateQuery(final String query, final InputStream is) {
@@ -165,5 +213,10 @@ public class BaseTest {
         } else {
             System.out.println("failed.");
         }
+    }
+    
+    public static void printCheck(boolean res, String msg) {
+        System.out.print(msg + "... ");
+        printCheck(res);
     }
 }

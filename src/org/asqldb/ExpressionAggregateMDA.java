@@ -66,9 +66,7 @@ public class ExpressionAggregateMDA extends Expression implements ExpressionMDA 
                     nodes[RIGHT].getValue(session, false));
 
             if (isMDARootNode) {
-                final Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-                rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
-                return RasUtil.executeHsqlArrayQuery(condense, rasArrayIds);
+                return RasUtil.executeHsqlArrayQuery(condense, getRasArrayIds(session));
             }
             return condense;
         }

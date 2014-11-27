@@ -23,7 +23,6 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.asqldb;
 
 import java.io.IOException;
@@ -39,6 +38,7 @@ import org.hsqldb.types.Type;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.asqldb.ras.RasArrayIdSet;
 import org.hsqldb.Expression;
 import org.hsqldb.FunctionSQL;
 import org.hsqldb.Session;
@@ -54,41 +54,40 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     private static FrameworkLogger log = FrameworkLogger.getLog(FunctionMDA.class);
 
-    private static final int FUNC_MDA_TIFF              = 200;
-    private static final int FUNC_MDA_PNG               = 201;
-    private static final int FUNC_MDA_CSV               = 202;
-    private static final int FUNC_MDA_JPEG              = 203;
-    private static final int FUNC_MDA_BMP               = 204;
+    private static final int FUNC_MDA_TIFF = 200;
+    private static final int FUNC_MDA_PNG = 201;
+    private static final int FUNC_MDA_CSV = 202;
+    private static final int FUNC_MDA_JPEG = 203;
+    private static final int FUNC_MDA_BMP = 204;
 
-    private static final int FUNC_MDA_SDOM              = 205;
-    private static final int FUNC_MDA_ADD_CELLS         = 206;
-    private static final int FUNC_MDA_ALL_CELLS         = 207;
-    private static final int FUNC_MDA_AVG_CELLS         = 208;
-    private static final int FUNC_MDA_COUNT_CELLS       = 209;
-    private static final int FUNC_MDA_MAX_CELLS         = 210;
-    private static final int FUNC_MDA_MIN_CELLS         = 211;
-    private static final int FUNC_MDA_SOME_CELLS        = 212;
-    private static final int FUNC_MDA_ARCCOS            = 213;
-    private static final int FUNC_MDA_ARCSIN            = 214;
-    private static final int FUNC_MDA_ARCTAN            = 215;
-    private static final int FUNC_MDA_BIT               = 216;
-    private static final int FUNC_MDA_COMPLEX           = 217;
-    private static final int FUNC_MDA_COSH              = 218;
-    private static final int FUNC_MDA_DIVIDE            = 219;
-    private static final int FUNC_MDA_MODULO            = 220;
-    private static final int FUNC_MDA_POW               = 221;
-    private static final int FUNC_MDA_SINH              = 222;
-    private static final int FUNC_MDA_TANH              = 223;
-    private static final int FUNC_MDA_SHIFT             = 224;
-    private static final int FUNC_MDA_EXTEND            = 225;
-    private static final int FUNC_MDA_DIV               = 226;
-    
-    private static final int FUNC_MDA_DECODE            = 250;
-    private static final int FUNC_MDA_ENCODE            = 251;
+    private static final int FUNC_MDA_SDOM = 205;
+    private static final int FUNC_MDA_ADD_CELLS = 206;
+    private static final int FUNC_MDA_ALL_CELLS = 207;
+    private static final int FUNC_MDA_AVG_CELLS = 208;
+    private static final int FUNC_MDA_COUNT_CELLS = 209;
+    private static final int FUNC_MDA_MAX_CELLS = 210;
+    private static final int FUNC_MDA_MIN_CELLS = 211;
+    private static final int FUNC_MDA_SOME_CELLS = 212;
+    private static final int FUNC_MDA_ARCCOS = 213;
+    private static final int FUNC_MDA_ARCSIN = 214;
+    private static final int FUNC_MDA_ARCTAN = 215;
+    private static final int FUNC_MDA_BIT = 216;
+    private static final int FUNC_MDA_COMPLEX = 217;
+    private static final int FUNC_MDA_COSH = 218;
+    private static final int FUNC_MDA_DIVIDE = 219;
+    private static final int FUNC_MDA_MODULO = 220;
+    private static final int FUNC_MDA_POW = 221;
+    private static final int FUNC_MDA_SINH = 222;
+    private static final int FUNC_MDA_TANH = 223;
+    private static final int FUNC_MDA_SHIFT = 224;
+    private static final int FUNC_MDA_EXTEND = 225;
+    private static final int FUNC_MDA_DIV = 226;
 
+    private static final int FUNC_MDA_DECODE = 250;
+    private static final int FUNC_MDA_ENCODE = 251;
 
-    static final IntKeyIntValueHashMap mdaFuncMap =
-            new IntKeyIntValueHashMap();
+    static final IntKeyIntValueHashMap mdaFuncMap
+            = new IntKeyIntValueHashMap();
 
     static {
         mdaFuncMap.put(Tokens.MDA_TIFF, FUNC_MDA_TIFF);
@@ -127,7 +126,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         super();
         this.funcType = id;
 
-        switch(id) {
+        switch (id) {
             case FUNC_MDA_TIFF:
             case FUNC_MDA_PNG:
             case FUNC_MDA_CSV:
@@ -168,8 +167,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     public static FunctionMDA newFunctionMDA(int tokenType) {
         int id = mdaFuncMap.get(tokenType, -1);
-        if (id == -1)
+        if (id == -1) {
             return null;
+        }
         return new FunctionMDA(id);
     }
 
@@ -216,7 +216,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 dataType = Type.SQL_MDARRAY_ALL_TYPES;
                 break;
             case FUNC_MDA_ENCODE:
-                dataType = Type.SQL_BLOB;
+                dataType = Type.SQL_ALL_TYPES;
                 break;
         }
     }
@@ -231,6 +231,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     /**
      * Evaluates a rasql function.
+     *
      * @param session the session
      * @param data parameter data
      * @param isMDARootNode
@@ -239,7 +240,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
     @Override
     protected Object getValue(Session session, Object[] data, boolean isMDARootNode) {
 
-        switch(funcType) {
+        switch (funcType) {
             case FUNC_MDA_TIFF:
             case FUNC_MDA_PNG:
             case FUNC_MDA_CSV:
@@ -286,29 +287,38 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     private Object getConversionFunctionValue(Session session) {
         final Object argValue = nodes[0].getValue(session, false);
-        final String argString = (argValue instanceof Object[])?
-                RasUtil.objectArrayToString(argValue):
-                (String)argValue;
+        final String argString = (argValue instanceof Object[])
+                ? RasUtil.objectArrayToString(argValue) : (String) argValue;
 
-        switch(funcType) {
+        RasArrayIdSet rasArrayIds = nodes[0].getRasArrayIds(session);
+
+        switch (funcType) {
             case FUNC_MDA_TIFF:
-                log.info("Executing function tiff: nodes[0] = "+ nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("tiff("+ argString +")", ".tiff", nodes[0].getRasArrayIds(session));
+                log.info("Executing function tiff: nodes[0] = " + nodes[0]);
+                return RasUtil.executeHsqlArrayQuery("tiff(" + argString + ")", ".tiff", rasArrayIds);
             case FUNC_MDA_PNG:
-                log.info("Executing function png: nodes[0] = "+ nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("png("+ argString +")", ".png", nodes[0].getRasArrayIds(session));
+                log.info("Executing function png: nodes[0] = " + nodes[0]);
+                return RasUtil.executeHsqlArrayQuery("png(" + argString + ")", ".png", rasArrayIds);
             case FUNC_MDA_CSV:
                 log.info("Executing function csv: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("csv("+ argString +")", ".csv", nodes[0].getRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("csv(" + argString + ")", ".csv", rasArrayIds);
             case FUNC_MDA_JPEG:
                 log.info("Executing function jpeg: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("jpeg("+ argString +")", ".jpeg",nodes[0].getRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("jpeg(" + argString + ")", ".jpeg", rasArrayIds);
             case FUNC_MDA_BMP:
                 log.info("Executing function bmp: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("bmp("+ argString +")", ".bmp", nodes[0].getRasArrayIds(session));
+                return RasUtil.executeHsqlArrayQuery("bmp(" + argString + ")", ".bmp", rasArrayIds);
             case FUNC_MDA_ENCODE:
                 log.info("Executing function encode: nodes[0] = " + nodes[0]);
-                return RasUtil.executeHsqlArrayQuery("encode("+ argString + "," +  ")", ".unknown", nodes[0].getRasArrayIds(session));
+
+                final Object formatObj = nodes[1].getValue(session, false);
+                final String format = (formatObj instanceof Object[])
+                        ? RasUtil.objectArrayToString(formatObj) : (String) formatObj;
+
+                String field = rasArrayIds.stringifyIdentifier();
+                final String rasql = "select encode(" + argString + ", \"" + format + "\") from "
+                        + rasArrayIds.stringifyRasColls() + " WHERE " + rasArrayIds.stringifyOids();
+                return RasUtil.executeRasqlQuery(rasql, false);
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionRas");
 
@@ -319,7 +329,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         final Object argValue = nodes[0].getValue(session, false);
         boolean isInt = true;
         String function = null;
-        switch(funcType) {
+        switch (funcType) {
             case FUNC_MDA_ADD_CELLS:
                 function = Tokens.T_MDA_ADD_CELLS;
                 break;
@@ -385,10 +395,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             }
             final String ret = RasUtil.executeHsqlArrayQuery(functionCall,
                     nodes[0].getRasArrayIds(session)).toString();
-            if (isInt)
+            if (isInt) {
                 return Integer.valueOf(ret);
-            else
+            } else {
                 return Double.valueOf(ret);
+            }
         }
         throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function");
     }
@@ -396,15 +407,31 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
     private Object getDoubleParamFunctionValue(final Session session, boolean isMDARootNode) {
         boolean isInt = true;
         String function = null;
-        switch(funcType) {
-            case FUNC_MDA_BIT: function = "bit"; break;
-            case FUNC_MDA_COMPLEX: function = "complex"; break;
-            case FUNC_MDA_DIVIDE: function = "divide"; break;
-            case FUNC_MDA_MODULO: function = "modulo"; break;
-            case FUNC_MDA_POW: function = "pow"; break;
-            case FUNC_MDA_SHIFT: function = "shift"; break;
-            case FUNC_MDA_EXTEND: function = "extend"; break;
-            case FUNC_MDA_DIV: function = "div"; break;
+        switch (funcType) {
+            case FUNC_MDA_BIT:
+                function = "bit";
+                break;
+            case FUNC_MDA_COMPLEX:
+                function = "complex";
+                break;
+            case FUNC_MDA_DIVIDE:
+                function = "divide";
+                break;
+            case FUNC_MDA_MODULO:
+                function = "modulo";
+                break;
+            case FUNC_MDA_POW:
+                function = "pow";
+                break;
+            case FUNC_MDA_SHIFT:
+                function = "shift";
+                break;
+            case FUNC_MDA_EXTEND:
+                function = "extend";
+                break;
+            case FUNC_MDA_DIV:
+                function = "div";
+                break;
 
         }
         if (function != null) {
@@ -413,10 +440,8 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             if (!isMDARootNode) {
                 return functionCall;
             }
-            Set<RasArrayId> rasArrayIds = nodes[0].getRasArrayIds(session);
-            rasArrayIds.addAll(nodes[1].getRasArrayIds(session));
-            return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
+            return RasUtil.executeHsqlArrayQuery(functionCall, getRasArrayIds(session));
         }
-        throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: "+funcType);
+        throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: " + funcType);
     }
 }

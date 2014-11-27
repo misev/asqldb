@@ -51,6 +51,7 @@ import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
 import java.util.Set;
+import org.asqldb.ras.RasArrayIdSet;
 
 /**
  * Implementation of SQL standard function calls
@@ -1240,9 +1241,7 @@ public class FunctionSQL extends Expression {
         final String functionCall = String.format("%s(%s, %s)",
                 function, nodes[0].getValue(session, false), nodes[1].getValue(session, false));
         if (isMDARootNode) {
-            Set<RasArrayId> rasArrayIds = nodes[0].getRasArrayIds(session);
-            rasArrayIds.addAll(nodes[1].getRasArrayIds(session));
-            return RasUtil.executeHsqlArrayQuery(functionCall, rasArrayIds);
+            return RasUtil.executeHsqlArrayQuery(functionCall, getRasArrayIds(session));
         }
         return functionCall;
     }

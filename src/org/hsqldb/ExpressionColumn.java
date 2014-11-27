@@ -49,6 +49,7 @@ import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import java.util.HashSet;
+import org.asqldb.ras.RasArrayIdSet;
 
 /**
  * Implementation of column, variable, parameter, etc. access operations.
@@ -769,11 +770,12 @@ public class ExpressionColumn extends Expression {
      * @return Set of 0 or 1 RasArrayIds
      */
     @Override
-    public java.util.Set<RasArrayId> getRasArrayIds(Session session) {
-        java.util.Set<RasArrayId> rasArrayIds = new HashSet<RasArrayId>();
+    public RasArrayIdSet getRasArrayIds(Session session) {
+        RasArrayIdSet rasArrayIds = new RasArrayIdSet();
         if (isExpressionMDA()) {
-            rasArrayIds.add(RasArrayId.parseString(
-                    RasUtil.objectArrayToString(getHsqlColumnValue(session)), getColumnName()));
+            Integer oid = (Integer) getHsqlColumnValue(session);
+            RasArrayId rid = new RasArrayId(column.getRasdamanCollectionName(), oid, getColumnName());
+            rasArrayIds.add(rid);
         }
         return rasArrayIds;
     }

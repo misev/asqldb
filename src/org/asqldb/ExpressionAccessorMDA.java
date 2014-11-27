@@ -56,15 +56,14 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
         if (nodes != null && nodes.length > 1) {
-            final String index = (nodes[RIGHT]==null)?"":("[" + nodes[RIGHT].getValue(session, false) + "]");
+            final String index = (nodes[RIGHT] == null) ? "" :
+                    ("[" + nodes[RIGHT].getValue(session, false) + "]");
             final String colName = nodes[LEFT].getColumnNameString();
 
             if (isMDARootNode) {
-                Set<RasArrayId> rasArrayIds = nodes[LEFT].getRasArrayIds(session);
-                rasArrayIds.addAll(nodes[RIGHT].getRasArrayIds(session));
-                return RasUtil.executeHsqlArrayQuery(colName + index, rasArrayIds);
+                return RasUtil.executeHsqlArrayQuery(colName + index, getRasArrayIds(session));
             }
-            return colName+index;
+            return colName + index;
         }
         return null;
     }
