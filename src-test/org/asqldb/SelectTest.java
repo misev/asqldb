@@ -245,4 +245,13 @@ public class SelectTest extends BaseTest {
         assertEquals(2.3, res.doubleValue(), 0.01);
     }
     
+    @Test
+    public void testSubsetSlice() throws SQLException {
+        RasMArrayByte res = (RasMArrayByte) executeQuerySingleResult(
+                "select a[50:55,100] from RASTEST2");
+        byte[] d = res.getArray();
+        assertEquals(6, d.length);
+        assertEquals(22, d[2]);
+    }
+    
 }
