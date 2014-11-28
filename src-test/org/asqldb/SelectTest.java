@@ -29,56 +29,47 @@ package org.asqldb;
 import org.asqldb.ras.RasUtil;
 import rasj.RasMArrayByte;
 import rasj.RasMArrayDouble;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Run SQL/MDA select tests.
  *
  * @author Dimitar Misev
  */
-public class SelectTest extends InsertDeleteTest {
-
-    public static void main(String[] args) {
-        boolean result = true;
-        int exitValue = 0;
-        
-        connect();
-        
-        final String[] createQueries = insertTestData();
-        
-        result = result && testSingleArraySelect();
-        result = result && testSingleArrayEncode();
-        
-        dropTables(createQueries);
-        
-        disconnect();
-        
-        exitValue += (result ? 0 : 1);
-        System.exit(exitValue);
+public class SelectTest extends BaseTest {
+    
+    protected static String[] createQueries;
+    
+    @BeforeClass
+    public static void setUpData() {
+        createQueries = insertTestData();
     }
     
-    public static boolean testSingleArraySelect() {
+    @AfterClass
+    public static void tearDownData() {
+        dropTables(createQueries);
+    }
+    
+    @Test
+    public void testSingleArraySelect() {
         System.out.println("\nTest single array select...");
-        boolean ret = true;
         
         Object dbag = executeQuerySingleResult("select c.a from RASTEST1 as c");
         RasMArrayDouble res = (RasMArrayDouble) RasUtil.head(dbag);
         double[] d = res.getDoubleArray();
-        ret = ret && d.length == 3;
-        printCheck(ret, "  check result");
-        
-        return ret;
+        assertEquals(d.length, 3);
     }
     
-    public static boolean testSingleArrayEncode() {
+    @Test
+    public void testSingleArrayEncode() {
         System.out.println("\nTest single array encode...");
-        boolean ret = true;
-        
+
         Object dbag = executeQuerySingleResult("select mdarray_encode(c.a, 'PNG') from RASTEST2 as c");
         RasMArrayByte res = (RasMArrayByte) RasUtil.head(dbag);
         byte[] d = res.getArray();
-        ret = ret && d.length == 22624;
-        printCheck(ret, "  check result");
-        
-        return ret;
+        assertEquals(d.length, 22624);
     }
 }

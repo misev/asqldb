@@ -26,6 +26,13 @@
 
 package org.asqldb;
 
+import java.io.InputStream;
+import static org.asqldb.BaseTest.executeQuery;
+import static org.asqldb.BaseTest.executeUpdateQuery;
+import org.asqldb.ras.RasUtil;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 /**
  * Execute CREATE tests.
  * 
@@ -34,51 +41,34 @@ package org.asqldb;
  * @author Dimitar Misev
  */
 public class CreateTest extends BaseTest {
-
-    public static void main(String[] args) {
-        connect();
         
-        final String[] createQueries = new String[]{
-            "create table RASTEST1 ("
-                + "id INTEGER NOT NULL,"
-                + "a INTEGER MDARRAY[x,y],"
-                + "PRIMARY KEY (id))",
-            "create table RASTEST2 ("
-                + "a INTEGER MDARRAY[x(0:1000),y(0:1000)])",
-            "create table RASTEST3 ("
-                + "a DOUBLE MDARRAY[0:1000,0:1000])",
-            "create table RASTEST4 ("
-                + "a DOUBLE MDARRAY[0:1000,-100:1000,z(1:100)])",
-            "create table RASTEST5 ("
-                + "a DOUBLE MDARRAY[-10000:-1000,-100:1000,z(-1000:-100)])",
-            "create table RASTEST6 ("
-                + "a DOUBLE MDARRAY[-10000:-1000])"};
-        
-        dropTables(createQueries);
-        final int failed = createTables(createQueries);
+    final String[] createQueries = new String[]{
+        "create table RASTEST1 ("
+            + "id INTEGER NOT NULL,"
+            + "a INTEGER MDARRAY[x,y],"
+            + "PRIMARY KEY (id))",
+        "create table RASTEST2 ("
+            + "a INTEGER MDARRAY[x(0:1000),y(0:1000)])",
+        "create table RASTEST3 ("
+            + "a DOUBLE MDARRAY[0:1000,0:1000])",
+        "create table RASTEST4 ("
+            + "a DOUBLE MDARRAY[0:1000,-100:1000,z(1:100)])",
+        "create table RASTEST5 ("
+            + "a DOUBLE MDARRAY[-10000:-1000,-100:1000,z(-1000:-100)])",
+        "create table RASTEST6 ("
+            + "a DOUBLE MDARRAY[-10000:-1000])"};
+    
+    @Test
+    public void test() {
         dropTables(createQueries);
         
-        disconnect();
+        assertEquals(createQueries.length, createTables(createQueries));
         
-        System.exit(failed);
-    }
-    
-    
-    public static int createTables(final String[] queries) {
-        System.out.println("\nCreating tables...");
-        return executeQueries(queries);
-    }
-    
-    /**
-     * Drop tables, assumes that the tables are called RASTEST1, RASTEST2, ...
-     * 
-     * @param queries 
-     */
-    public static void dropTables(final String[] queries) {
-        System.out.println("\nDroping tables...");
-        for (int i = 1; i <= queries.length; i++) {
+        for (int i = 1; i <= createQueries.length; i++) {
             final String table = "RASTEST" + i;
-            executeQuery("DROP TABLE " + table + " IF EXISTS");
+            assertTrue(tableExistsInRasdaman(table));
         }
+        
+        assertTrue(dropTables(createQueries));
     }
 }

@@ -28,6 +28,10 @@ package org.asqldb;
 
 import java.io.InputStream;
 import org.asqldb.ras.RasUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * INSERT/DELETE MDARRAY tests.<p>
@@ -51,92 +55,54 @@ import org.asqldb.ras.RasUtil;
  *
  * @author Dimitar Misev
  */
-public class InsertDeleteTest extends CreateTest {
-
-    public static void main(String[] args) {
-        boolean result = true;
-        int exitValue = 0;
-        
-        connect();
-        
-        final String[] createQueries = insertTestData();
-        
-        result = result && testInsertArrayLiteral();
-        result = result && testInsertArrayValues();
-        result = result && testInsertDecode();
-        dropTables(createQueries);
-        
-        disconnect();
-        
-        exitValue += (result ? 0 : 1);
-        System.exit(exitValue);
-    }
+public class InsertDeleteTest extends BaseTest {
     
-    public static String[] insertTestData() {
-        final String[] createQueries = new String[]{
+    protected static String[] createQueries;
+    
+    @BeforeClass
+    public static void setUpData() {
+        createQueries = new String[]{
             "create table RASTEST1 ("
                 + "a DOUBLE MDARRAY[-10000:-1000])",
             "create table RASTEST2 ("
                 + "a CHAR MDARRAY[x, y])"};
         dropTables(createQueries);
         createTables(createQueries);
-        
-        executeQuery("insert into RASTEST1(a) values ("
-                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])");
-        
-        final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
-        executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
-        
-        return createQueries;
     }
     
-    public static boolean testInsertArrayLiteral() {
+    @AfterClass
+    public static void tearDownData() {
+        dropTables(createQueries);
+    }
+    
+    @Test
+    public void testInsertArrayLiteral() {
         System.out.println("\nTest inserting array literal...");
-        boolean ret = true;
         
-        ret = ret && executeQuery("insert into RASTEST1(a) values ("
-                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])");
-        
-        System.out.print("  check inserted data... ");
-        String csv = RasUtil.collectionAsCsv("RASTEST1", "A");
-        ret = ret && "{1,2.3,-9.88832}".equals(csv);
-        printCheck(ret);
-        
-        ret = ret && executeQuery("DELETE FROM RASTEST1");
-        
-        return ret;
+        assertTrue(executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"));
+        assertEquals("{1,2.3,-9.88832}", RasUtil.collectionAsCsv("RASTEST1", "A"));
+        assertTrue(executeQuery("DELETE FROM RASTEST1"));
     }
     
-    public static boolean testInsertArrayValues() {
+    @Test
+    public void testInsertArrayValues() {
         System.out.println("\nTest inserting array values...");
-        boolean ret = true;
         
-        ret = ret && executeQuery("insert into RASTEST1(a) values ("
-                + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))");
+        assertTrue(executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))"));
+        assertEquals("{-9999,-9998,-9997}", RasUtil.collectionAsCsv("RASTEST1", "A"));
+        assertTrue(executeQuery("DELETE FROM RASTEST1"));
         
-        System.out.print("  check inserted data... ");
-        String csv = RasUtil.collectionAsCsv("RASTEST1", "A");
-        ret = ret && "{-9999,-9998,-9997}".equals(csv);
-        printCheck(ret);
-        
-        ret = ret && executeQuery("DELETE FROM RASTEST1");
-        
-        return ret;
     }
     
-    public static boolean testInsertDecode() {
+    @Test
+    public void testInsertDecode() {
         System.out.println("\nTest inserting decode...");
-        boolean ret = true;
         
         final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
         executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
-        System.out.print("  check inserted data... ");
-        String sdom = RasUtil.collectionAsSdom("RASTEST2", "A");
-        ret = ret && "[0:255,0:210]".equals(sdom);
-        printCheck(ret);
-        
-        ret = ret && executeQuery("DELETE FROM RASTEST2");
-        
-        return ret;
+        assertEquals("[0:255,0:210]", RasUtil.collectionAsSdom("RASTEST2", "A"));
+        assertTrue(executeQuery("DELETE FROM RASTEST2"));
     }
 }

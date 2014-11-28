@@ -37,6 +37,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 /**
  * Base class for MDARRAY tests.
@@ -45,53 +47,64 @@ import java.util.Properties;
  */
 public class BaseTest {
 
-    public static final String DEFAULT_DB_FILE = "/var/hsqldb/test/db";
-    
-    private static final String HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
+    public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
+    public static final String HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
 
-    public static String dbFile = DEFAULT_DB_FILE;
-    public static boolean verbose = false;
+    protected static String dbPath = DEFAULT_DB_PATH;
+    protected static String jdbcUrl = "jdbc:hsqldb:" + dbPath;
     
     protected static Connection connection = null;
     
-    public static void connect() {
-        getRasConnection();
-        getHsqlConnection();
+    @BeforeClass
+    public static void setUp() {
+        connect();
     }
     
-    public static void disconnect() {
+    @AfterClass
+    public static void tearDown() {
+        disconnect();
+    }
+    
+    protected static void connect() {
+        openRasConnection();
+        openHsqlConnection();
+    }
+    
+    protected static void disconnect() {
         RasUtil.closeDatabase();
         if (connection != null) {
             try {
                 connection.close();
             } catch (SQLException ex) {
+            } finally {
+                connection = null;
             }
         }
     }
 
-    public static void getRasConnection() {
+    protected static void openRasConnection() {
         RasUtil.openDatabase(RasUtil.adminUsername, RasUtil.adminPassword, true);
     }
     
-    public static void getHsqlConnection() {
-        final Properties connectionProps = new Properties();
-        connectionProps.put("user", "SA");
-        connectionProps.put("password", "");
-
+    protected static void openHsqlConnection() {
         try {
             Class.forName(HSQLDB_JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Could not load the hsqldb JDBCDriver", e);
         }
 
-        final String jdbcUrl = "jdbc:hsqldb:file:" + dbFile;
         try {
-            connection = DriverManager.getConnection(jdbcUrl, connectionProps);
+            connection = DriverManager.getConnection(jdbcUrl, getJdbcConnectionProperties());
         } catch (SQLException ex) {
-            System.out.println("Failed connecting to database: " + ex.getMessage());
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Failed getting JDBC connection.", ex);
         }
-        System.out.println("Connected to database: "+jdbcUrl);
+    }
+    
+    private static Properties getJdbcConnectionProperties() {
+        final Properties ret = new Properties();
+        ret.put("user", "SA");
+        ret.put("password", "");
+        return ret;
     }
 
     /**
@@ -194,12 +207,12 @@ public class BaseTest {
     }
     
     /**
-     * Execute the list of queries, return the number of failed ones.
+     * Execute the list of queries, return the number of passed ones.
      */
     public static int executeQueries(String[] queries) {
         int ret = 0;
         for (String query : queries) {
-            if (!executeQuery(query)) {
+            if (executeQuery(query)) {
                 ++ret;
             }
         }
@@ -217,5 +230,52 @@ public class BaseTest {
     public static void printCheck(boolean res, String msg) {
         System.out.print(msg + "... ");
         printCheck(res);
+    }
+    
+    public static int createTables(final String[] queries) {
+        System.out.println("\nCreating tables...");
+        return executeQueries(queries);
+    }
+    
+    /**
+     * Drop tables, assumes that the tables are called RASTEST1, RASTEST2, ...
+     * 
+     * @return true if tables have been successfully removed from rasdaman,
+     * false otherwise.
+     */
+    public static boolean dropTables(final String[] queries) {
+        System.out.println("\nDroping tables...");
+        boolean ret = false;
+        for (int i = 1; i <= queries.length; i++) {
+            final String table = "RASTEST" + i;
+            executeQuery("DROP TABLE " + table + " IF EXISTS");
+            ret = ret || tableExistsInRasdaman(table);
+        }
+        return !ret;
+    }
+    
+    /**
+     * Assumes the corresponding array field in HSQLDB is A.
+     */
+    public static boolean tableExistsInRasdaman(String table) {
+        return RasUtil.collectionExists("PUBLIC_" + table + "_A");
+    }
+    
+    public static String[] insertTestData() {
+        final String[] createQueries = new String[]{
+            "create table RASTEST1 ("
+                + "a DOUBLE MDARRAY[-10000:-1000])",
+            "create table RASTEST2 ("
+                + "a CHAR MDARRAY[x, y])"};
+        dropTables(createQueries);
+        createTables(createQueries);
+        
+        executeQuery("insert into RASTEST1(a) values ("
+                + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])");
+        
+        final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
+        executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
+        
+        return createQueries;
     }
 }
