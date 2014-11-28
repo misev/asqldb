@@ -26,10 +26,6 @@
 
 package org.asqldb;
 
-import java.io.InputStream;
-import static org.asqldb.BaseTest.executeQuery;
-import static org.asqldb.BaseTest.executeUpdateQuery;
-import org.asqldb.ras.RasUtil;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -40,7 +36,7 @@ import static org.junit.Assert.*;
  *
  * @author Dimitar Misev
  */
-public class CreateTest extends BaseTest {
+public class CreateDropTest extends BaseTest {
         
     final String[] createQueries = new String[]{
         "create table RASTEST1 ("
@@ -59,7 +55,7 @@ public class CreateTest extends BaseTest {
             + "a DOUBLE MDARRAY[-10000:-1000])"};
     
     @Test
-    public void test() {
+    public void testCreateDrop() {
         dropTables(createQueries);
         
         assertEquals(createQueries.length, createTables(createQueries));

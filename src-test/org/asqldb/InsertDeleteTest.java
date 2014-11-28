@@ -77,8 +77,6 @@ public class InsertDeleteTest extends BaseTest {
     
     @Test
     public void testInsertArrayLiteral() {
-        System.out.println("\nTest inserting array literal...");
-        
         assertTrue(executeQuery("insert into RASTEST1(a) values ("
                 + "MDARRAY[-9999:-9997] [1.0,2.3,-9.88832])"));
         assertEquals("{1,2.3,-9.88832}", RasUtil.collectionAsCsv("RASTEST1", "A"));
@@ -87,8 +85,6 @@ public class InsertDeleteTest extends BaseTest {
     
     @Test
     public void testInsertArrayValues() {
-        System.out.println("\nTest inserting array values...");
-        
         assertTrue(executeQuery("insert into RASTEST1(a) values ("
                 + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))"));
         assertEquals("{-9999,-9998,-9997}", RasUtil.collectionAsCsv("RASTEST1", "A"));
@@ -98,8 +94,6 @@ public class InsertDeleteTest extends BaseTest {
     
     @Test
     public void testInsertDecode() {
-        System.out.println("\nTest inserting decode...");
-        
         final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
         executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
         assertEquals("[0:255,0:210]", RasUtil.collectionAsSdom("RASTEST2", "A"));

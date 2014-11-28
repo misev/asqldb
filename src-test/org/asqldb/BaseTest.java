@@ -39,6 +39,10 @@ import java.util.List;
 import java.util.Properties;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 /**
  * Base class for MDARRAY tests.
@@ -54,6 +58,31 @@ public class BaseTest {
     protected static String jdbcUrl = "jdbc:hsqldb:" + dbPath;
     
     protected static Connection connection = null;
+    
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            System.out.println("\n-----------------------------------------------------------------------");
+            System.out.println("Running test: " + description.getMethodName());
+        }
+        
+        @Override
+        protected void finished(Description description) {
+            System.out.println("-----------------------------------------------------------------------");
+        }
+        
+        @Override
+        protected void succeeded(Description description) {
+            System.out.println("\nTEST PASSED");
+        }
+        
+        @Override
+        protected void failed(Throwable e, Description description) {
+            System.out.println("\n*** TEST FAILED ***");
+            System.out.println("Error: " + e.getMessage());
+        }
+    };
     
     @BeforeClass
     public static void setUp() {
@@ -111,7 +140,7 @@ public class BaseTest {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeQuery(final String query) {
-        System.out.print("Executing query: " + query);
+        System.out.print("  executing query: " + query);
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
@@ -151,7 +180,7 @@ public class BaseTest {
      * @return a list of the results from the first returned row, as objects.
      */
     public static List<Object> executeQuerySingleResult(final String query, int columnCount) {
-        System.out.print("Executing query: " + query);
+        System.out.print("  executing query: " + query);
         List<Object> ret = new ArrayList<Object>();
         Statement stmt = null;
         try {
@@ -181,7 +210,7 @@ public class BaseTest {
      * Execute the given query, return true if passed, false otherwise.
      */
     public static boolean executeUpdateQuery(final String query, final InputStream is) {
-        System.out.print("Executing update query: " + query);
+        System.out.print("  executing update query: " + query);
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(query);

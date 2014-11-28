@@ -26,46 +26,19 @@
 
 package org.asqldb;
 
-import org.asqldb.ras.RasUtil;
-import rasj.RasMArrayByte;
-import rasj.RasMArrayDouble;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * Run SQL/MDA select tests.
+ * Run all ASQLDB's JUnit tests.
  *
  * @author Dimitar Misev
  */
-public class SelectTest extends BaseTest {
-    
-    protected static String[] createQueries;
-    
-    @BeforeClass
-    public static void setUpData() {
-        createQueries = insertTestData();
-    }
-    
-    @AfterClass
-    public static void tearDownData() {
-        dropTables(createQueries);
-    }
-    
-    @Test
-    public void testSingleArraySelect() {
-        Object dbag = executeQuerySingleResult("select c.a from RASTEST1 as c");
-        RasMArrayDouble res = (RasMArrayDouble) RasUtil.head(dbag);
-        double[] d = res.getDoubleArray();
-        assertEquals(d.length, 3);
-    }
-    
-    @Test
-    public void testSingleArrayEncode() {
-        Object dbag = executeQuerySingleResult("select mdarray_encode(c.a, 'PNG') from RASTEST2 as c");
-        RasMArrayByte res = (RasMArrayByte) RasUtil.head(dbag);
-        byte[] d = res.getArray();
-        assertEquals(d.length, 22624);
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    CreateDropTest.class,
+    InsertDeleteTest.class,
+    SelectTest.class
+})
+public class AllTests {
 }
