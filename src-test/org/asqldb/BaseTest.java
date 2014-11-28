@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.asqldb.test;
+package org.asqldb;
 
 import java.io.InputStream;
 import org.asqldb.ras.RasUtil;
@@ -37,7 +37,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import rasj.RasMArrayDouble;
 
 /**
  * Base class for MDARRAY tests.

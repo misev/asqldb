@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.asqldb.test;
+package org.asqldb;
 
 import org.asqldb.ras.RasUtil;
 import rasj.RasMArrayByte;
