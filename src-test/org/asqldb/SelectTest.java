@@ -26,6 +26,7 @@
 
 package org.asqldb;
 
+import java.sql.SQLException;
 import org.asqldb.ras.RasUtil;
 import rasj.RasMArrayByte;
 import rasj.RasMArrayDouble;
@@ -33,6 +34,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import rasj.RasMArrayInteger;
 
 /**
  * Run SQL/MDA select tests.
@@ -53,8 +55,12 @@ public class SelectTest extends BaseTest {
         dropTables(createQueries);
     }
     
+    /**
+     * Test simple, single array select.
+     */
+    
     @Test
-    public void testSingleArraySelect() {
+    public void testSingleArraySelect() throws SQLException {
         Object dbag = executeQuerySingleResult("select c.a from RASTEST1 as c");
         RasMArrayDouble res = (RasMArrayDouble) RasUtil.head(dbag);
         double[] d = res.getDoubleArray();
@@ -62,15 +68,20 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testSingleArrayEncode() {
+    public void testSingleArrayEncode() throws SQLException {
         Object dbag = executeQuerySingleResult("select mdarray_encode(c.a, 'PNG') from RASTEST2 as c");
         RasMArrayByte res = (RasMArrayByte) RasUtil.head(dbag);
         byte[] d = res.getArray();
         assertEquals(d.length, 22624);
     }
     
+    /**
+     * Test predefined aggregation operators:
+     * avg_cells, add_cells, count_cells, some_cells, all_cells
+     */
+    
     @Test
-    public void testPredefinedAggregation_AvgCells() {
+    public void testPredefinedAggregation_AvgCells() throws SQLException {
         Double hsqlRes = (Double) executeQuerySingleResult(
                 "select avg_cells(c.a) from RASTEST2 as c");
         Double rasqlRes = (Double) RasUtil.head(RasUtil.executeRasqlQuery(
@@ -80,7 +91,7 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testPredefinedAggregation_AddCells() {
+    public void testPredefinedAggregation_AddCells() throws SQLException {
         Integer hsqlRes = (Integer) executeQuerySingleResult(
                 "select add_cells(c.a = 0) from RASTEST2 as c");
         Long rasqlRes = (Long) RasUtil.head(RasUtil.executeRasqlQuery(
@@ -90,7 +101,7 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testPredefinedAggregation_CountCells() {
+    public void testPredefinedAggregation_CountCells() throws SQLException {
         Integer hsqlRes = (Integer) executeQuerySingleResult(
                 "select count_cells(c.a != 0) from RASTEST2 as c");
         Long rasqlRes = (Long) RasUtil.head(RasUtil.executeRasqlQuery(
@@ -100,7 +111,7 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testPredefinedAggregation_SomeCells() {
+    public void testPredefinedAggregation_SomeCells() throws SQLException {
         Integer hsqlRes = (Integer) executeQuerySingleResult(
                 "select some_cells(c.a > 0) from RASTEST2 as c");
         Integer rasqlRes = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(
@@ -110,7 +121,7 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testPredefinedAggregation_AllCells() {
+    public void testPredefinedAggregation_AllCells() throws SQLException {
         Integer hsqlRes = (Integer) executeQuerySingleResult(
                 "select all_cells(c.a <= 0) from RASTEST2 as c");
         Integer rasqlRes = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(
@@ -118,4 +129,36 @@ public class SelectTest extends BaseTest {
         assertTrue(hsqlRes == 0);
         assertEquals(rasqlRes, hsqlRes);
     }
+    
+    /**
+     * Test general array constructor
+     */
+    
+    @Test
+    public void testGeneralArrayConstructor() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [x(0:10),y(0:10)] values 1 from RASTEST1");
+        int[] d = res.getIntArray();
+        assertEquals(d.length, 121);
+        
+        res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [x(0:10),y(0:10)] values x + y from RASTEST1");
+        d = res.getIntArray();
+        assertEquals(121, d.length);
+        assertEquals(5, d[5]);
+        
+        res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [x(-1:1)] values 2 * x from RASTEST1");
+        d = res.getIntArray();
+        assertEquals(3, d.length);
+        assertEquals(-2, d[0]);
+        
+        try {
+            res = (RasMArrayInteger) executeQuerySingleResult(
+                    "select mdarray [x(50:55)] values 2 + y from RASTEST1");
+            fail();
+        } catch (SQLException ex) {
+        }
+    }
+    
 }

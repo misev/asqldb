@@ -160,7 +160,7 @@ public class BaseTest {
      * Execute the given query.
      * @return the first column of the first returned row, as an object.
      */
-    public static Object executeQuerySingleResult(final String query) {
+    public static Object executeQuerySingleResult(final String query) throws SQLException {
         List<Object> res = executeQuerySingleResult(query, 1);
         if (res.isEmpty()) {
             return null;
@@ -174,7 +174,7 @@ public class BaseTest {
      * @param columnCount number of columns per row returned by the query.
      * @return a list of the results from the first returned row, as objects.
      */
-    public static List<Object> executeQuerySingleResult(final String query, int columnCount) {
+    public static List<Object> executeQuerySingleResult(final String query, int columnCount) throws SQLException {
         System.out.print("  executing query: " + query);
         List<Object> ret = new ArrayList<Object>();
         Statement stmt = null;
@@ -188,7 +188,7 @@ public class BaseTest {
             }
         } catch (SQLException e) {
             System.out.println(" ... failed.");
-            e.printStackTrace();
+            throw e;
         } finally {
             if (stmt != null) {
                 try {

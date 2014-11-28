@@ -26,6 +26,7 @@
 
 package org.asqldb;
 
+import java.util.Objects;
 import org.hsqldb.Expression;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.OpTypes;
@@ -73,5 +74,25 @@ public class ExpressionDimensionLiteralMDA extends Expression implements Express
 
     public int getIndex() {
         return index;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.name.name);
+        hash = 35 * hash + this.index;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ExpressionDimensionLiteralMDA other = (ExpressionDimensionLiteralMDA) obj;
+        return name.name.equals(other.name.name) && index == other.index;
     }
 }

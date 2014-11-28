@@ -183,13 +183,11 @@ public class RasUtil {
 
         final Object obj = it.next();
 
-        //todo: allow returning scalar results
-        if ((obj instanceof RasGMArray)) {
-            RasGMArray arr = (RasGMArray) obj;
-            final String filename = rasArrayIds.stringifyIdentifier() + extension;
-            writeToFile(arr, filename);
-            //            return System.getProperty("user.dir")+System.getProperty("file.separator")+filename;
-        }
+//        if ((obj instanceof RasGMArray)) {
+//            RasGMArray arr = (RasGMArray) obj;
+//            final String filename = rasArrayIds.stringifyIdentifier() + extension;
+//            writeToFile(arr, filename);
+//        }
         //result is a scalar
         return obj;
     }
