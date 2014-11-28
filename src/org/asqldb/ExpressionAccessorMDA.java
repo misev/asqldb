@@ -47,8 +47,10 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        if (nodes != null && nodes.length > 0) {
-            nodes[LEFT].resolveTypes(session, this);
+        for (Expression node : nodes) {
+            if (node != null) {
+                node.resolveTypes(session, this);
+            }
         }
         dataType = Type.SQL_VARCHAR;
     }

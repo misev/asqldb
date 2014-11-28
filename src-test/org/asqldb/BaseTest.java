@@ -290,7 +290,10 @@ public class BaseTest {
             "create table RASTEST1 ("
                 + "a DOUBLE MDARRAY[-10000:-1000])",
             "create table RASTEST2 ("
-                + "a CHAR MDARRAY[x, y])"};
+                + "a CHAR MDARRAY[x, y])",
+            "create table RASTEST3 ("
+                + "id INTEGER,"
+                + "a CHAR MDARRAY[x])"};
         dropTables(createQueries);
         createTables(createQueries);
         
@@ -299,6 +302,11 @@ public class BaseTest {
         
         final InputStream is = InsertDeleteTest.class.getResourceAsStream("mr_1.png");
         executeUpdateQuery("insert into RASTEST2(a) values (mdarray_decode(?))", is);
+        
+        executeQuery("insert into RASTEST3(id, a) values ("
+                + "3, MDARRAY[x(0:2)] [2,5,3])");
+        executeQuery("insert into RASTEST3(id, a) values ("
+                + "2, MDARRAY[x(0:1)] [8,7])");
         
         return createQueries;
     }

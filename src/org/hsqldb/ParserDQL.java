@@ -3357,6 +3357,8 @@ public class ParserDQL extends ParserBase {
             Expression tmp = e;
             e = XreadMDArrayIndexRangeAsteriskOrNumerical();
             e = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE, tmp, e);
+        } else {
+            e = new ExpressionIndexMDA(OpTypes.ARRAY_INDEX_LIST, e);
         }
         
         return e;
@@ -5033,9 +5035,9 @@ public class ParserDQL extends ParserBase {
 
         if (token.tokenType == Tokens.LEFTBRACKET) {
             read();
-
-            Expression e1 = XreadNumericValueExpression();
-
+            
+            final Expression e1 = XreadMDArraySubsetExpression();
+            
             readThis(Tokens.RIGHTBRACKET);
 
             e = ExpressionAccessor.forExpression(e, e1);

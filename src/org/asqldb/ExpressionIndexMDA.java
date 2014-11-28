@@ -43,8 +43,8 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
         switch (opType) {
             case OpTypes.ARRAY_RANGE_ASTERISK:
                 break;
-            default :
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex");
+            default:
+                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
         }
     }
 
@@ -60,8 +60,24 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
             case OpTypes.ARRAY_RANGE:
                 break;
 
-            default :
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex");
+            default:
+                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
+        }
+    }
+
+    public ExpressionIndexMDA(int type, Expression left) {
+        super(type);
+        nodes = new Expression[UNARY];
+        nodes[LEFT] = left;
+
+        switch (opType) {
+
+            case OpTypes.ARRAY_INDEX_LIST:
+            case OpTypes.ARRAY_RANGE:
+                break;
+
+            default:
+                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
         }
     }
 
@@ -82,17 +98,26 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
         dataType = Type.SQL_VARCHAR;
     }
 
-
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
 
-        switch(opType) {
-            case OpTypes.ARRAY_RANGE_ASTERISK:
-                return "*";
-            case OpTypes.ARRAY_RANGE:
-                return nodes[LEFT].getValue(session, false)+":"+nodes[RIGHT].getValue(session, false);
-            case OpTypes.ARRAY_INDEX_LIST:
-                return nodes[LEFT].getValue(session, false)+","+nodes[RIGHT].getValue(session, false);
+        if (nodes.length == 1) {
+            switch (opType) {
+                case OpTypes.ARRAY_RANGE_ASTERISK:
+                    return "*";
+                case OpTypes.ARRAY_RANGE:
+                case OpTypes.ARRAY_INDEX_LIST:
+                    return nodes[LEFT].getValue(session, false);
+            }
+        } else {
+            switch (opType) {
+                case OpTypes.ARRAY_RANGE_ASTERISK:
+                    return "*";
+                case OpTypes.ARRAY_RANGE:
+                    return nodes[LEFT].getValue(session, false) + ":" + nodes[RIGHT].getValue(session, false);
+                case OpTypes.ARRAY_INDEX_LIST:
+                    return nodes[LEFT].getValue(session, false) + "," + nodes[RIGHT].getValue(session, false);
+            }
         }
         return null;
     }

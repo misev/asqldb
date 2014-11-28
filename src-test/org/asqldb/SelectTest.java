@@ -135,30 +135,114 @@ public class SelectTest extends BaseTest {
      */
     
     @Test
-    public void testGeneralArrayConstructor() throws SQLException {
+    public void testGeneralArrayConstructor_Const() throws SQLException {
         RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
                 "select mdarray [x(0:10),y(0:10)] values 1 from RASTEST1");
         int[] d = res.getIntArray();
         assertEquals(d.length, 121);
-        
-        res = (RasMArrayInteger) executeQuerySingleResult(
+    }
+    
+    @Test
+    public void testGeneralArrayConstructor_IteratorVars1() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
                 "select mdarray [x(0:10),y(0:10)] values x + y from RASTEST1");
-        d = res.getIntArray();
+        int[] d = res.getIntArray();
         assertEquals(121, d.length);
         assertEquals(5, d[5]);
-        
-        res = (RasMArrayInteger) executeQuerySingleResult(
+    }
+    
+    @Test
+    public void testGeneralArrayConstructor_IteratorVars2() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
                 "select mdarray [x(-1:1)] values 2 * x from RASTEST1");
-        d = res.getIntArray();
+        int[] d = res.getIntArray();
         assertEquals(3, d.length);
         assertEquals(-2, d[0]);
-        
+    }
+    
+    @Test
+    public void testGeneralArrayConstructor_HsqlMix1() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [x(0:2)] values id * x from RASTEST3");
+        int[] d = res.getIntArray();
+        assertEquals(3, d.length);
+        assertEquals(6, d[2]);
+    }
+    
+    @Test
+    public void testGeneralArrayConstructor_HsqlMix2() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [x(0:2), x1(0:2)] values xid.id * x + x1 from RASTEST3 as xid");
+        int[] d = res.getIntArray();
+        assertEquals(9, d.length);
+        assertEquals(2, d[2]);
+    }
+    
+    @Test
+    public void testGeneralArrayConstructor_InvalidIterator() throws SQLException {
         try {
-            res = (RasMArrayInteger) executeQuerySingleResult(
+            executeQuerySingleResult(
                     "select mdarray [x(50:55)] values 2 + y from RASTEST1");
             fail();
         } catch (SQLException ex) {
         }
+    }
+    
+    /**
+     * Test general array aggregate
+     */
+    
+    @Test
+    public void testGeneralArrayAggregate_Const() throws SQLException {
+        Integer res = (Integer) executeQuerySingleResult(
+                "select aggregate + over [x(0:10),y(0:10)] using 1 from RASTEST1");
+        assertEquals(121, res.intValue());
+    }
+    
+    @Test
+    public void testGeneralArrayAggregate_IteratorVars1() throws SQLException {
+        Integer res = (Integer) executeQuerySingleResult(
+                "select aggregate + over [x(0:10),y(0:10)] using x from RASTEST1");
+        assertEquals(605, res.intValue());
+    }
+    
+    @Test
+    public void testGeneralArrayAggregate_InvalidIterator() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select aggregate + over [x(0:10)] using y from RASTEST1");
+            fail();
+        } catch (SQLException ex) {
+        }
+    }
+    
+    @Test
+    public void testGeneralArrayAggregate_ArrayConstructorMix() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select mdarray [z(0:2)] values aggregate + over [x(0:10),y(0:10)] using z from RASTEST1");
+        int[] d = res.getIntArray();
+        assertEquals(3, d.length);
+        assertEquals(242, d[2]);
+    }
+    
+    /**
+     * Test array subset
+     */
+    
+    @Test
+    public void testSubset() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                "select a[-9999:-9998] from RASTEST1");
+        double[] d = res.getDoubleArray();
+        assertEquals(2, d.length);
+        assertEquals(2.3, d[1], 0.01);
+    }
+    
+    @Test
+    public void testSlice() throws SQLException {
+        Double res = (Double) executeQuerySingleResult(
+                "select a[-9998] from RASTEST1");
+        assertEquals(2.3, res.doubleValue(), 0.01);
     }
     
 }

@@ -112,8 +112,8 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
             
             if (opType == OpTypes.ARRAY_CONSTRUCTOR_LITERAL) {
                 String suffix = type.getRasqlSuffix();
-                right = right.replaceAll("(\\-?\\d+\\.\\d+)", "$1" + suffix);
-                insertQuery += "< " + left + " " + right + " >";
+                right = right.replaceAll("(\\-?\\d+(\\.\\d+)?)", "$1" + suffix);
+                insertQuery += "<" + left + " " + right + ">";
                 
             } else if (opType == OpTypes.ARRAY_CONSTRUCTOR_VALUE) {
                 ExpressionElementListMDA el = (ExpressionElementListMDA) nodes[LEFT];
