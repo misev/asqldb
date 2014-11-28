@@ -26,12 +26,7 @@
 
 package org.asqldb.test;
 
-import java.sql.Blob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import org.asqldb.ras.RasUtil;
-import static org.asqldb.test.BaseTest.connection;
 import rasj.RasMArrayByte;
 import rasj.RasMArrayDouble;
 
@@ -62,7 +57,7 @@ public class SelectTest extends InsertDeleteTest {
     }
     
     public static boolean testSingleArraySelect() {
-        System.out.println("\nTest pure array select...");
+        System.out.println("\nTest single array select...");
         boolean ret = true;
         
         Object dbag = executeQuerySingleResult("select c.a from RASTEST1 as c");
@@ -75,7 +70,7 @@ public class SelectTest extends InsertDeleteTest {
     }
     
     public static boolean testSingleArrayEncode() {
-        System.out.println("\nTest pure array encode...");
+        System.out.println("\nTest single array encode...");
         boolean ret = true;
         
         Object dbag = executeQuerySingleResult("select mdarray_encode(c.a, 'PNG') from RASTEST2 as c");
