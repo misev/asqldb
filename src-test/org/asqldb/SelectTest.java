@@ -68,4 +68,54 @@ public class SelectTest extends BaseTest {
         byte[] d = res.getArray();
         assertEquals(d.length, 22624);
     }
+    
+    @Test
+    public void testPredefinedAggregation_AvgCells() {
+        Double hsqlRes = (Double) executeQuerySingleResult(
+                "select avg_cells(c.a) from RASTEST2 as c");
+        Double rasqlRes = (Double) RasUtil.head(RasUtil.executeRasqlQuery(
+                "select avg_cells(c) from PUBLIC_RASTEST2_A as c", false));
+        assertTrue(hsqlRes > 0);
+        assertEquals(rasqlRes, hsqlRes);
+    }
+    
+    @Test
+    public void testPredefinedAggregation_AddCells() {
+        Integer hsqlRes = (Integer) executeQuerySingleResult(
+                "select add_cells(c.a = 0) from RASTEST2 as c");
+        Long rasqlRes = (Long) RasUtil.head(RasUtil.executeRasqlQuery(
+                "select add_cells(c = 0) from PUBLIC_RASTEST2_A as c", false));
+        assertTrue(hsqlRes > 0);
+        assertEquals(rasqlRes.longValue(), hsqlRes.longValue());
+    }
+    
+    @Test
+    public void testPredefinedAggregation_CountCells() {
+        Integer hsqlRes = (Integer) executeQuerySingleResult(
+                "select count_cells(c.a != 0) from RASTEST2 as c");
+        Long rasqlRes = (Long) RasUtil.head(RasUtil.executeRasqlQuery(
+                "select count_cells(c != 0) from PUBLIC_RASTEST2_A as c", false));
+        assertTrue(hsqlRes > 0);
+        assertEquals(rasqlRes.longValue(), hsqlRes.longValue());
+    }
+    
+    @Test
+    public void testPredefinedAggregation_SomeCells() {
+        Integer hsqlRes = (Integer) executeQuerySingleResult(
+                "select some_cells(c.a > 0) from RASTEST2 as c");
+        Integer rasqlRes = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(
+                "select some_cells(c > 0) from PUBLIC_RASTEST2_A as c", false));
+        assertTrue(hsqlRes > 0);
+        assertEquals(rasqlRes, hsqlRes);
+    }
+    
+    @Test
+    public void testPredefinedAggregation_AllCells() {
+        Integer hsqlRes = (Integer) executeQuerySingleResult(
+                "select all_cells(c.a <= 0) from RASTEST2 as c");
+        Integer rasqlRes = (Integer) RasUtil.head(RasUtil.executeRasqlQuery(
+                "select all_cells(c <= 0) from PUBLIC_RASTEST2_A as c", false));
+        assertTrue(hsqlRes == 0);
+        assertEquals(rasqlRes, hsqlRes);
+    }
 }

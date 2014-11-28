@@ -92,7 +92,7 @@ public class RasUtil {
     public static String adminUsername;
     public static String adminPassword;
 
-    public static boolean printLog = true;
+    public static boolean printLog = false;
 
     private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
 
@@ -523,7 +523,7 @@ public class RasUtil {
     }
     
     /**
-     * @return the first element of a DBag, or null if bag is empty.
+     * @return the first element of a DBag, or null if bag is empty or not a DBag.
      */
     public static Object head(Object bag) {
         Object ret = null;

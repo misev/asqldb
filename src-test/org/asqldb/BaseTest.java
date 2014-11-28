@@ -68,18 +68,13 @@ public class BaseTest {
         }
         
         @Override
-        protected void finished(Description description) {
-            System.out.println("-----------------------------------------------------------------------");
-        }
-        
-        @Override
         protected void succeeded(Description description) {
-            System.out.println("\nTEST PASSED");
+            System.out.println("TEST PASSED");
         }
         
         @Override
         protected void failed(Throwable e, Description description) {
-            System.out.println("\n*** TEST FAILED ***");
+            System.out.println("*** TEST FAILED ***");
             System.out.println("Error: " + e.getMessage());
         }
     };

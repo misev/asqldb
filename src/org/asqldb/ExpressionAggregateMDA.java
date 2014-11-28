@@ -26,11 +26,9 @@
 
 package org.asqldb;
 
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
-import java.util.Set;
 import org.hsqldb.Expression;
 import org.hsqldb.Session;
 import org.hsqldb.Tokens;
