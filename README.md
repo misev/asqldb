@@ -4,10 +4,6 @@ asqldb
 ASQLDB is an SQL/MDA implementation based on HSQLDB and rasdaman. The SQL/MDA
 Part 15 of ISO SQL adds advanced query support for multidimensional arrays.
 
-Currently only SELECT queries are supported. An array has to be inserted
-directly into rasdaman first, and then published in ASQLDB by inserting it's
-OID in a VARCHAR ARRAY column.
-
 Getting started
 ===============
 * Configure the rasdaman connection: `editor config.properties`
@@ -25,23 +21,23 @@ Suppose we have a table in ASQLDB:
     CREATE TABLE Arrays (
       id INTEGER PRIMARY KEY,
       acquired DATE,
-      array VARCHAR(20) ARRAY
+       MDARRAY [x]
     );
 
 To publish an array object in collection MYCOLL, with OID = 100, then in Arrays
-we would insert the following:
+we would insert the following for example:
 
     INSERT INTO Arrays
-    VALUES (1, '2014-01-22', ARRAY['MYCOLL:100']);
+    VALUES (1, '2014-01-22', MDARRAY[x(0:2)] [0,1,2]);
 
 In SELECT queries then we can do advanced array processing on the array column,
 and even combine it with other non-array columns, e.g.
 
-    SELECT acquired, avg_cells(array[0:100, 50:200]) * id
+    SELECT acquired, avg_cells(a[0:1]) * id
     FROM Arrays
 
 The rasql syntax (http://rasdaman.org/ for more details) is mostly supported as
-is, with subtle keyword differences, like `ARRAY` instead of `MARRAY`, and
+is, with subtle keyword differences, like `MDARRAY` instead of `MARRAY`, and
 `AGGREGATE` instead of `CONDENSE`.
 
 Automated tests
