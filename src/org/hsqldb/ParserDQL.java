@@ -31,10 +31,10 @@
 
 package org.hsqldb;
 
+import java.util.ArrayList;
 import org.asqldb.ExpressionAggregateMDA;
 import org.asqldb.FunctionMDA;
 import org.asqldb.ExpressionValueVariableMDA;
-import org.asqldb.ExpressionDimensionLiteralMDA;
 import org.asqldb.ExpressionArrayConstructorMDA;
 import org.asqldb.ExpressionElementListMDA;
 import org.asqldb.ExpressionIndexMDA;
@@ -67,12 +67,14 @@ import org.hsqldb.types.NumberType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
-import org.asqldb.types.MDADomain;
-import org.asqldb.types.MDADimension;
-import org.asqldb.types.MDArrayType;
+import org.asqldb.types.MDADomainType;
+import org.asqldb.types.MDADimensionType;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.asqldb.ExpressionIndexUnboundedMDA;
+import org.asqldb.types.MDAType;
 
 /**
  * Parser for DQL statements
@@ -84,7 +86,7 @@ import java.util.Set;
  */
 public class ParserDQL extends ParserBase {
 
-    private Set<ExpressionDimensionLiteralMDA> dimensions = new HashSet<ExpressionDimensionLiteralMDA>();
+    private Set<ExpressionIndexMDA> dimensions = new HashSet<ExpressionIndexMDA>();
 
     protected Database             database;
     protected Session              session;
@@ -653,10 +655,16 @@ public class ParserDQL extends ParserBase {
                 throw unexpectedToken();
             }
 
-            typeObject = new MDArrayType(typeObject);
-            MDADomain domain = ((MDArrayType)(typeObject)).getDomain();
-
-            readMDArrayDefinitionDomain(domain);
+            read();
+            readThis(Tokens.LEFTBRACKET);
+            ExpressionElementListMDA dimensionList = XreadMDArrayDimensionListOrNull(null);
+            if (dimensionList != null) {
+                dimensionList.resolveTypes(session, dimensionList);
+                MDADomainType domainType = (MDADomainType) dimensionList.dataType;
+                typeObject = new MDAType(typeObject, domainType);
+            } else {
+                typeObject = new MDAType(typeObject);
+            }
         }
 
         return typeObject;
@@ -2295,7 +2303,7 @@ public class ParserDQL extends ParserBase {
             case Tokens.X_DELIMITED_IDENTIFIER :
             case Tokens.X_IDENTIFIER :
             case Tokens.X_IDENTIFIER_WITH_STRUCT :
-                e = XreadMDArrayVariableOrNull();
+                e = XreadMDArrayVariableOrNull(token.tokenString);
 
                 if (e != null) {
                     return e;
@@ -2685,7 +2693,7 @@ public class ParserDQL extends ParserBase {
                 return readCollection(OpTypes.ARRAY);
 
             case Tokens.MDARRAY :
-                return readMDArray(OpTypes.MDARRAY);
+                return readMDArrayConstructor(OpTypes.MDARRAY);
 
             case Tokens.ANY :
             case Tokens.SOME :
@@ -3031,8 +3039,9 @@ public class ParserDQL extends ParserBase {
         if (token.tokenType == Tokens.LEFTBRACKET) {
             read();
             //multidimensional interval being read
-            final Expression e = XreadMDArraySubsetExpression();
-            readThis(Tokens.RIGHTBRACKET);
+//            final Expression e = XreadMDArraySubsetExpression();
+            final Expression e = XreadMDArrayDimensionListOrNull(null, true);
+//            readThis(Tokens.RIGHTBRACKET);
             return e;
         }
 
@@ -3326,59 +3335,6 @@ public class ParserDQL extends ParserBase {
         }
 
         return XreadValueExpressionPrimary();
-    }
-
-    /**
-     * Reads an array subset expressions, e.g. 0:2,1:*,..
-     */
-    Expression XreadMDArraySubsetExpression() {
-        Expression e = XreadMDArrayIndexRangeExpression();
-
-        while (token.tokenType == Tokens.COMMA) {
-            read();
-
-            Expression tmp = e;
-            e = XreadMDArrayIndexRangeExpression();
-            e = new ExpressionIndexMDA(OpTypes.ARRAY_INDEX_LIST, tmp, e);
-        }
-
-        return e;
-    }
-
-    /**
-     * Reads an array range expression of format numberExp[:numberExp]
-     */
-    Expression XreadMDArrayIndexRangeExpression() {
-        Expression e = XreadMDArrayIndexRangeAsteriskOrNumerical();
-        
-        if (token.tokenType == Tokens.COLON) {
-            read();
-
-            Expression tmp = e;
-            e = XreadMDArrayIndexRangeAsteriskOrNumerical();
-            e = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE, tmp, e);
-        } else {
-            e = new ExpressionIndexMDA(OpTypes.ARRAY_INDEX_LIST, e);
-        }
-        
-        return e;
-    }
-
-    /**
-     * Reads an array index expression, which can be an '*' or a numeric expression.
-     */
-    Expression XreadMDArrayIndexRangeAsteriskOrNumerical() {
-        
-        final Expression e;
-        
-        if (token.tokenType == Tokens.ASTERISK) {
-            readThis(Tokens.ASTERISK);
-            e = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
-        } else {
-            e = XreadNumericValueExpression();
-        }
-        
-        return e;
     }
 
     Expression XreadNumericValueExpression() {
@@ -5036,10 +4992,15 @@ public class ParserDQL extends ParserBase {
         if (token.tokenType == Tokens.LEFTBRACKET) {
             read();
             
-            final Expression e1 = XreadMDArraySubsetExpression();
-            
-            readThis(Tokens.RIGHTBRACKET);
+            final Expression e1;
+            if (e.isExpressionMDA()) {
+                e1 = XreadMDArrayDimensionListOrNull(null, true);
+            } else {
+                e1 = XreadNumericValueExpression();
 
+                readThis(Tokens.RIGHTBRACKET);
+            }
+            
             e = ExpressionAccessor.forExpression(e, e1);
         }
 
@@ -5319,7 +5280,10 @@ public class ParserDQL extends ParserBase {
         if (token.tokenType != Tokens.OPENBRACKET) {
             checkValidCatalogName(prePrePrefix);
 
-            Expression column = new ExpressionColumn(prePrefix, prefix, name);
+            Expression column = XreadMDArrayVariableOrNull(name);
+            if (column == null) {
+                column = new ExpressionColumn(prePrefix, prefix, name);
+            }
 
             return column;
         }
@@ -6802,84 +6766,85 @@ public class ParserDQL extends ParserBase {
         }
     }
     
-    /**
-     * Read the definition domain of an MDARRAY into the given _domain_.
-     */
-    void readMDArrayDefinitionDomain(MDADomain domain) {
-        
-        read();
-
-        if (token.tokenType == Tokens.LEFTBRACKET) {
-
-            read();
-
-            for (int dimension = 0; ; dimension++) {
-
-                if (token.tokenType == Tokens.RIGHTBRACKET) {
-                    read();
-                    break;
-                }
-
-                String dimensionName = null;
-                long lowerBound = MDADimension.LOWER_UNBOUNDED;
-                long upperBound = MDADimension.UPPER_UNBOUNDED;
-
-                if (dimension > 0) {
-                    readThis(Tokens.COMMA);
-                }
-
-                Token currToken = token.duplicate();
-                read();
-
-                if (token.tokenType == Tokens.OPENBRACKET) {
-                    // currToken is dimension name
-                    dimensionName = currToken.tokenString;
-                    read();
-                    lowerBound = readBigint();
-                    readThis(Tokens.COLON);
-                    upperBound = readBigint();
-                    readThis(Tokens.CLOSEBRACKET);
-                } else if (token.tokenType == Tokens.COMMA) {
-                    // currToken is dimension name, no lower/upper bounds
-                    dimensionName = currToken.tokenString;
-                } else if (currToken.tokenType == Tokens.MINUS) {
-                    // no dimension, but the lower dimension bound is negative
-                    lowerBound = -readBigint();
-                    read();
-                    upperBound = readBigint();
-                } else if (token.tokenType == Tokens.COLON) {
-                    // currToken is lower dimension bound
-                    try {
-                        lowerBound = Long.parseLong(currToken.tokenString);
-                    } catch (NumberFormatException ex) {
-                        throw Error.error(ErrorCode.X_42563);
-                    }
-                    read();
-                    upperBound = readBigint();
-                } else if (token.tokenType == Tokens.RIGHTBRACKET) {
-                    // currToken is a final lonely dimension name
-                    dimensionName = currToken.tokenString;
-                }
-
-                if (dimensionName == null) {
-                    dimensionName = MDADimension.getDefaultName(dimension);
-                }
-
-                domain.addDimension(new MDADimension(dimensionName, lowerBound, upperBound));
-            }
-        } else {
-            domain.addDimension(new MDADimension());
-        }
-    }
+//    /**
+//     * Read the definition domain of an MDARRAY into the given _domain_.
+//     */
+//    void readMDArrayDefinitionDomain(MDADomainType domain) {
+//        
+//        read();
+//
+//        if (token.tokenType == Tokens.LEFTBRACKET) {
+//
+//            read();
+//
+//            for (int dimension = 0; ; dimension++) {
+//
+//                if (token.tokenType == Tokens.RIGHTBRACKET) {
+//                    read();
+//                    break;
+//                }
+//
+//                String dimensionName = null;
+//                long lowerBound = MDADimensionType.LOWER_UNBOUNDED;
+//                long upperBound = MDADimensionType.UPPER_UNBOUNDED;
+//
+//                if (dimension > 0) {
+//                    readThis(Tokens.COMMA);
+//                }
+//
+//                Token currToken = token.duplicate();
+//                read();
+//
+//                if (token.tokenType == Tokens.OPENBRACKET) {
+//                    // currToken is dimension name
+//                    dimensionName = currToken.tokenString;
+//                    read();
+//                    lowerBound = readBigint();
+//                    readThis(Tokens.COLON);
+//                    upperBound = readBigint();
+//                    readThis(Tokens.CLOSEBRACKET);
+//                } else if (token.tokenType == Tokens.COMMA) {
+//                    // currToken is dimension name, no lower/upper bounds
+//                    dimensionName = currToken.tokenString;
+//                } else if (currToken.tokenType == Tokens.MINUS) {
+//                    // no dimension, but the lower dimension bound is negative
+//                    lowerBound = -readBigint();
+//                    read();
+//                    upperBound = readBigint();
+//                } else if (token.tokenType == Tokens.COLON) {
+//                    // currToken is lower dimension bound
+//                    try {
+//                        lowerBound = Long.parseLong(currToken.tokenString);
+//                    } catch (NumberFormatException ex) {
+//                        throw Error.error(ErrorCode.X_42563);
+//                    }
+//                    read();
+//                    upperBound = readBigint();
+//                } else if (token.tokenType == Tokens.RIGHTBRACKET) {
+//                    // currToken is a final lonely dimension name
+//                    dimensionName = currToken.tokenString;
+//                }
+//
+//                if (dimensionName == null) {
+//                    dimensionName = MDADimensionType.getDefaultName(dimension);
+//                }
+//
+//                domain.addDimension(new MDADimensionType(dimensionName, lowerBound, upperBound));
+//            }
+//        } else {
+//            domain.addDimension(new MDADimensionType());
+//        }
+//    }
 
     /**
      * Read MDARRAY creation expression.
      */
-    Expression readMDArray(int type) {
+    Expression readMDArrayConstructor(int type) {
 
         read();
         
-        Set<ExpressionDimensionLiteralMDA> dimensionsTmp = new HashSet<ExpressionDimensionLiteralMDA>();
+        Set<ExpressionIndexMDA> dimensionsTmp = new HashSet<ExpressionIndexMDA>();
+        readThis(Tokens.LEFTBRACKET);
         final Expression domain = XreadMDArrayDimensionListOrNull(dimensionsTmp);
         if (domain == null || domain.nodes.length == 0) {
             throw unexpectedToken();
@@ -6907,31 +6872,39 @@ public class ParserDQL extends ParserBase {
     /**
      * @TODO
      */
-    public Expression XreadMDArrayVariableOrNull() {
-        ExpressionDimensionLiteralMDA dimensionToken = null;
-        for (ExpressionDimensionLiteralMDA dimension : dimensions) {
-            if (dimension.getName().equals(token.tokenString)) {
+    public ExpressionValueVariableMDA XreadMDArrayVariableOrNull(String name) {
+        ExpressionValueVariableMDA ret = null;
+        
+        ExpressionIndexMDA dimensionToken = null;
+        for (ExpressionIndexMDA dimension : dimensions) {
+            if (dimension.getNameString().equals(name)) {
                 dimensionToken = dimension;
                 break;
             }
         }
-        if (dimensionToken == null)
-            return null;
         
-        final int index = dimensionToken.getIndex();
-        read();
-        return new ExpressionValueVariableMDA(index);
+        if (dimensionToken != null) {
+            final int index = dimensionToken.getIndex();
+            read();
+            ret = new ExpressionValueVariableMDA(index);
+        }
+        return ret;
     }
 
     /**
      * Reads a list of dimensions for the array constructor.
      */
-    private Expression XreadMDArrayDimensionListOrNull(Set<ExpressionDimensionLiteralMDA> dimensions) {
-        readThis(Tokens.LEFTBRACKET);
+    private ExpressionElementListMDA XreadMDArrayDimensionListOrNull(Set<ExpressionIndexMDA> dimensions) {
+        return XreadMDArrayDimensionListOrNull(dimensions, false);
+    }
 
+    /**
+     * Reads a list of dimensions for the array constructor.
+     */
+    private ExpressionElementListMDA XreadMDArrayDimensionListOrNull(Set<ExpressionIndexMDA> dimensions, boolean subset) {
         final HsqlArrayList dimensionList = new HsqlArrayList();
 
-        for (int i = 0; ; i++) {
+        for (int dimensionIndex = 0; ; dimensionIndex++) {
 
             if (token.tokenType == Tokens.RIGHTBRACKET) {
                 read();
@@ -6939,9 +6912,9 @@ public class ParserDQL extends ParserBase {
             }
 
             HsqlNameManager.SimpleName dimensionName = null;
-            Expression range = null;
+            ExpressionIndexMDA range = null;
 
-            if (i > 0) {
+            if (dimensionIndex > 0) {
                 readThis(Tokens.COMMA);
             }
 
@@ -6956,11 +6929,17 @@ public class ParserDQL extends ParserBase {
                 read();
                 range = XreadMDArrayIndexRangeExpression();
                 readThis(Tokens.CLOSEBRACKET);
-            } else if (token.tokenType == Tokens.COMMA) {
-                // currToken is dimension name, no lower/upper bounds
-                dimensionName = HsqlNameManager.getSimpleName(currToken.tokenString,
-                        isDelimitedIdentifier());
-                range = new ExpressionIndexMDA();
+            } else if (token.tokenType == Tokens.COMMA || token.tokenType == Tokens.RIGHTBRACKET) {
+                if (subset) {
+                    // it's a slice
+                    rewind(position);
+                    range = XreadMDArrayIndexRangeExpression();
+                } else {
+                    // currToken is dimension name, no lower/upper bounds
+                    dimensionName = HsqlNameManager.getSimpleName(currToken.tokenString,
+                            isDelimitedIdentifier());
+                    range = new ExpressionIndexMDA();
+                }
             } else if (currToken.tokenType == Tokens.MINUS) {
                 // no dimension, but the lower dimension bound is negative
                 rewind(position);
@@ -6969,26 +6948,30 @@ public class ParserDQL extends ParserBase {
                 // currToken is lower dimension bound
                 rewind(position);
                 range = XreadMDArrayIndexRangeExpression();
-            } else if (token.tokenType == Tokens.RIGHTBRACKET) {
-                // currToken is a final lonely dimension name
-                dimensionName = HsqlNameManager.getSimpleName(currToken.tokenString,
-                        isDelimitedIdentifier());
-                range = new ExpressionIndexMDA();
             }
 
             if (dimensionName == null) {
-                dimensionName = HsqlNameManager.getSimpleName(MDADimension.getDefaultName(i),
+                dimensionName = HsqlNameManager.getSimpleName(
+                        MDADimensionType.getDefaultName(dimensionIndex),
                         isDelimitedIdentifier());
             }
-
-            final ExpressionDimensionLiteralMDA dimension = new ExpressionDimensionLiteralMDA(dimensionName, i, range);
-            dimensionList.add(dimension);
-            dimensions.add(dimension);
+            
+            if (range == null) {
+                range = new ExpressionIndexMDA();
+            }
+            range.setName(dimensionName);
+            range.setIndex(dimensionIndex);
+            
+            dimensionList.add(range);
+            if (dimensions != null) {
+                dimensions.add(range);
+            }
         }
 
-        final Expression[] dims = new Expression[dimensionList.size()];
-        dimensionList.toArray(dims);
-        return new ExpressionElementListMDA(OpTypes.ARRAY_DIMENSION_LIST, dims);
+        final Expression[] dimsArray = new Expression[dimensionList.size()];
+        dimensionList.toArray(dimsArray);
+        int opType = subset ? OpTypes.ARRAY_SUBSET_RANGE : OpTypes.ARRAY_DOMAIN_DEFINITION;
+        return new ExpressionElementListMDA(opType, dimsArray);
     }
 
     /**
@@ -7024,7 +7007,7 @@ public class ParserDQL extends ParserBase {
 
             list.toArray(array);
 
-            e = new ExpressionElementListMDA(OpTypes.ARRAY_ELEMENT_LIST, array);
+            e = new ExpressionElementListMDA(OpTypes.ARRAY_LITERAL, array);
         } else {
             e = XreadNumericValueExpression();
         }
@@ -7052,8 +7035,9 @@ public class ParserDQL extends ParserBase {
 
         readThis(Tokens.OVER);
 
-        Set<ExpressionDimensionLiteralMDA> dimensionsTmp = new HashSet<ExpressionDimensionLiteralMDA>();
-        Expression dimensions = XreadMDArrayDimensionListOrNull(dimensionsTmp);
+        Set<ExpressionIndexMDA> dimensionsTmp = new HashSet<ExpressionIndexMDA>();
+        readThis(Tokens.LEFTBRACKET);
+        Expression dimensionsList = XreadMDArrayDimensionListOrNull(dimensionsTmp);
 
         readThis(Tokens.USING);
 
@@ -7061,6 +7045,90 @@ public class ParserDQL extends ParserBase {
         Expression e = XreadNumericValueExpression();
         this.dimensions.removeAll(dimensionsTmp);
 
-        return new ExpressionAggregateMDA(type, dimensions, e);
+        return new ExpressionAggregateMDA(type, dimensionsList, e);
+    }
+
+    /**
+     * Reads an array subset expressions, e.g. 0:2,1:*,..
+     */
+    Expression XreadMDArraySubsetExpression() {
+        List<ExpressionIndexMDA> subsetList = new ArrayList<ExpressionIndexMDA>();
+        
+        ExpressionIndexMDA e = XreadMDArrayIndexDimensionRangeExpression();
+        subsetList.add(e);
+
+        while (token.tokenType == Tokens.COMMA) {
+            read();
+
+            e = XreadMDArrayIndexDimensionRangeExpression();
+            subsetList.add(e);
+        }
+        
+        final Expression[] subsetArray = new Expression[subsetList.size()];
+        subsetList.toArray(subsetArray);
+        return new ExpressionElementListMDA(OpTypes.ARRAY_SUBSET_RANGE, subsetArray);
+    }
+
+    /**
+     * Reads an array range expression of format numberExp[:numberExp]
+     */
+    ExpressionIndexMDA XreadMDArrayIndexDimensionRangeExpression() {
+        ExpressionIndexMDA e = null;
+        
+        int position = getPosition();
+        read();
+        int tokenType = token.tokenType;
+        rewind(position);
+        
+        if (tokenType == Tokens.OPENBRACKET) {
+            HsqlNameManager.SimpleName dimensionName = HsqlNameManager.getSimpleName(
+                    token.tokenString, isDelimitedIdentifier());
+            read();
+            readThis(Tokens.OPENBRACKET);
+            e = XreadMDArrayIndexRangeExpression();
+            readThis(Tokens.CLOSEBRACKET);
+            e.setName(dimensionName);
+        } else {
+            e = XreadMDArrayIndexRangeExpression();
+        }
+        
+        return e;
+    }
+
+    /**
+     * Reads an array range expression of format numberExp[:numberExp]
+     */
+    ExpressionIndexMDA XreadMDArrayIndexRangeExpression() {
+        Expression e = XreadMDArrayIndexRangeAsteriskOrNumerical();
+        ExpressionIndexMDA ret = null;
+        
+        if (token.tokenType == Tokens.COLON) {
+            read();
+
+            Expression left = e;
+            e = XreadMDArrayIndexRangeAsteriskOrNumerical();
+            ret = new ExpressionIndexMDA(left, e);
+        } else {
+            ret = new ExpressionIndexMDA(e);
+        }
+        
+        return ret;
+    }
+
+    /**
+     * Reads an array index expression, which can be an '*' or a numeric expression.
+     */
+    Expression XreadMDArrayIndexRangeAsteriskOrNumerical() {
+        
+        final Expression e;
+        
+        if (token.tokenType == Tokens.ASTERISK) {
+            readThis(Tokens.ASTERISK);
+            e = new ExpressionIndexUnboundedMDA();
+        } else {
+            e = XreadNumericValueExpression();
+        }
+        
+        return e;
     }
 }

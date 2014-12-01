@@ -314,4 +314,9 @@ public class Token {
 
         return array;
     }
+
+    @Override
+    public String toString() {
+        return tokenString;
+    }
 }

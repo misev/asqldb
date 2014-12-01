@@ -121,16 +121,14 @@ public interface OpTypes {
         USER_AGGREGATE       = 98,
         ARRAY_ACCESS         = 99,
         ARRAY_SUBQUERY       = 100,
-        ARRAY_INDEX_LIST          = 200,   // MDARRAY operations
-        ARRAY_ELEMENT_LIST        = 201,
-        ARRAY_RANGE               = 202,
-        ARRAY_RANGE_ASTERISK      = 203,
-        ARRAY_DIMENSION           = 204,
-        ARRAY_DIMENSION_LIST      = 205,
-        ARRAY_DIMENSION_SDOM      = 206,
-        ARRAY_CONSTRUCTOR_LITERAL = 207,
-        ARRAY_CONSTRUCTOR_VALUE   = 208,
-        ARRAY_VALUE_VARIABLE      = 209,
-        MDARRAY                   = 210
+        MDARRAY                   = 200,
+        ARRAY_SUBSET_SLICE        = 201,   // MDARRAY operations
+        ARRAY_SUBSET_RANGE        = 202,
+        ARRAY_SUBSET_ASTERISK     = 203,
+        ARRAY_DOMAIN_DEFINITION   = 204,
+        ARRAY_CONSTRUCTOR_LITERAL = 205,
+        ARRAY_LITERAL             = 206,
+        ARRAY_CONSTRUCTOR_VALUE   = 207,
+        ARRAY_VALUE_VARIABLE      = 208
     ;
 }

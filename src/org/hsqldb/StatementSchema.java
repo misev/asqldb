@@ -40,11 +40,12 @@ import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.navigator.RowIterator;
 import org.asqldb.ras.RasUtil;
+import org.asqldb.types.MDADomainType;
 import org.hsqldb.result.Result;
 import org.hsqldb.rights.Grantee;
 import org.hsqldb.rights.GranteeManager;
 import org.hsqldb.rights.Right;
-import org.asqldb.types.MDArrayType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.types.Charset;
 import org.hsqldb.types.Collation;
 import org.hsqldb.types.Type;
@@ -1202,7 +1203,7 @@ public class StatementSchema extends Statement {
                     for (int i = 0; i < table.columnCount; i++) {
                         ColumnSchema column = table.getColumn(i);
                         Type dataType = column.getDataType();
-                        if (dataType instanceof MDArrayType) {
+                        if (dataType instanceof MDAType) {
                             String rasqlCreateStatement = null;
                             try {
                                 rasqlCreateStatement = column.getRasqlCreateStatement();

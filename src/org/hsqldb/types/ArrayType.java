@@ -55,8 +55,8 @@ public class ArrayType extends Type {
 
     public static final int defaultArrayCardinality      = 1024;
     public static final int defaultLargeArrayCardinality = Integer.MAX_VALUE;
-    final Type              dataType;
-    final int               maxCardinality;
+    protected Type              dataType;
+    protected int               maxCardinality;
 
     public ArrayType(Type dataType, int cardinality) {
 

@@ -254,4 +254,18 @@ public class SelectTest extends BaseTest {
         assertEquals(22, d[2]);
     }
     
+    @Test
+    public void testSubsetDimensionNames() throws SQLException {
+        Integer res = (Integer) executeQuerySingleResult(
+                "select a[x(100),y(100)] from RASTEST2");
+        assertEquals(163, res.intValue());
+    }
+    
+    @Test
+    public void testSubsetDimensionName() throws SQLException {
+        Double res = (Double) executeQuerySingleResult(
+                "select avg_cells(a[y(100)]) from RASTEST2");
+        assertEquals(163, res.intValue());
+    }
+    
 }

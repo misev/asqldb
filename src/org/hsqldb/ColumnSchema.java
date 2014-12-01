@@ -38,7 +38,7 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.Iterator;
 import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.rights.Grantee;
-import org.asqldb.types.MDArrayType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
@@ -77,7 +77,7 @@ public final class ColumnSchema extends ColumnBase implements SchemaObject {
         this.isPrimaryKey      = isPrimaryKey;
         this.defaultExpression = defaultExpression;
 
-        if (type instanceof MDArrayType) {
+        if (type instanceof MDAType) {
             rasdamanCollectionName = name.getSchemaQualifiedStatementName();
             rasdamanCollectionName = rasdamanCollectionName.replace('.', '_');
         }
@@ -90,8 +90,8 @@ public final class ColumnSchema extends ColumnBase implements SchemaObject {
     
     public String getRasqlCreateStatement() {
         String ret = null;
-        if (dataType instanceof MDArrayType) {
-            String rasqlCollectionType = ((MDArrayType)dataType).getRasqlCollectionType();
+        if (dataType instanceof MDAType) {
+            String rasqlCollectionType = ((MDAType)dataType).getRasqlCollectionType();
             ret = "create collection " + rasdamanCollectionName + " " + rasqlCollectionType;
         } else {
             throw new RuntimeException("Not an array column.");

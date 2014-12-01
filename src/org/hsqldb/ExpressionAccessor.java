@@ -32,6 +32,7 @@
 package org.hsqldb;
 
 import org.asqldb.ExpressionAccessorMDA;
+import org.asqldb.ExpressionElementListMDA;
 import org.asqldb.ExpressionIndexMDA;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -68,7 +69,8 @@ public class ExpressionAccessor extends Expression {
      * @return ExpressionAccessor (or ExpressionAccessorMDA for rasdaman arrays)
      */
     static ExpressionAccessor forExpression(Expression left, Expression right) {
-        if (left.isExpressionMDA() || right instanceof ExpressionIndexMDA)
+        if (left.isExpressionMDA() || right instanceof ExpressionIndexMDA ||
+                right instanceof ExpressionElementListMDA)
             return new ExpressionAccessorMDA(left, right);
         return new ExpressionAccessor(left, right);
     }

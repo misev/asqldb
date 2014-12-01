@@ -37,7 +37,6 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.IntValueHashMap;
 import org.hsqldb.lib.OrderedIntHashSet;
 import org.hsqldb.map.ValuePool;
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.BinaryData;
 import org.hsqldb.types.BinaryType;
@@ -50,8 +49,6 @@ import org.hsqldb.types.NumberType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
-import java.util.Set;
-import org.asqldb.ras.RasArrayIdSet;
 
 /**
  * Implementation of SQL standard function calls

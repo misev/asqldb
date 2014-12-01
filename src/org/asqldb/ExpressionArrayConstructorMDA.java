@@ -31,9 +31,12 @@ import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import org.asqldb.ras.RasArrayIdSet;
+import org.asqldb.types.MDADomainType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
+import org.hsqldb.types.ArrayType;
 
 /**
  * @author Johannes Bachhuber
@@ -49,8 +52,8 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
         nodes[LEFT] = domain;
         nodes[RIGHT] = values;
 
-        if (domain.opType != OpTypes.ARRAY_DIMENSION_LIST) {
-            throw new IllegalArgumentException("Left operands must be of OpType ARRAY_DIMENSION_LIST");
+        if (domain.opType != OpTypes.ARRAY_DOMAIN_DEFINITION) {
+            throw new IllegalArgumentException("Left operands must be of OpType ARRAY_DOMAIN_DEFINITION");
         }
 
         switch (opType) {
@@ -66,12 +69,15 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
+        resolveChildrenTypes(session);
+        
+        MDADomainType domainType = (MDADomainType) nodes[LEFT].getDataType();
+        Type cellType = nodes[RIGHT].getDataType();
+        if (opType == OpTypes.ARRAY_CONSTRUCTOR_LITERAL) {
+            ArrayType at = (ArrayType) cellType;
+            cellType = ((ArrayType) cellType).collectionBaseType();
         }
-        dataType = Type.SQL_MDARRAY_ALL_TYPES;
+        dataType = new MDAType(cellType, domainType);
     }
 
     @Override
@@ -121,17 +127,17 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 
                 insertQuery += "MARRAY x IN [";
                 for (int i = 0; i < dims.length; i++) {
-                    ExpressionDimensionLiteralMDA dim = (ExpressionDimensionLiteralMDA) dims[i];
+                    ExpressionIndexMDA dim = (ExpressionIndexMDA) dims[i];
                     
                     // append range
-                    final String range = dim.getNodes()[0].getValue(session, false).toString();
+                    final String range = dim.getValue(session, false).toString();
                     insertQuery += range;
                     if (i < dims.length - 1) {
                         insertQuery += ", ";
                     }
                     
                     // replace dimension name references with rasql equivalents in the values clause
-                    final String name = dim.getName();
+                    final String name = dim.getNameString();
                     final String replName = "x[" + i + "]";
                     right = right.replaceAll(name, replName);
                 }

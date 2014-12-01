@@ -26,45 +26,37 @@
 
 package org.asqldb;
 
-import org.asqldb.ras.RasUtil;
+import org.hsqldb.Expression;
+import org.hsqldb.OpTypes;
+import org.hsqldb.Session;
 import org.hsqldb.types.Type;
 
-import org.hsqldb.Expression;
-import org.hsqldb.Session;
-import org.hsqldb.Tokens;
-
 /**
+ * Represent infinite dimension bound.
+ * 
  * @author Johannes Bachhuber
  * @author Dimitar Misev
  */
-public class ExpressionAggregateMDA extends Expression implements ExpressionMDA {
+public class ExpressionIndexUnboundedMDA extends Expression implements ExpressionMDA {
 
-    public ExpressionAggregateMDA(final int type, final Expression left, final Expression right) {
-        super(type);
-        nodes = new Expression[BINARY];
-        nodes[LEFT] = left;
-        nodes[RIGHT] = right;
+    /**
+     * Subset of the form: *:*
+     */
+    public ExpressionIndexUnboundedMDA() {
+        super(OpTypes.ARRAY_SUBSET_ASTERISK);
     }
 
     @Override
-    public void resolveTypes(final Session session, final Expression parent) {
-        resolveChildrenTypes(session);
-        
+    public void resolveTypes(Session session, Expression parent) {
         dataType = Type.SQL_VARCHAR;
     }
 
+    /**
+     * @TODO: implement proper translation to rasql of named subsets
+     */
     @Override
-    public Object getValue(final Session session, final boolean isMDARootNode) {
-        if (nodes != null && nodes.length > 1) {
-            final String condense = String.format("CONDENSE %s OVER x in %s USING %s",
-                    Tokens.getKeyword(opType), nodes[LEFT].getValue(session, false),
-                    nodes[RIGHT].getValue(session, false));
-
-            if (isMDARootNode) {
-                return RasUtil.executeHsqlArrayQuery(condense, getRasArrayIds(session));
-            }
-            return condense;
-        }
-        return null;
+    public Object getValue(Session session, boolean isMDARootNode) {
+        return "*";
     }
+    
 }

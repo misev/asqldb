@@ -104,11 +104,8 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
 
     @Override
     public void resolveTypes(Session session, Expression parent) {
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
-        }
+        resolveChildrenTypes(session);
+        
         if (nodes.length > 1) {
             if (!nodes[LEFT].isExpressionMDA() && !nodes[RIGHT].isExpressionMDA()) {
                 super.resolveTypes(session, parent);

@@ -26,99 +26,131 @@
 
 package org.asqldb;
 
-import org.hsqldb.error.ErrorCode;
+import java.util.Objects;
+import org.asqldb.types.MDADimensionType;
 import org.hsqldb.Expression;
+import org.hsqldb.HsqlNameManager;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
-import org.hsqldb.types.Type;
 
 /**
  * @author Johannes Bachhuber
  * @author Dimitar Misev
  */
 public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
+    
+    private HsqlNameManager.SimpleName name = null;
+    private int index = -1;
 
-    public ExpressionIndexMDA(int type) {
-        super(type);
-        switch (opType) {
-            case OpTypes.ARRAY_RANGE_ASTERISK:
-                break;
-            default:
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
-        }
+    /**
+     * Subset of the form: *:*
+     */
+    public ExpressionIndexMDA() {
+        super(OpTypes.ARRAY_SUBSET_RANGE);
+        nodes = new Expression[BINARY];
+        nodes[LEFT] = new ExpressionIndexUnboundedMDA();
+        nodes[RIGHT] = new ExpressionIndexUnboundedMDA();
     }
 
-    public ExpressionIndexMDA(int type, Expression left, Expression right) {
-        super(type);
+    /**
+     * Slice on a named dimension, of the form dim(slice)
+     */
+    public ExpressionIndexMDA(Expression slice) {
+        super(OpTypes.ARRAY_SUBSET_SLICE);
+        nodes = new Expression[UNARY];
+        nodes[LEFT] = slice;
+    }
+
+    /**
+     * Subset on a named dimension, of the form dim(left:right)
+     */
+    public ExpressionIndexMDA(Expression left, Expression right) {
+        super(OpTypes.ARRAY_SUBSET_RANGE);
         nodes = new Expression[BINARY];
         nodes[LEFT] = left;
         nodes[RIGHT] = right;
-
-        switch (opType) {
-
-            case OpTypes.ARRAY_INDEX_LIST:
-            case OpTypes.ARRAY_RANGE:
-                break;
-
-            default:
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
-        }
     }
 
-    public ExpressionIndexMDA(int type, Expression left) {
-        super(type);
-        nodes = new Expression[UNARY];
-        nodes[LEFT] = left;
-
-        switch (opType) {
-
-            case OpTypes.ARRAY_INDEX_LIST:
-            case OpTypes.ARRAY_RANGE:
-                break;
-
-            default:
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionIndexMDA");
-        }
+    public int getIndex() {
+        return index;
     }
 
-    public ExpressionIndexMDA() {
-        super(OpTypes.ARRAY_RANGE);
-        nodes = new Expression[BINARY];
-        nodes[LEFT] = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
-        nodes[RIGHT] = new ExpressionIndexMDA(OpTypes.ARRAY_RANGE_ASTERISK);
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public HsqlNameManager.SimpleName getName() {
+        if (name == null && index != -1) {
+            name = HsqlNameManager.getSimpleName(
+                    MDADimensionType.getDefaultName(index), true);
+        }
+        return name;
+    }
+
+    public void setName(HsqlNameManager.SimpleName name) {
+        this.name = name;
+    }
+
+    public String getNameString() {
+        HsqlNameManager.SimpleName myname = getName();
+        if (myname != null) {
+            return myname.name;
+        } else {
+            return "";
+        }
     }
 
     @Override
     public void resolveTypes(Session session, Expression parent) {
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
+        resolveChildrenTypes(session);
+        
+        String valueLeft = nodes[LEFT].getValue(session, false).toString();
+        if (nodes.length == 1) {
+            dataType = new MDADimensionType(getNameString(), valueLeft);
+        } else {
+            String valueRight = nodes[RIGHT].getValue(session, false).toString();
+            dataType = new MDADimensionType(getNameString(), valueLeft, valueRight);
         }
-        dataType = Type.SQL_VARCHAR;
+    }
+
+    /**
+     * @TODO: implement proper translation to rasql of named subsets
+     */
+    @Override
+    public Object getValue(Session session, boolean isMDARootNode) {
+        if (nodes.length == 1) {
+            return nodes[LEFT].getValue(session, false);
+        } else {
+            return nodes[LEFT].getValue(session, false) + ":" + 
+                    nodes[RIGHT].getValue(session, false);
+        }
     }
 
     @Override
-    public Object getValue(Session session, boolean isMDARootNode) {
-
-        if (nodes.length == 1) {
-            switch (opType) {
-                case OpTypes.ARRAY_RANGE_ASTERISK:
-                    return "*";
-                case OpTypes.ARRAY_RANGE:
-                case OpTypes.ARRAY_INDEX_LIST:
-                    return nodes[LEFT].getValue(session, false);
-            }
-        } else {
-            switch (opType) {
-                case OpTypes.ARRAY_RANGE_ASTERISK:
-                    return "*";
-                case OpTypes.ARRAY_RANGE:
-                    return nodes[LEFT].getValue(session, false) + ":" + nodes[RIGHT].getValue(session, false);
-                case OpTypes.ARRAY_INDEX_LIST:
-                    return nodes[LEFT].getValue(session, false) + "," + nodes[RIGHT].getValue(session, false);
-            }
-        }
-        return null;
+    public int hashCode() {
+        int hash = 3;
+        hash = 53 * hash + Objects.hashCode(this.name.name);
+        hash = 53 * hash + this.index;
+        return hash;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ExpressionIndexMDA other = (ExpressionIndexMDA) obj;
+        if (!Objects.equals(this.name.name, other.name.name)) {
+            return false;
+        }
+        if (this.index != other.index) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

@@ -25,19 +25,13 @@
  */
 package org.asqldb;
 
-import java.io.IOException;
-import java.io.InputStream;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.FrameworkLogger;
 import org.hsqldb.lib.IntKeyIntValueHashMap;
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.asqldb.ras.RasArrayIdSet;
 import org.hsqldb.Expression;
 import org.hsqldb.FunctionSQL;
@@ -175,12 +169,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     @Override
     public void resolveTypes(Session session, Expression parent) {
-
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
-        }
+        resolveChildrenTypes(session);
 
         switch (funcType) {
             case FUNC_MDA_SDOM:

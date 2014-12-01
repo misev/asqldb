@@ -28,6 +28,8 @@ package org.asqldb.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hsqldb.types.ArrayType;
+import org.hsqldb.types.Type;
 
 /**
  * Class for MDARRAY domain representation. The domain is simply a list
@@ -47,22 +49,24 @@ import java.util.List;
  *  
  * @author Dimitar Misev
  */
-public class MDADomain {
+public class MDADomainType extends ArrayType {
+    
+    public static final int MAX_DIMENSIONALITY = 1000;
 
-    private final List<MDADimension> dimensions;
-    private long cardinality;
+    private final List<MDADimensionType> dimensions;
+    private int cardinality = 0;
 
-    public MDADomain() {
-        this.dimensions = new ArrayList<>();
-        cardinality = 0;
+    public MDADomainType() {
+        super(Type.SQL_MDADIMENSION_TYPE, MAX_DIMENSIONALITY);
+        dimensions = new ArrayList<MDADimensionType>();
     }
     
-    public void addDimension(MDADimension dimension) {
-        this.dimensions.add(dimension);
-        cardinality += dimension.getExtent();
+    public void addDimension(MDADimensionType dimension) {
+        dimensions.add(dimension);
+        cardinality *= dimension.getExtent();
     }
     
-    public MDADimension getDimension(int index) {
+    public MDADimensionType getDimension(int index) {
         if (index >= getDimensionality()) {
             throw new IllegalArgumentException("Tried to access dimension " +
                     index + " in a " + getDimensionality() + "-D array.");
@@ -70,9 +74,9 @@ public class MDADomain {
         return dimensions.get(index);
     }
     
-    public MDADimension getDimension(String name) {
-        for (MDADimension dimension : dimensions) {
-            if (dimension.getName().equals(name)) {
+    public MDADimensionType getDimension(String name) {
+        for (MDADimensionType dimension : dimensions) {
+            if (dimension.getDimensionName().equals(name)) {
                 return dimension;
             }
         }
@@ -82,15 +86,15 @@ public class MDADomain {
     public int getDimensionality() {
         return dimensions.size();
     }
-    
-    public long getCardinality() {
+
+    public int getCardinality() {
         return cardinality;
     }
 
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder("");
-        for (MDADimension dimension : dimensions) {
+        for (MDADimensionType dimension : dimensions) {
             if (res.length() > 0) {
                 res.append(",");
             }

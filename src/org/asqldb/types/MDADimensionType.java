@@ -26,6 +26,9 @@
 
 package org.asqldb.types;
 
+import org.hsqldb.types.RowType;
+import org.hsqldb.types.Type;
+
 /**
  * Class for array dimension representation. Each dimension has a name,
  * upper and lower bounds. The lower and/or upper bounds can be unbounded.<p>
@@ -45,68 +48,98 @@ package org.asqldb.types;
  *
  * @author Dimitar Misev
  */
-public class MDADimension {
+public class MDADimensionType extends RowType {
     
     public static final String DEFAULT_DIMENSION_PREFIX = "d";
-    public static final Long LOWER_UNBOUNDED = Long.MIN_VALUE;
-    public static final Long UPPER_UNBOUNDED = Long.MAX_VALUE;
+    public static final String UNBOUNDED = "*";
 
     private final String name;
-    private final long lowerBound;
-    private final long upperBound;
+    private final String lowerBound;
+    private final String upperBound;
+    private final boolean slice;
     
-    public MDADimension() {
+    public MDADimensionType() {
         this(0);
     }
     
-    public MDADimension(int dimensionIndex) {
-        this(MDADimension.getDefaultName(dimensionIndex));
+    public MDADimensionType(int dimensionIndex) {
+        this(MDADimensionType.getDefaultName(dimensionIndex));
     }
 
-    public MDADimension(String name) {
-        this(name, LOWER_UNBOUNDED, UPPER_UNBOUNDED);
+    public MDADimensionType(String name) {
+        this(name, UNBOUNDED, UNBOUNDED);
     }
 
-    public MDADimension(String name, long lowerBound, long upperBound) {
+    public MDADimensionType(int dimensionIndex, String lowerBound, String upperBound) {
+        this(MDADimensionType.getDefaultName(dimensionIndex), lowerBound, upperBound);
+    }
+
+    public MDADimensionType(String name, String lowerBound, String upperBound) {
+        super(new Type[] {Type.SQL_VARCHAR, Type.SQL_VARCHAR, Type.SQL_VARCHAR});
         this.name = name;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+        this.slice = false;
     }
 
-    public MDADimension(int dimensionIndex, long lowerBound, long upperBound) {
-        this(MDADimension.getDefaultName(dimensionIndex), lowerBound, upperBound);
+    public MDADimensionType(int dimensionIndex, String lowerBound) {
+        this(MDADimensionType.getDefaultName(dimensionIndex), lowerBound);
     }
 
-    public String getName() {
-        return name;
+    public MDADimensionType(String name, String lowerBound) {
+        super(new Type[] {Type.SQL_VARCHAR, Type.SQL_VARCHAR});
+        this.name = name;
+        this.lowerBound = lowerBound;
+        this.upperBound = null;
+        this.slice = true;
     }
     
     public static String getDefaultName(int dimensionIndex) {
         return DEFAULT_DIMENSION_PREFIX + dimensionIndex;
     }
 
-    public long getLowerBound() {
+    public String getDimensionName() {
+        return name;
+    }
+
+    public String getLowerBound() {
         return lowerBound;
     }
 
-    public long getUpperBound() {
+    public String getSlice() {
+        return lowerBound;
+    }
+
+    public String getUpperBound() {
         return upperBound;
     }
     
     public long getExtent() {
-        return upperBound - lowerBound + 1;
+        try {
+            return Long.parseLong(upperBound) - Long.parseLong(lowerBound) + 1;
+        } catch (Exception ex) {
+            return 0;
+        }
     }
     
     public boolean isLowerUnbounded() {
-        return lowerBound == LOWER_UNBOUNDED;
+        return lowerBound.equals(UNBOUNDED);
     }
     
     public boolean isUpperUnbounded() {
-        return upperBound == UPPER_UNBOUNDED;
+        return upperBound.equals(UNBOUNDED);
+    }
+
+    public boolean isSlice() {
+        return slice;
     }
 
     @Override
     public String toString() {
-        return name + "(" + lowerBound + ":" + upperBound + ")";
+        if (slice) {
+            return name + "(" + lowerBound + ")";
+        } else {
+            return name + "(" + lowerBound + ":" + upperBound + ")";
+        }
     }
 }

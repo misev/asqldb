@@ -48,7 +48,6 @@ import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
-import java.util.HashSet;
 import org.asqldb.ras.RasArrayIdSet;
 
 /**
@@ -106,7 +105,7 @@ public class ExpressionColumn extends Expression {
 
     //
     boolean isParam;
-    private boolean arrayColumn = false;
+    boolean arrayColumn = false;
 
     //
 
@@ -457,7 +456,7 @@ public class ExpressionColumn extends Expression {
                     }
                 }
 
-                if (resolved) {
+                if (resolved || isExpressionMDA()) {
                     return unresolvedSet;
                 }
 

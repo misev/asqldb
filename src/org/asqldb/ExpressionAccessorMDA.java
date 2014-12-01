@@ -26,11 +26,9 @@
 
 package org.asqldb;
 
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
-import java.util.Set;
 import org.hsqldb.Expression;
 import org.hsqldb.ExpressionAccessor;
 import org.hsqldb.Session;
@@ -47,11 +45,8 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
-        }
+        resolveChildrenTypes(session);
+        
         dataType = Type.SQL_VARCHAR;
     }
 
@@ -59,7 +54,7 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
     public Object getValue(Session session, boolean isMDARootNode) {
         if (nodes != null && nodes.length > 1) {
             final String index = (nodes[RIGHT] == null) ? "" :
-                    ("[" + nodes[RIGHT].getValue(session, false) + "]");
+                    nodes[RIGHT].getValue(session, false) + "";
             final String colName = nodes[LEFT].getColumnNameString();
 
             if (isMDARootNode) {

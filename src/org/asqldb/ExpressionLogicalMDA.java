@@ -27,11 +27,9 @@
 package org.asqldb;
 
 import org.hsqldb.error.*;
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
-import java.util.Set;
 import org.hsqldb.Expression;
 import org.hsqldb.ExpressionLogical;
 import org.hsqldb.OpTypes;

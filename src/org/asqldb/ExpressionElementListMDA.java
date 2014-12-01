@@ -26,12 +26,16 @@
 
 package org.asqldb;
 
+import org.asqldb.types.MDADimensionType;
+import org.asqldb.types.MDADomainType;
 import org.hsqldb.error.*;
 import org.hsqldb.error.Error;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
 import org.hsqldb.Token;
+import org.hsqldb.types.ArrayType;
+import org.hsqldb.types.Type;
 
 /**
  * @author Johannes Bachhuber
@@ -44,25 +48,37 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
         nodes = expressions;
 
         switch (opType) {
-
-            case OpTypes.ARRAY_DIMENSION_LIST:
-            case OpTypes.ARRAY_DIMENSION_SDOM:
-            case OpTypes.ARRAY_ELEMENT_LIST:
+            case OpTypes.ARRAY_SUBSET_RANGE:
+            case OpTypes.ARRAY_DOMAIN_DEFINITION:
+            case OpTypes.ARRAY_LITERAL:
                 break;
 
             default :
-                throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasIndex");
+                throw org.hsqldb.error.Error.runtimeError(
+                        ErrorCode.U_S0500, "ExpressionElementListMDA");
         }
     }
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        for (Expression node : nodes) {
-            if (node != null) {
-                node.resolveTypes(session, this);
-            }
+        resolveChildrenTypes(session);
+
+        switch (opType) {
+            case OpTypes.ARRAY_SUBSET_RANGE:
+            case OpTypes.ARRAY_DOMAIN_DEFINITION:
+                MDADomainType domainType = new MDADomainType();
+                for (Expression dim : nodes) {
+                    domainType.addDimension((MDADimensionType) dim.getDataType());
+                }
+                dataType = domainType;
+                break;
+            case OpTypes.ARRAY_LITERAL:
+                Type cellType = null;
+                if (nodes.length > 0) {
+                    cellType = nodes[0].getDataType();
+                }
+                dataType = new ArrayType(cellType, nodes.length);
         }
-        //todo: type resolution necessary?
     }
 
     @Override
@@ -72,13 +88,9 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
                     " and can't be the RasRoot.");
         }
 
-        if (opType == OpTypes.ARRAY_DIMENSION_SDOM) {
-            return nodes[0].getValue(session, false);
-        }
-
         final StringBuilder sb = new StringBuilder();
 
-        if (opType == OpTypes.ARRAY_DIMENSION_LIST) {
+        if (opType == OpTypes.ARRAY_DOMAIN_DEFINITION || opType == OpTypes.ARRAY_SUBSET_RANGE) {
             sb.append('[');
         }
 
@@ -90,7 +102,7 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
             }
         }
 
-        if (opType == OpTypes.ARRAY_DIMENSION_LIST) {
+        if (opType == OpTypes.ARRAY_DOMAIN_DEFINITION || opType == OpTypes.ARRAY_SUBSET_RANGE) {
             sb.append(']');
         }
         return sb.toString();
@@ -103,15 +115,13 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
      */
     public boolean isDimensionName(final Token token) {
         switch(opType){
-            case OpTypes.ARRAY_DIMENSION_SDOM:
-                return token.tokenString.matches("(?i)d\\d+");
-            case OpTypes.ARRAY_DIMENSION_LIST:
+            case OpTypes.ARRAY_DOMAIN_DEFINITION:
                 break;
             default:
                 throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (Expression node : nodes) {
-            if (((ExpressionDimensionLiteralMDA) node).getName().equals(token.tokenString)) {
+            if (((ExpressionIndexMDA) node).getNameString().equals(token.tokenString)) {
                 return true;
             }
         }
@@ -125,20 +135,14 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
      */
     public int getIndexForName(final Token token) {
         switch(opType){
-            case OpTypes.ARRAY_DIMENSION_SDOM:
-                if (token.tokenString.matches("(?i)d\\d+")) {
-                    //dX is the shortcut for dimensions when sdom(array) is being used.
-                    //Should  the dimensions not match, rasdaman will throw an error
-                    return Integer.parseInt(token.tokenString.substring(1));
-                }
-            case OpTypes.ARRAY_DIMENSION_LIST:
+            case OpTypes.ARRAY_DOMAIN_DEFINITION:
                 break;
             default:
                 throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
             Expression node = nodes[i];
-            if (((ExpressionDimensionLiteralMDA) node).getName().equals(token.tokenString)) {
+            if (((ExpressionIndexMDA) node).getNameString().equals(token.tokenString)) {
                 return i;
             }
         }

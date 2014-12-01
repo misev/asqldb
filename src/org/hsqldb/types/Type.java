@@ -31,7 +31,8 @@
 
 package org.hsqldb.types;
 
-import org.asqldb.types.MDArrayType;
+import org.asqldb.types.MDADimensionType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.SchemaObject;
@@ -849,12 +850,16 @@ public abstract class Type implements SchemaObject, Cloneable {
     }
 
     //
-    public static final MDArrayType SQL_MDARRAY_ALL_TYPES =
-        new MDArrayType(SQL_ALL_TYPES);
+    public static final MDAType SQL_MDARRAY_ALL_TYPES =
+        new MDAType(SQL_ALL_TYPES);
 
-    public static MDArrayType getDefaultMDArrayType(int type) {
-        return new MDArrayType(getDefaultType(type));
+    public static MDAType getDefaultMDArrayType(int type) {
+        return new MDAType(getDefaultType(type));
     }
+
+    //
+    public static final MDADimensionType SQL_MDADIMENSION_TYPE =
+        new MDADimensionType();
 
     public static Type getDefaultType(int type) {
 

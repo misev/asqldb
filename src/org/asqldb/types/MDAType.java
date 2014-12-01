@@ -52,16 +52,16 @@ import org.hsqldb.types.Types;
  *
  * @author Dimitar Misev
  */
-public class MDArrayType extends Type {
+public class MDAType extends Type {
 
     final Type dataType;
-    final MDADomain domain;
+    final MDADomainType domain;
 
-    public MDArrayType(Type dataType) {
-        this(dataType, new MDADomain());
+    public MDAType(Type dataType) {
+        this(dataType, new MDADomainType());
     }
 
-    public MDArrayType(Type dataType, MDADomain domain) {
+    public MDAType(Type dataType, MDADomainType domain) {
 
         super(Types.SQL_MDARRAY, Types.SQL_MDARRAY, 0, 0);
 
@@ -107,7 +107,7 @@ public class MDArrayType extends Type {
 
     @Override
     public int displaySize() {
-        return 7 + (dataType.displaySize() + 1) * (int) domain.getCardinality();
+        return 7 + (dataType.displaySize() + 1);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class MDArrayType extends Type {
         return 0;
     }
 
-    public MDADomain getDomain() {
+    public MDADomainType getDomain() {
         return domain;
     }
 
@@ -420,10 +420,10 @@ public class MDArrayType extends Type {
             return -1;
         }
 
-        if (domain.getCardinality() >= ((MDArrayType) otherType).domain.getCardinality()) {
-            return dataType.canMoveFrom((MDArrayType) otherType);
+        if (domain.getCardinality() >= ((MDAType) otherType).domain.getCardinality()) {
+            return dataType.canMoveFrom((MDAType) otherType);
         } else {
-            if (dataType.canMoveFrom((MDArrayType) otherType) == -1) {
+            if (dataType.canMoveFrom((MDAType) otherType) == -1) {
                 return -1;
             }
 
@@ -483,21 +483,21 @@ public class MDArrayType extends Type {
         Type otherComponent = other.collectionBaseType();
 
         if (dataType.equals(otherComponent)) {
-            return ((MDArrayType) other).domain.getCardinality() > domain.getCardinality() ? other
+            return ((MDAType) other).domain.getCardinality() > domain.getCardinality() ? other
                     : this;
         }
 
         Type newComponent = dataType.getAggregateType(otherComponent);
-        MDADomain newDomain = ((MDArrayType) other).domain.getCardinality() > domain.getCardinality()
-                ? ((MDArrayType) other).domain
+        MDADomainType newDomain = ((MDAType) other).domain.getCardinality() > domain.getCardinality()
+                ? ((MDAType) other).domain
                 : domain;
 
-        return new MDArrayType(newComponent, newDomain);
+        return new MDAType(newComponent, newDomain);
     }
 
     @Override
     public Type getCombinedType(Session session, Type other, int operation) {
-        MDArrayType type = (MDArrayType) getAggregateType(other);
+        MDAType type = (MDAType) getAggregateType(other);
 
         if (other == null) {
             return type;
@@ -507,7 +507,7 @@ public class MDArrayType extends Type {
             return type;
         }
 
-        return new MDArrayType(dataType);
+        return new MDAType(dataType);
     }
 
     /**
@@ -552,8 +552,8 @@ public class MDArrayType extends Type {
                 return false;
             }
 
-            return domain.getCardinality() == ((MDArrayType) other).domain.getCardinality()
-                    && dataType.equals(((MDArrayType) other).dataType);
+            return domain.getCardinality() == ((MDAType) other).domain.getCardinality()
+                    && dataType.equals(((MDAType) other).dataType);
         }
 
         return false;
@@ -599,5 +599,10 @@ public class MDArrayType extends Type {
         comparator.setType(dataType, sort);
 
         return ArraySort.deDuplicate(array, 0, array.length, comparator);
+    }
+
+    @Override
+    public String toString() {
+        return dataType.getDefinition() + " MDARRAY " + domain;
     }
 }

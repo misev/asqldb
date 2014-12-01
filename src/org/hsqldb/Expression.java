@@ -53,7 +53,7 @@ import org.hsqldb.result.Result;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.CharacterType;
 import org.hsqldb.types.Collation;
-import org.asqldb.types.MDArrayType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.types.NullType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
@@ -1192,6 +1192,15 @@ public class Expression implements Cloneable {
 
         return unresolvedSet;
     }
+    
+    protected void resolveChildrenTypes(Session session) {
+
+        for (Expression node : nodes) {
+            if (node != null) {
+                node.resolveTypes(session, this);
+            }
+        }
+    }
 
     public void resolveTypes(Session session, Expression parent) {
 
@@ -1271,7 +1280,7 @@ public class Expression implements Cloneable {
                 }
 
                 // @TODO: definition domain should be also calculated here
-                dataType = new MDArrayType(nodeDataType);
+                dataType = new MDAType(nodeDataType);
 
                 return;
             }
