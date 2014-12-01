@@ -262,10 +262,46 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
-    public void testSubsetDimensionName() throws SQLException {
+    public void testSubsetDimensionName1() throws SQLException {
         Double res = (Double) executeQuerySingleResult(
                 "select avg_cells(a[y(100)]) from RASTEST2");
         assertEquals(81, res.intValue());
+    }
+    
+    @Test
+    public void testSubsetDimensionName2() throws SQLException {
+        Double res = (Double) executeQuerySingleResult(
+                "select avg_cells(a[x(80)]) + avg_cells(a[y(50)]) from RASTEST2");
+        assertEquals(29, res.intValue());
+    }
+    
+    @Test
+    public void testSubsetUnbounded() throws SQLException {
+        Double res = (Double) executeQuerySingleResult(
+                "select avg_cells(a[80,*:*]) + avg_cells(a[0:*,50]) from RASTEST2");
+        assertEquals(29, res.intValue());
+    }
+    
+    @Test
+    public void testSubsetMixedNames() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select avg_cells(a[80,x(*:*)]) + avg_cells(a[y(50),*:*]) from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            System.out.println("Expected exception: " + ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSubsetInvalidDimensionName() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select a[x(100),z(100)] from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            System.out.println("Expected exception: " + ex.getMessage());
+        }
     }
     
 }

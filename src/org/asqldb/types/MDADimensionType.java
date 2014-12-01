@@ -63,15 +63,11 @@ public class MDADimensionType extends RowType {
     }
     
     public MDADimensionType(int dimensionIndex) {
-        this(MDADimensionType.getDefaultName(dimensionIndex));
+        this(null);
     }
 
     public MDADimensionType(String name) {
         this(name, UNBOUNDED, UNBOUNDED);
-    }
-
-    public MDADimensionType(int dimensionIndex, String lowerBound, String upperBound) {
-        this(MDADimensionType.getDefaultName(dimensionIndex), lowerBound, upperBound);
     }
 
     public MDADimensionType(String name, String lowerBound, String upperBound) {
@@ -80,10 +76,6 @@ public class MDADimensionType extends RowType {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.slice = false;
-    }
-
-    public MDADimensionType(int dimensionIndex, String lowerBound) {
-        this(MDADimensionType.getDefaultName(dimensionIndex), lowerBound);
     }
 
     public MDADimensionType(String name, String lowerBound) {
@@ -136,10 +128,16 @@ public class MDADimensionType extends RowType {
 
     @Override
     public String toString() {
-        if (slice) {
-            return name + "(" + lowerBound + ")";
-        } else {
-            return name + "(" + lowerBound + ":" + upperBound + ")";
+        String ret = lowerBound;
+        if (name != null) {
+            ret = name + "(" + ret;
         }
+        if (!slice) {
+            ret += ":" + upperBound;
+        }
+        if (name != null) {
+            ret += ")";
+        }
+        return ret;
     }
 }

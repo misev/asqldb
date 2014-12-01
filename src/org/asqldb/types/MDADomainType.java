@@ -144,11 +144,22 @@ public class MDADomainType extends ArrayType {
     
     public boolean isNamedSubset(MDADomainType parentSubset) {
         boolean ret = true;
+        int count = 0;
         for (MDADimensionType dimension : dimensions) {
+            boolean namedDimension = true;
             if (!parentSubset.hasDimension(dimension.getDimensionName())) {
-                ret = false;
-                break;
+                namedDimension = false;
             }
+            if (dimension.getDimensionName() != null && !namedDimension) {
+                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET,
+                        "Referenced an unknown dimension name: " + dimension.getDimensionName());
+            }
+            if (count > 0 && namedDimension != ret) {
+                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET,
+                        "Invalid mixing of names and positional indexes in " + toString());
+            }
+            ret = ret && namedDimension;
+            ++count;
         }
         return ret;
     }

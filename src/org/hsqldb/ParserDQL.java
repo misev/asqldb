@@ -6807,7 +6807,7 @@ public class ParserDQL extends ParserBase {
         
         ExpressionIndexMDA dimensionToken = null;
         for (ExpressionIndexMDA dimension : dimensions) {
-            if (dimension.getNameString().equals(name)) {
+            if (name.equals(dimension.getNameString())) {
                 dimensionToken = dimension;
                 break;
             }
@@ -6880,7 +6880,7 @@ public class ParserDQL extends ParserBase {
                 range = XreadMDArrayIndexRangeExpression();
             }
 
-            if (dimensionName == null) {
+            if (dimensionName == null && !subset) {
                 dimensionName = HsqlNameManager.getSimpleName(
                         MDADimensionType.getDefaultName(dimensionIndex),
                         isDelimitedIdentifier());

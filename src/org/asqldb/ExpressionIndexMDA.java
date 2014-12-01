@@ -81,10 +81,6 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
     }
 
     public HsqlNameManager.SimpleName getName() {
-        if (name == null && index != -1) {
-            name = HsqlNameManager.getSimpleName(
-                    MDADimensionType.getDefaultName(index), true);
-        }
         return name;
     }
 
@@ -97,7 +93,7 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
         if (myname != null) {
             return myname.name;
         } else {
-            return "";
+            return null;
         }
     }
 

@@ -138,8 +138,10 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                     
                     // replace dimension name references with rasql equivalents in the values clause
                     final String name = dim.getNameString();
-                    final String replName = "x[" + i + "]";
-                    right = right.replaceAll(name, replName);
+                    if (name != null) {
+                        final String replName = "x[" + i + "]";
+                        right = right.replaceAll(name, replName);
+                    }
                 }
                 insertQuery += "] VALUES " + right;
             }
