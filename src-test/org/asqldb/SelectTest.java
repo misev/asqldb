@@ -380,8 +380,8 @@ public class SelectTest extends BaseTest {
     @Test
     public void testHiIndex() throws SQLException {
         Integer hi = (Integer) executeQuerySingleResult(
-                "select hi(a, 1) from RASTEST2");
-        assertEquals(210, hi.intValue());
+                "select hi(a[y(100:110)], 1) from RASTEST2");
+        assertEquals(110, hi.intValue());
     }
     
 }
