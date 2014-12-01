@@ -6800,25 +6800,43 @@ public class ParserDQL extends ParserBase {
     }
 
     /**
-     * @TODO
+     * Read general array aggregation, for example sum of the values 0 - 100:
+     * 
+     * AGGREGATE +
+     * OVER [x(0:100)]
+     * USING x
      */
-    public ExpressionValueVariableMDA XreadMDArrayVariableOrNull(String name) {
-        ExpressionValueVariableMDA ret = null;
-        
-        ExpressionIndexMDA dimensionToken = null;
-        for (ExpressionIndexMDA dimension : dimensions) {
-            if (name.equals(dimension.getNameString())) {
-                dimensionToken = dimension;
+    private Expression readMDArrayAggregate() {
+        read();
+        final int type;
+        switch(token.tokenType) {
+            case Tokens.PLUS:
+            case Tokens.MINUS:
+            case Tokens.ASTERISK:
+            case Tokens.MIN:
+            case Tokens.MAX:
+            case Tokens.OR:
+            case Tokens.AND:
+                type = token.tokenType;
+                read();
                 break;
-            }
+            default:
+                throw Error.error(ErrorCode.MDA_CONDENSER_INVALID_OP, token.tokenString);
         }
-        
-        if (dimensionToken != null) {
-            final int index = dimensionToken.getIndex();
-            read();
-            ret = new ExpressionValueVariableMDA(index);
-        }
-        return ret;
+
+        readThis(Tokens.OVER);
+
+        Set<ExpressionIndexMDA> dimensionsTmp = new HashSet<ExpressionIndexMDA>();
+        readThis(Tokens.LEFTBRACKET);
+        Expression dimensionsList = XreadMDArrayDimensionListOrNull(dimensionsTmp);
+
+        readThis(Tokens.USING);
+
+        this.dimensions.addAll(dimensionsTmp);
+        Expression e = XreadNumericValueExpression();
+        this.dimensions.removeAll(dimensionsTmp);
+
+        return new ExpressionAggregateMDA(type, dimensionsList, e);
     }
 
     /**
@@ -6945,58 +6963,27 @@ public class ParserDQL extends ParserBase {
         return e;
     }
 
-    private Expression readMDArrayAggregate() {
-        read();
-        final int type;
-        switch(token.tokenType) {
-            case Tokens.PLUS:
-            case Tokens.MINUS:
-            case Tokens.ASTERISK:
-            case Tokens.MIN:
-            case Tokens.MAX:
-            case Tokens.OR:
-            case Tokens.AND:
-                type = token.tokenType;
-                read();
-                break;
-            default:
-                throw Error.error(ErrorCode.MDA_CONDENSER_INVALID_OP, token.tokenString);
-        }
-
-        readThis(Tokens.OVER);
-
-        Set<ExpressionIndexMDA> dimensionsTmp = new HashSet<ExpressionIndexMDA>();
-        readThis(Tokens.LEFTBRACKET);
-        Expression dimensionsList = XreadMDArrayDimensionListOrNull(dimensionsTmp);
-
-        readThis(Tokens.USING);
-
-        this.dimensions.addAll(dimensionsTmp);
-        Expression e = XreadNumericValueExpression();
-        this.dimensions.removeAll(dimensionsTmp);
-
-        return new ExpressionAggregateMDA(type, dimensionsList, e);
-    }
-
     /**
-     * Reads an array subset expressions, e.g. 0:2,1:*,..
+     * Reads an iterator reference variable if it is found in the current
+     * marray domain; returns null if not found.
      */
-    Expression XreadMDArraySubsetExpression() {
-        List<ExpressionIndexMDA> subsetList = new ArrayList<ExpressionIndexMDA>();
+    public ExpressionValueVariableMDA XreadMDArrayVariableOrNull(String name) {
+        ExpressionValueVariableMDA ret = null;
         
-        ExpressionIndexMDA e = XreadMDArrayIndexDimensionRangeExpression();
-        subsetList.add(e);
-
-        while (token.tokenType == Tokens.COMMA) {
-            read();
-
-            e = XreadMDArrayIndexDimensionRangeExpression();
-            subsetList.add(e);
+        ExpressionIndexMDA dimensionToken = null;
+        for (ExpressionIndexMDA dimension : dimensions) {
+            if (name.equals(dimension.getNameString())) {
+                dimensionToken = dimension;
+                break;
+            }
         }
         
-        final Expression[] subsetArray = new Expression[subsetList.size()];
-        subsetList.toArray(subsetArray);
-        return new ExpressionElementListMDA(OpTypes.ARRAY_SUBSET_RANGE, subsetArray);
+        if (dimensionToken != null) {
+            final int index = dimensionToken.getIndex();
+            read();
+            ret = new ExpressionValueVariableMDA(index);
+        }
+        return ret;
     }
 
     /**
