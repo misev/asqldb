@@ -239,6 +239,24 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
+    public void testSubset2() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                "select a[+9999:10000] from RASTEST1");
+        double[] d = res.getDoubleArray();
+        assertEquals(2, d.length);
+        assertEquals(0, d[1], 0.01);
+    }
+    
+    @Test
+    public void testSubset3() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                "select a[+9999*1:10000] from RASTEST1");
+        double[] d = res.getDoubleArray();
+        assertEquals(2, d.length);
+        assertEquals(0, d[1], 0.01);
+    }
+    
+    @Test
     public void testSlice() throws SQLException {
         Double res = (Double) executeQuerySingleResult(
                 "select a[-9998] from RASTEST1");
@@ -323,6 +341,28 @@ public class SelectTest extends BaseTest {
             fail();
         } catch (Exception ex) {
             assertEquals("incompatible data type in operation", ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSubsetInvalidIndex3() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select a[0:*:1,21:12] from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            assertEquals("unexpected token: : required: ,", ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSubsetInvalidIndex4() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select a[x(21:12),y(5)] from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            assertEquals("Error executing the rasdaman query: SELE", ex.getMessage().substring(0,40));
         }
     }
     

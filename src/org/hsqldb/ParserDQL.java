@@ -6870,7 +6870,7 @@ public class ParserDQL extends ParserBase {
                             isDelimitedIdentifier());
                     range = new ExpressionIndexMDA();
                 }
-            } else if (currToken.tokenType == Tokens.MINUS) {
+            } else if (currToken.tokenType == Tokens.MINUS || currToken.tokenType == Tokens.PLUS) {
                 // no dimension, but the lower dimension bound is negative
                 rewind(position);
                 range = XreadMDArrayIndexRangeExpression();
