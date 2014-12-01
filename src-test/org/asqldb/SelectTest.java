@@ -409,4 +409,25 @@ public class SelectTest extends BaseTest {
         assertEquals(110, hi.intValue());
     }
     
+    @Test
+    public void testName() throws SQLException {
+        String name = (String) executeQuerySingleResult(
+                "select name(a[y(100:110)], 0) from RASTEST2");
+        assertEquals("X", name);
+    }
+    
+    @Test
+    public void testDimensionality1() throws SQLException {
+        Integer hi = (Integer) executeQuerySingleResult(
+                "select dimensionality(a[y(100)]) from RASTEST2");
+        assertEquals(1, hi.intValue());
+    }
+    
+    @Test
+    public void testDimensionality2() throws SQLException {
+        Integer hi = (Integer) executeQuerySingleResult(
+                "select dimensionality(a[y(100:110)]) from RASTEST2");
+        assertEquals(2, hi.intValue());
+    }
+    
 }

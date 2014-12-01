@@ -298,8 +298,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 return functionCall;
                 
             case FUNC_MDA_NAME:
+                Integer index = (Integer) nodes[RIGHT].getValue(session, false);
+                return getNameForIndex(index);
+                
             case FUNC_MDA_DIMENSION:
-                return null; // @TODO:
+                return getDimensionality();
 
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionMDA");
@@ -523,6 +526,16 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                         "Dimension index not found: " + index);
             }
             ret = dimensionType.getDimensionName();
+        }
+        return ret;
+    }
+    
+    private Integer getDimensionality() {
+        Integer ret = null;
+        Type arrayType = nodes[LEFT].getDataType();
+        if (arrayType.isMDArrayType()) {
+            MDADomainType domainType = ((MDAType) arrayType).getDomain();
+            ret = domainType.getDimensionality();
         }
         return ret;
     }
