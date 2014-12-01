@@ -366,4 +366,22 @@ public class SelectTest extends BaseTest {
         }
     }
     
+    /**
+     * Test probing functions
+     */
+    
+    @Test
+    public void testLoIndex() throws SQLException {
+        Integer lo = (Integer) executeQuerySingleResult(
+                "select lo(a, 0) from RASTEST1");
+        assertEquals(-9999, lo.intValue());
+    }
+    
+    @Test
+    public void testHiIndex() throws SQLException {
+        Integer hi = (Integer) executeQuerySingleResult(
+                "select hi(a, 1) from RASTEST2");
+        assertEquals(210, hi.intValue());
+    }
+    
 }

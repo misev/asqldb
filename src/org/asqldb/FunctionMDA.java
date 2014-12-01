@@ -79,6 +79,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     private static final int FUNC_MDA_DECODE = 250;
     private static final int FUNC_MDA_ENCODE = 251;
+    
+    private static final int FUNC_MDA_LO = 260;
+    private static final int FUNC_MDA_HI = 261;
+    private static final int FUNC_MDA_NAME = 262;
+    private static final int FUNC_MDA_DIMENSION = 263;
 
     static final IntKeyIntValueHashMap mdaFuncMap
             = new IntKeyIntValueHashMap();
@@ -114,6 +119,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         mdaFuncMap.put(Tokens.MDA_DIV, FUNC_MDA_DIV);
         mdaFuncMap.put(Tokens.MDA_DECODE, FUNC_MDA_DECODE);
         mdaFuncMap.put(Tokens.MDA_ENCODE, FUNC_MDA_ENCODE);
+        
+        mdaFuncMap.put(Tokens.MDA_LO, FUNC_MDA_LO);
+        mdaFuncMap.put(Tokens.MDA_HI, FUNC_MDA_HI);
+        mdaFuncMap.put(Tokens.MDA_NAME, FUNC_MDA_NAME);
+        mdaFuncMap.put(Tokens.MDA_DIMENSION, FUNC_MDA_DIMENSION);
     }
 
     protected FunctionMDA(int id) {
@@ -141,6 +151,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_SINH:
             case FUNC_MDA_TANH:
             case FUNC_MDA_DECODE:
+            case FUNC_MDA_DIMENSION:
                 parseList = singleParamList;
                 break;
             case FUNC_MDA_BIT:
@@ -152,6 +163,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_EXTEND:
             case FUNC_MDA_DIV:
             case FUNC_MDA_ENCODE:
+            case FUNC_MDA_LO:
+            case FUNC_MDA_HI:
+            case FUNC_MDA_NAME:
                 parseList = doubleParamList;
                 break;
             default:
@@ -172,17 +186,25 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         resolveChildrenTypes(session);
 
         switch (funcType) {
+            /**
+             * @TODO: sdom should be a proper SQL type, not string.
+             */
             case FUNC_MDA_SDOM:
             case FUNC_MDA_SHIFT:
             case FUNC_MDA_EXTEND:
+            case FUNC_MDA_NAME:
                 dataType = Type.SQL_VARCHAR;
                 break;
             case FUNC_MDA_ADD_CELLS:
             case FUNC_MDA_AVG_CELLS:
-            case FUNC_MDA_COUNT_CELLS:
             case FUNC_MDA_MAX_CELLS:
             case FUNC_MDA_MIN_CELLS:
+                dataType = Type.SQL_DOUBLE;
+            case FUNC_MDA_COUNT_CELLS:
             case FUNC_MDA_DIV:
+            case FUNC_MDA_LO:
+            case FUNC_MDA_HI:
+            case FUNC_MDA_DIMENSION:
                 dataType = Type.SQL_INTEGER;
                 break;
             case FUNC_MDA_ALL_CELLS:
@@ -261,6 +283,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_EXTEND:
             case FUNC_MDA_DIV:
                 return getDoubleParamFunctionValue(session, isMDARootNode);
+            case FUNC_MDA_LO:
+            case FUNC_MDA_HI:
+                return getLoHiValue(session, isMDARootNode);
 
             case FUNC_MDA_SDOM:
                 final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
@@ -268,6 +293,10 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                     return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
                 }
                 return functionCall;
+                
+            case FUNC_MDA_NAME:
+            case FUNC_MDA_DIMENSION:
+                return null; // @TODO:
 
             default:
                 throw Error.runtimeError(ErrorCode.U_S0500, "FunctionMDA");
@@ -394,7 +423,6 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
     }
 
     private Object getDoubleParamFunctionValue(final Session session, boolean isMDARootNode) {
-        boolean isInt = true;
         String function = null;
         switch (funcType) {
             case FUNC_MDA_BIT:
@@ -421,7 +449,6 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_DIV:
                 function = "div";
                 break;
-
         }
         if (function != null) {
             final String functionCall = String.format("%s(%s, %s)", function,
@@ -432,5 +459,38 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             return RasUtil.executeHsqlArrayQuery(functionCall, getRasArrayIds(session));
         }
         throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: " + funcType);
+    }
+    
+    private Object getLoHiValue(final Session session, boolean isMDARootNode) {
+        Object ret = null;
+        
+        final String function;
+        switch (funcType) {
+            case FUNC_MDA_LO:
+                function = Tokens.T_MDA_LO;
+                break;
+            case FUNC_MDA_HI:
+                function = Tokens.T_MDA_HI;
+                break;
+            default:
+                function = null;
+                break;
+        }
+        if (function != null) {
+            Integer index = null;
+            if (nodes[RIGHT].getDataType().isCharacterType()) {
+                String name = nodes[RIGHT].getValue(session, false).toString();
+            } else {
+                index = (Integer) nodes[RIGHT].getValue(session, false);
+            }
+            String left = nodes[LEFT].getValue(session, false).toString();
+            String rasql = String.format("sdom(%s)[%d].%s", left, index, function);
+            if (isMDARootNode) {
+                ret = RasUtil.executeHsqlArrayQuery(rasql, getRasArrayIds(session));
+            } else {
+                ret = rasql;
+            }
+        }
+        return ret;
     }
 }
