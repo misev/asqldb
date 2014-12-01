@@ -4993,13 +4993,13 @@ public class ParserDQL extends ParserBase {
             read();
             
             final Expression e1;
-            if (e.isExpressionMDA()) {
+//            if (e.isExpressionMDA()) {
                 e1 = XreadMDArrayDimensionListOrNull(null, true);
-            } else {
-                e1 = XreadNumericValueExpression();
-
-                readThis(Tokens.RIGHTBRACKET);
-            }
+//            } else {
+//                e1 = XreadNumericValueExpression();
+//
+//                readThis(Tokens.RIGHTBRACKET);
+//            }
             
             e = ExpressionAccessor.forExpression(e, e1);
         }

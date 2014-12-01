@@ -655,7 +655,6 @@ public class ExpressionColumn extends Expression {
             case OpTypes.COLUMN:
                 if (isExpressionMDA()) {
                     this.arrayColumn = true;
-                    dataType = Type.SQL_MDARRAY_ALL_TYPES;
                 }
         }
     }

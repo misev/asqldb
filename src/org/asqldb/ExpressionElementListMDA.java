@@ -83,6 +83,11 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
 
     @Override
     public Object getValue(final Session session, final boolean isMDARootNode) {
+        return getValue(session, null, isMDARootNode);
+    }
+
+    @Override
+    public Object getValue(final Session session, Type parentDomainType, final boolean isMDARootNode) {
         if (isMDARootNode) {
             throw new IllegalArgumentException("An ElementList has to be the child of an ArrayConstructor" +
                     " and can't be the RasRoot.");
@@ -94,11 +99,34 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
             sb.append('[');
         }
 
-        for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
-            final Expression node = nodes[i];
-            sb.append(node.getValue(session, false));
-            if (i < nodesLength-1) {
-                sb.append(", ");
+        boolean evaluatedChildrenNodes = false;
+        if (opType == OpTypes.ARRAY_SUBSET_RANGE && parentDomainType != null) {
+            MDADomainType subsetType = (MDADomainType) dataType;
+            MDADomainType parentType = (MDADomainType) parentDomainType;
+            if (subsetType.isNamedSubset(parentType)) {
+                int dimensionality = parentType.getDimensionality();
+                for (int i = 0; i < dimensionality; i++) {
+                    MDADimensionType dimensionType = parentType.getDimension(i);
+                    int ind = subsetType.getDimensionIndex(dimensionType.getDimensionName());
+                    if (ind != -1) {
+                        sb.append(nodes[ind].getValue(session, false));
+                    } else {
+                        sb.append("*:*");
+                    }
+                    if (i < dimensionality - 1) {
+                        sb.append(',');
+                    }
+                }
+                evaluatedChildrenNodes = true;
+            }
+        }
+        
+        if (!evaluatedChildrenNodes) {
+            for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
+                sb.append(nodes[i].getValue(session, false));
+                if (i < nodesLength - 1) {
+                    sb.append(", ");
+                }
             }
         }
 
@@ -113,15 +141,16 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
      * @param token The token to be tested
      * @return true if the token is a reference to a dimension in this list, false otherwise
      */
-    public boolean isDimensionName(final Token token) {
+    public boolean isDimensionName(final String name) {
         switch(opType){
             case OpTypes.ARRAY_DOMAIN_DEFINITION:
+            case OpTypes.ARRAY_SUBSET_RANGE:
                 break;
             default:
                 throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (Expression node : nodes) {
-            if (((ExpressionIndexMDA) node).getNameString().equals(token.tokenString)) {
+            if (((ExpressionIndexMDA) node).getNameString().equals(name)) {
                 return true;
             }
         }
@@ -130,19 +159,19 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
 
     /**
      * Retrieves the index of a dimension variable within this list.
-     * @param token Token containing the variable name
      * @return the index of the given dimension
      */
-    public int getIndexForName(final Token token) {
+    public int getIndexForName(final String name) {
         switch(opType){
             case OpTypes.ARRAY_DOMAIN_DEFINITION:
+            case OpTypes.ARRAY_SUBSET_RANGE:
                 break;
             default:
                 throw new UnsupportedOperationException("This ElementList does not support this operation.");
         }
         for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
             Expression node = nodes[i];
-            if (((ExpressionIndexMDA) node).getNameString().equals(token.tokenString)) {
+            if (((ExpressionIndexMDA) node).getNameString().equals(name)) {
                 return i;
             }
         }

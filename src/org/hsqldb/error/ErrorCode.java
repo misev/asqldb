@@ -707,5 +707,7 @@ public interface ErrorCode {
     //condenser errors
     int MDA_CONDENSER_INVALID_OP = 7017;            //Invalid condenser operation
 
-    int MDA_CONNECTION = 7018;                     // Rasdaman connection error
+    int MDA_CONNECTION = 7018;                      // Rasdaman connection error
+
+    int MDA_INVALID_SUBSET = 7019;                  // Invalid subset specification
 }

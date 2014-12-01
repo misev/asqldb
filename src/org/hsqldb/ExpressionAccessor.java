@@ -69,8 +69,7 @@ public class ExpressionAccessor extends Expression {
      * @return ExpressionAccessor (or ExpressionAccessorMDA for rasdaman arrays)
      */
     static ExpressionAccessor forExpression(Expression left, Expression right) {
-        if (left.isExpressionMDA() || right instanceof ExpressionIndexMDA ||
-                right instanceof ExpressionElementListMDA)
+        if (left.isExpressionMDA() || right instanceof ExpressionElementListMDA)
             return new ExpressionAccessorMDA(left, right);
         return new ExpressionAccessor(left, right);
     }

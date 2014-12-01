@@ -28,6 +28,7 @@ package org.asqldb.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hsqldb.error.ErrorCode;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.Type;
 
@@ -83,6 +84,33 @@ public class MDADomainType extends ArrayType {
         throw new IllegalArgumentException("Dimension with name " + name + " not found.");
     }
     
+    /**
+     * @return the index of dimension with given name, or -1 if not found.
+     */
+    public int getDimensionIndex(String name) {
+        int i = 0;
+        for (MDADimensionType dimension : dimensions) {
+            if (dimension.getDimensionName().equals(name)) {
+                return i;
+            }
+            ++i;
+        }
+        return -1;
+    }
+    
+    public boolean hasDimension(String name) {
+        boolean ret = false;
+        if (name != null) {
+            for (MDADimensionType dimension : dimensions) {
+                if (dimension.getDimensionName().equals(name)) {
+                    ret = true;
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+    
     public int getDimensionality() {
         return dimensions.size();
     }
@@ -111,6 +139,66 @@ public class MDADomainType extends ArrayType {
     public String toRasqlString() {
         String ret = "";
         
+        return ret;
+    }
+    
+    public boolean isNamedSubset(MDADomainType parentSubset) {
+        boolean ret = true;
+        for (MDADimensionType dimension : dimensions) {
+            if (!parentSubset.hasDimension(dimension.getDimensionName())) {
+                ret = false;
+                break;
+            }
+        }
+        return ret;
+    }
+    
+    /**
+     * Remove slices and set dimension names properly in the subset domain.
+     */
+    public MDADomainType matchSubsetDomain(MDADomainType subsetDomain) {
+        if (subsetDomain.isNamedSubset(this)) {
+            return matchNamedSubsetDomain(subsetDomain);
+        } else {
+            return matchPositionSubsetDomain(subsetDomain);
+        }
+    }
+    
+    /**
+     * Normalize subset domain that has named subsets, e.g. x(5)
+     */
+    private MDADomainType matchNamedSubsetDomain(MDADomainType subsetDomain) {
+        MDADomainType ret = new MDADomainType();
+        for (int i = 0; i < getDimensionality(); i++) {
+            MDADimensionType dimension = getDimension(i);
+            MDADimensionType newDimension = null;
+            try {
+                newDimension = subsetDomain.getDimension(dimension.getDimensionName());
+            } catch (IllegalArgumentException ex) {
+                newDimension = dimension;
+            }
+            if (!newDimension.isSlice()) {
+                ret.addDimension(newDimension);
+            }
+        }
+        return ret;
+    }
+    
+    /**
+     * Normalize subset domain that has position subsets, e.g. 0:14,1,..
+     */
+    private MDADomainType matchPositionSubsetDomain(MDADomainType subsetDomain) {
+        MDADomainType ret = new MDADomainType();
+        if (getDimensionality() != subsetDomain.getDimensionality()) {
+            throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET,
+                    "Subset dimensionality does not match array dimensionality.");
+        }
+        for (int i = 0; i < subsetDomain.getDimensionality(); i++) {
+            MDADimensionType newDimension = subsetDomain.getDimension(i);
+            if (!newDimension.isSlice()) {
+                ret.addDimension(newDimension);
+            }
+        }
         return ret;
     }
 }

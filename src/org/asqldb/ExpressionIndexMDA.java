@@ -32,6 +32,7 @@ import org.hsqldb.Expression;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
+import org.hsqldb.types.Type;
 
 /**
  * @author Johannes Bachhuber
@@ -103,7 +104,6 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
     @Override
     public void resolveTypes(Session session, Expression parent) {
         resolveChildrenTypes(session);
-        
         String valueLeft = nodes[LEFT].getValue(session, false).toString();
         if (nodes.length == 1) {
             dataType = new MDADimensionType(getNameString(), valueLeft);

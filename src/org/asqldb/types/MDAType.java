@@ -73,6 +73,10 @@ public class MDAType extends Type {
         this.domain = domain;
     }
 
+    public Type getDataType() {
+        return dataType;
+    }
+
     public String getRasqlCollectionType() {
         String ret = "";
 

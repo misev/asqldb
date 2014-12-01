@@ -27,17 +27,22 @@
 package org.asqldb;
 
 import org.asqldb.ras.RasUtil;
-import org.hsqldb.types.Type;
+import org.asqldb.types.MDADomainType;
+import org.asqldb.types.MDAType;
 
 import org.hsqldb.Expression;
+import static org.hsqldb.Expression.LEFT;
 import org.hsqldb.ExpressionAccessor;
 import org.hsqldb.Session;
+import org.hsqldb.error.ErrorCode;
 
 /**
  * @author Johannes Bachhuber
  * @author Dimitar Misev
  */
 public class ExpressionAccessorMDA extends ExpressionAccessor implements ExpressionMDA {
+    
+    private MDADomainType originalArrayDomain = null;
 
     public ExpressionAccessorMDA(Expression left, Expression right) {
         super(left, right);
@@ -45,17 +50,39 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
-        resolveChildrenTypes(session);
+        try {
+            resolveChildrenTypes(session);
+        } catch (Throwable ex) {
+            // this is an array element reference
+            try {
+                ExpressionElementListMDA listExpr = (ExpressionElementListMDA) nodes[RIGHT];
+                ExpressionIndexMDA sliceExpr = (ExpressionIndexMDA) listExpr.getNodes()[0];
+                Expression arrayElementRefExpr = sliceExpr.getNodes()[0];
+                nodes[RIGHT] = arrayElementRefExpr;
+                super.resolveTypes(session, parent);
+                return;
+            } catch (Throwable ex2) {
+                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET);
+            }
+        }
         
-        dataType = Type.SQL_VARCHAR;
+        dataType = nodes[LEFT].getDataType();
+        if (dataType instanceof MDAType) {
+            MDADomainType subsetDomain = (MDADomainType) nodes[RIGHT].getDataType();
+            MDADomainType arrayDomain = ((MDAType)dataType).getDomain();
+            originalArrayDomain = arrayDomain;
+            MDADomainType newArrayDomain = arrayDomain.matchSubsetDomain(subsetDomain);
+            
+            dataType = new MDAType(((MDAType) dataType).getDataType(), newArrayDomain);
+        }
     }
 
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
         if (nodes != null && nodes.length > 1) {
             final String index = (nodes[RIGHT] == null) ? "" :
-                    nodes[RIGHT].getValue(session, false) + "";
-            final String colName = nodes[LEFT].getColumnNameString();
+                    nodes[RIGHT].getValue(session, originalArrayDomain, false).toString();
+            final String colName = nodes[LEFT].getValue(session, false).toString();
 
             if (isMDARootNode) {
                 return RasUtil.executeHsqlArrayQuery(colName + index, getRasArrayIds(session));
