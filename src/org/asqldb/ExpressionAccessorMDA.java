@@ -33,6 +33,7 @@ import org.asqldb.types.MDAType;
 import org.hsqldb.Expression;
 import static org.hsqldb.Expression.LEFT;
 import org.hsqldb.ExpressionAccessor;
+import org.hsqldb.HsqlException;
 import org.hsqldb.Session;
 import org.hsqldb.error.ErrorCode;
 
@@ -62,7 +63,7 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
                 super.resolveTypes(session, parent);
                 return;
             } catch (Throwable ex2) {
-                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET);
+                throw ex2;
             }
         }
         

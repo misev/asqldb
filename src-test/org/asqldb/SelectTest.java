@@ -289,7 +289,7 @@ public class SelectTest extends BaseTest {
                     "select avg_cells(a[80,x(*:*)]) + avg_cells(a[y(50),*:*]) from RASTEST2");
             fail();
         } catch (Exception ex) {
-            System.out.println("Expected exception: " + ex.getMessage());
+            assertEquals("Invalid subset specification: Invalid mixing of names and positional indexes in [80,X(*:*)]", ex.getMessage());
         }
     }
     
@@ -300,7 +300,29 @@ public class SelectTest extends BaseTest {
                     "select a[x(100),z(100)] from RASTEST2");
             fail();
         } catch (Exception ex) {
-            System.out.println("Expected exception: " + ex.getMessage());
+            assertEquals("Invalid subset specification: Referenced an unknown dimension name: Z", ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSubsetInvalidIndex1() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select a[x(asdf)] from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            assertEquals("user lacks privilege or object not found: ASDF", ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSubsetInvalidIndex2() throws SQLException {
+        try {
+            executeQuerySingleResult(
+                    "select a[a:1,0:*] from RASTEST2");
+            fail();
+        } catch (Exception ex) {
+            assertEquals("incompatible data type in operation", ex.getMessage());
         }
     }
     

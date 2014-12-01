@@ -32,6 +32,7 @@ import org.hsqldb.Expression;
 import org.hsqldb.HsqlNameManager;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
+import org.hsqldb.error.ErrorCode;
 import org.hsqldb.types.Type;
 
 /**
@@ -99,7 +100,17 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
 
     @Override
     public void resolveTypes(Session session, Expression parent) {
-        resolveChildrenTypes(session);
+        for (Expression node : nodes) {
+            if (node != null) {
+                node.resolveTypes(session, this);
+                Type nodeDataType = node.getDataType();
+                if (!nodeDataType.isNumberType() && !nodeDataType.isCharacterType()) {
+                    throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_SUBSET,
+                            "Invalid index type, expected a number expression or '*'.");
+                }
+            }
+        }
+        
         String valueLeft = nodes[LEFT].getValue(session, false).toString();
         if (nodes.length == 1) {
             dataType = new MDADimensionType(getNameString(), valueLeft);
