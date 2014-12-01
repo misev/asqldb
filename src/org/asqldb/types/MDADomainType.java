@@ -53,6 +53,8 @@ import org.hsqldb.types.Type;
 public class MDADomainType extends ArrayType {
     
     public static final int MAX_DIMENSIONALITY = 1000;
+    
+    public static final int INVALID_DIMENSION_INDEX = -1;
 
     private final List<MDADimensionType> dimensions;
     private int cardinality = 0;
@@ -90,12 +92,12 @@ public class MDADomainType extends ArrayType {
     public int getDimensionIndex(String name) {
         int i = 0;
         for (MDADimensionType dimension : dimensions) {
-            if (dimension.getDimensionName().equals(name)) {
+            if (dimension.getDimensionName().equalsIgnoreCase(name)) {
                 return i;
             }
             ++i;
         }
-        return -1;
+        return INVALID_DIMENSION_INDEX;
     }
     
     public boolean hasDimension(String name) {

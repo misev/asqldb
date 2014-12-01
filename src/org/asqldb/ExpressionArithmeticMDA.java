@@ -28,10 +28,8 @@ package org.asqldb;
 
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
-import org.asqldb.ras.RasArrayId;
 import org.asqldb.ras.RasUtil;
 
-import java.util.Set;
 import org.hsqldb.Expression;
 import org.hsqldb.ExpressionArithmetic;
 import org.hsqldb.OpTypes;

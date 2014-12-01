@@ -694,12 +694,12 @@ public interface ErrorCode {
 
     //error codes for ras oid retrieval
     int MDA_OIDNOTFOUND = 7011;                     //Unable to find OID in given collection.
-    int MDA_NOARRAY = 7012;                         //Attempting to perform array operation on non-array.
+    int MDA_NOARRAY = 7012;                         //Attempting to perform array operation on non-array
     int MDA_IOERROR = 7013;                         //Could not write array to file
     int MDA_INVALID_COLL_OID = 7014;                //The coll oid provides is not formatted correctly
 
     //error codes for function evaluation
-    int MDA_INVALID_PARAMETER = 7015;               //The parameter passed to this function is valid.
+    int MDA_INVALID_PARAMETER = 7015;               //The parameter passed to this function is invalid
 
     //error codes for array index parsing
     int MDA_ARRAY_DIMENSION_REQUIRED = 7016;        //Dimension literal required

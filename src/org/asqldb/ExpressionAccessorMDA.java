@@ -33,9 +33,7 @@ import org.asqldb.types.MDAType;
 import org.hsqldb.Expression;
 import static org.hsqldb.Expression.LEFT;
 import org.hsqldb.ExpressionAccessor;
-import org.hsqldb.HsqlException;
 import org.hsqldb.Session;
-import org.hsqldb.error.ErrorCode;
 
 /**
  * @author Johannes Bachhuber

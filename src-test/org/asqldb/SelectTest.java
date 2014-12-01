@@ -378,9 +378,34 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
+    public void testLoName() throws SQLException {
+        Integer lo = (Integer) executeQuerySingleResult(
+                "select lo(a, 'd0') from RASTEST1");
+        assertEquals(-9999, lo.intValue());
+    }
+    
+    @Test
+    public void testLoInvalidName() throws SQLException {
+        try {
+            Integer lo = (Integer) executeQuerySingleResult(
+                    "select lo(a, 'x') from RASTEST1");
+            fail();
+        } catch (Exception ex) {
+            assertEquals("The parameter passed to this function is invalid: Dimension name not found: x", ex.getMessage());
+        }
+    }
+    
+    @Test
     public void testHiIndex() throws SQLException {
         Integer hi = (Integer) executeQuerySingleResult(
                 "select hi(a[y(100:110)], 1) from RASTEST2");
+        assertEquals(110, hi.intValue());
+    }
+    
+    @Test
+    public void testHiName() throws SQLException {
+        Integer hi = (Integer) executeQuerySingleResult(
+                "select hi(a[y(100:110)], 'y') from RASTEST2");
         assertEquals(110, hi.intValue());
     }
     

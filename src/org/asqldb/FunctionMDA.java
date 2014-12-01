@@ -33,6 +33,9 @@ import org.asqldb.ras.RasUtil;
 import org.hsqldb.types.Type;
 
 import org.asqldb.ras.RasArrayIdSet;
+import org.asqldb.types.MDADimensionType;
+import org.asqldb.types.MDADomainType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.Expression;
 import org.hsqldb.FunctionSQL;
 import org.hsqldb.Session;
@@ -480,6 +483,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             Integer index = null;
             if (nodes[RIGHT].getDataType().isCharacterType()) {
                 String name = nodes[RIGHT].getValue(session, false).toString();
+                index = getIndexForName(name);
             } else {
                 index = (Integer) nodes[RIGHT].getValue(session, false);
             }
@@ -490,6 +494,35 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             } else {
                 ret = rasql;
             }
+        }
+        return ret;
+    }
+    
+    private Integer getIndexForName(String name) {
+        Integer ret = null;
+        Type arrayType = nodes[LEFT].getDataType();
+        if (arrayType.isMDArrayType()) {
+            MDADomainType domainType = ((MDAType) arrayType).getDomain();
+            ret = domainType.getDimensionIndex(name);
+            if (ret == MDADomainType.INVALID_DIMENSION_INDEX) {
+                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_PARAMETER,
+                        "Dimension name not found: " + name);
+            }
+        }
+        return ret;
+    }
+    
+    private String getNameForIndex(int index) {
+        String ret = null;
+        Type arrayType = nodes[LEFT].getDataType();
+        if (arrayType.isMDArrayType()) {
+            MDADomainType domainType = ((MDAType) arrayType).getDomain();
+            MDADimensionType dimensionType = domainType.getDimension(index);
+            if (dimensionType == null) {
+                throw org.hsqldb.error.Error.error(ErrorCode.MDA_INVALID_PARAMETER,
+                        "Dimension index not found: " + index);
+            }
+            ret = dimensionType.getDimensionName();
         }
         return ret;
     }
