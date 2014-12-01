@@ -135,46 +135,4 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
         }
         return sb.toString();
     }
-
-    /**
-     * Determines whether the given token contains a reference to a dimension in this list.
-     * @param token The token to be tested
-     * @return true if the token is a reference to a dimension in this list, false otherwise
-     */
-    public boolean isDimensionName(final String name) {
-        switch(opType){
-            case OpTypes.ARRAY_DOMAIN_DEFINITION:
-            case OpTypes.ARRAY_SUBSET_RANGE:
-                break;
-            default:
-                throw new UnsupportedOperationException("This ElementList does not support this operation.");
-        }
-        for (Expression node : nodes) {
-            if (((ExpressionIndexMDA) node).getNameString().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Retrieves the index of a dimension variable within this list.
-     * @return the index of the given dimension
-     */
-    public int getIndexForName(final String name) {
-        switch(opType){
-            case OpTypes.ARRAY_DOMAIN_DEFINITION:
-            case OpTypes.ARRAY_SUBSET_RANGE:
-                break;
-            default:
-                throw new UnsupportedOperationException("This ElementList does not support this operation.");
-        }
-        for (int i = 0, nodesLength = nodes.length; i < nodesLength; i++) {
-            Expression node = nodes[i];
-            if (((ExpressionIndexMDA) node).getNameString().equals(name)) {
-                return i;
-            }
-        }
-        throw Error.error(ErrorCode.MDA_ARRAY_DIMENSION_REQUIRED);
-    }
 }
