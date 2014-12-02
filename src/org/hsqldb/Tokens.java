@@ -929,6 +929,7 @@ public class Tokens {
     public static final String        T_MDA_SHIFT        = "SHIFT";
     public static final String        T_MDA_EXTEND       = "EXTEND";
     public static final String        T_MDA_DIV          = "DIV";
+    public static final String        T_MDA_SCALE        = "MDARRAY_SCALE";
     
     public static final String        T_MDA_DECODE       = "MDARRAY_DECODE";
     public static final String        T_MDA_ENCODE       = "MDARRAY_ENCODE";
@@ -1854,6 +1855,7 @@ public class Tokens {
     public static final int MDA_SHIFT                  = 1024;
     public static final int MDA_EXTEND                 = 1025;
     public static final int MDA_DIV                    = 1026;
+    public static final int MDA_SCALE                  = 1027;
     
     public static final int MDA_DECODE                 = 1050;
     public static final int MDA_ENCODE                 = 1051;
@@ -2229,6 +2231,7 @@ public class Tokens {
         reservedKeys.put(Tokens.T_MDA_SHIFT, MDA_SHIFT);
         reservedKeys.put(Tokens.T_MDA_EXTEND, MDA_EXTEND);
         reservedKeys.put(Tokens.T_MDA_DIV, MDA_DIV);
+        reservedKeys.put(Tokens.T_MDA_SCALE, MDA_SCALE);
         
         reservedKeys.put(Tokens.T_MDA_DECODE, MDA_DECODE);
         reservedKeys.put(Tokens.T_MDA_ENCODE, MDA_ENCODE);

@@ -2839,6 +2839,10 @@ public class ParserDQL extends ParserBase {
 
                 return new Expression(OpTypes.TABLE_SUBQUERY, td);
             }
+            case Tokens.LEFTBRACKET : {
+                readThis(Tokens.LEFTBRACKET);
+                return XreadMDArrayDimensionListOrNull(null, true);
+            }
             default :
                 if (isCoreReservedKey()) {
                     throw unexpectedToken();

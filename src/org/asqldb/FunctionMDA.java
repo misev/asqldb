@@ -79,6 +79,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
     private static final int FUNC_MDA_SHIFT = 224;
     private static final int FUNC_MDA_EXTEND = 225;
     private static final int FUNC_MDA_DIV = 226;
+    private static final int FUNC_MDA_SCALE = 227;
 
     private static final int FUNC_MDA_DECODE = 250;
     private static final int FUNC_MDA_ENCODE = 251;
@@ -120,6 +121,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         mdaFuncMap.put(Tokens.MDA_SHIFT, FUNC_MDA_SHIFT);
         mdaFuncMap.put(Tokens.MDA_EXTEND, FUNC_MDA_EXTEND);
         mdaFuncMap.put(Tokens.MDA_DIV, FUNC_MDA_DIV);
+        mdaFuncMap.put(Tokens.MDA_SCALE, FUNC_MDA_SCALE);
         mdaFuncMap.put(Tokens.MDA_DECODE, FUNC_MDA_DECODE);
         mdaFuncMap.put(Tokens.MDA_ENCODE, FUNC_MDA_ENCODE);
         
@@ -169,6 +171,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_LO:
             case FUNC_MDA_HI:
             case FUNC_MDA_NAME:
+            case FUNC_MDA_SCALE:
                 parseList = doubleParamList;
                 break;
             default:
@@ -193,8 +196,6 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
              * @TODO: sdom should be a proper SQL type, not string.
              */
             case FUNC_MDA_SDOM:
-            case FUNC_MDA_SHIFT:
-            case FUNC_MDA_EXTEND:
             case FUNC_MDA_NAME:
                 dataType = Type.SQL_VARCHAR;
                 break;
@@ -231,6 +232,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 break;
             case FUNC_MDA_ENCODE:
                 dataType = Type.SQL_ALL_TYPES;
+                break;
+            case FUNC_MDA_SHIFT:
+            case FUNC_MDA_EXTEND:
+            case FUNC_MDA_SCALE:
+                dataType = nodes[LEFT].getDataType();
                 break;
         }
     }
@@ -285,6 +291,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_SHIFT:
             case FUNC_MDA_EXTEND:
             case FUNC_MDA_DIV:
+            case FUNC_MDA_SCALE:
                 return getDoubleParamFunctionValue(session, isMDARootNode);
             case FUNC_MDA_LO:
             case FUNC_MDA_HI:
@@ -305,7 +312,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 return getDimensionality();
 
             default:
-                throw Error.runtimeError(ErrorCode.U_S0500, "FunctionMDA");
+                throw Error.runtimeError(ErrorCode.U_S0500, opType + "");
         }
     }
 
@@ -452,13 +459,21 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_EXTEND:
                 function = "extend";
                 break;
+            case FUNC_MDA_SCALE:
+                function = "scale";
+                break;
             case FUNC_MDA_DIV:
                 function = "div";
                 break;
         }
         if (function != null) {
-            final String functionCall = String.format("%s(%s, %s)", function,
-                    nodes[0].getValue(session, false), nodes[1].getValue(session, false));
+            String left = nodes[LEFT].getValue(session, false).toString();
+            Type arrayType = nodes[LEFT].getDataType();
+            if (arrayType instanceof MDAType) {
+                arrayType = ((MDAType) arrayType).getDomain();
+            }
+            String right = nodes[RIGHT].getValue(session, arrayType, false).toString();
+            final String functionCall = String.format("%s(%s, %s)", function, left, right);
             if (!isMDARootNode) {
                 return functionCall;
             }

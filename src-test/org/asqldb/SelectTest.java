@@ -403,6 +403,13 @@ public class SelectTest extends BaseTest {
     }
     
     @Test
+    public void testHiIndex2() throws SQLException {
+        Integer hi = (Integer) executeQuerySingleResult(
+                "select hi(a[y(100:110)], 1) + lo(a, 0) from RASTEST2");
+        assertEquals(110, hi.intValue());
+    }
+    
+    @Test
     public void testHiName() throws SQLException {
         Integer hi = (Integer) executeQuerySingleResult(
                 "select hi(a[y(100:110)], 'y') from RASTEST2");
@@ -428,6 +435,26 @@ public class SelectTest extends BaseTest {
         Integer hi = (Integer) executeQuerySingleResult(
                 "select dimensionality(a[y(100:110)]) from RASTEST2");
         assertEquals(2, hi.intValue());
+    }
+    
+    /**
+     * Test shift, scale, etc.
+     */
+    
+    @Test
+    public void testScale1() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select MDARRAY_SCALE(a+3, [0:100,0:100]) from RASTEST2");
+        int[] d = res.getIntArray();
+        assertEquals(10201, d.length);
+    }
+    
+    @Test
+    public void testScale2() throws SQLException {
+        RasMArrayInteger res = (RasMArrayInteger) executeQuerySingleResult(
+                "select MDARRAY_SCALE(a+3, [x(0:10), y(0:10)]) from RASTEST2");
+        int[] d = res.getIntArray();
+        assertEquals(121, d.length);
     }
     
 }
