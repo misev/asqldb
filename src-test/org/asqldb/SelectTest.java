@@ -457,4 +457,18 @@ public class SelectTest extends BaseTest {
         assertEquals(121, d.length);
     }
     
+    @Test
+    public void testShift1() throws SQLException {
+        Integer lo = (Integer) executeQuerySingleResult(
+                "select lo(shift(a, [5,5]), 0) from RASTEST2");
+        assertEquals(5, lo.intValue());
+    }
+    
+    @Test
+    public void testShift2() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                "select shift(a, [5]) from RASTEST1");
+        assertEquals(5, res.getDoubleArray()[0], 0.001);
+    }
+    
 }
