@@ -34,6 +34,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import rasj.RasMArrayInteger;
 
 /**
@@ -466,9 +467,20 @@ public class SelectTest extends BaseTest {
     
     @Test
     public void testShift2() throws SQLException {
+        RasMArrayByte res = (RasMArrayByte) executeQuerySingleResult(
+                "select shift(a, [5,5]) from RASTEST2");
+        assertEquals(0, res.getArray()[0]);
+    }
+    
+    /**
+     * Fails due to a rasdaman bug: http://rasdaman.org/ticket/858
+     */
+    @Ignore
+    @Test
+    public void testShift3() throws SQLException {
         RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
-                "select shift(a, [5]) from RASTEST1");
-        assertEquals(5, res.getDoubleArray()[0], 0.001);
+                "select shift(a, [5]) from RASTEST2");
+        assertEquals(1, res.getDoubleArray()[0], 0.01);
     }
     
 }
