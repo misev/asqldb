@@ -491,6 +491,10 @@ public class SelectTest extends BaseTest {
         assertEquals(90601, d.length);
     }
     
+    /**
+     * @TODO: to be supported, overlay clashes with existing operator in SQL
+     */
+    @Ignore
     @Test
     public void testOverlay() throws SQLException {
         RasMArrayByte res = (RasMArrayByte) executeQuerySingleResult(
