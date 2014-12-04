@@ -120,9 +120,6 @@ public class ExpressionIndexMDA extends Expression implements ExpressionMDA {
         }
     }
 
-    /**
-     * @TODO: implement proper translation to rasql of named subsets
-     */
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
         if (nodes.length == 1) {

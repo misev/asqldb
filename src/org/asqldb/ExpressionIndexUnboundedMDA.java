@@ -40,7 +40,7 @@ import org.hsqldb.types.Type;
 public class ExpressionIndexUnboundedMDA extends Expression implements ExpressionMDA {
 
     /**
-     * Subset of the form: *:*
+     * Subset of the form: *
      */
     public ExpressionIndexUnboundedMDA() {
         super(OpTypes.ARRAY_SUBSET_ASTERISK);
@@ -51,9 +51,6 @@ public class ExpressionIndexUnboundedMDA extends Expression implements Expressio
         dataType = Type.SQL_VARCHAR;
     }
 
-    /**
-     * @TODO: implement proper translation to rasql of named subsets
-     */
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
         return "*";
