@@ -42,8 +42,8 @@ import org.hsqldb.types.ArrayType;
  * @author Johannes Bachhuber
  * @author Dimitar Misev
  */
-public class ExpressionArrayConstructorMDA extends Expression implements ExpressionMDA {
-
+public class ExpressionArrayConstructorMDA extends ExpressionIterationMDA implements ExpressionMDA {
+    
     private Object resultCache = null;
 
     public ExpressionArrayConstructorMDA(final int type, final Expression domain, final Expression values) {
@@ -82,15 +82,20 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
 
     @Override
     public Object getValue(final Session session, final boolean isMDARootNode) {
+        setRasqlIteratorNames();
         final String rasql;
         
         if (insertColumn == null) {
             switch (opType) {
                 case OpTypes.ARRAY_CONSTRUCTOR_LITERAL:
-                    rasql = String.format("< %s %s >", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
+                    rasql = String.format("< %s %s >",
+                            nodes[LEFT].getValue(session, false),
+                            nodes[RIGHT].getValue(session, false));
                     break;
                 case OpTypes.ARRAY_CONSTRUCTOR_VALUE:
-                    rasql = String.format("(marray x in %s values %s)", nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
+                    rasql = String.format("(marray %s in %s values %s)", rasqlIteratorName,
+                            nodes[LEFT].getValue(session, false),
+                            nodes[RIGHT].getValue(session, false));
                     break;
 
                 default:
@@ -125,7 +130,7 @@ public class ExpressionArrayConstructorMDA extends Expression implements Express
                 ExpressionElementListMDA el = (ExpressionElementListMDA) nodes[LEFT];
                 Expression[] dims = el.getNodes();
                 
-                insertQuery += "MARRAY x IN [";
+                insertQuery += "MARRAY " + rasqlIteratorName + " IN [";
                 for (int i = 0; i < dims.length; i++) {
                     ExpressionIndexMDA dim = (ExpressionIndexMDA) dims[i];
                     

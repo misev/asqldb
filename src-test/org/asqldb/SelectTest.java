@@ -189,6 +189,13 @@ public class SelectTest extends BaseTest {
         }
     }
     
+    @Test
+    public void testGeneralArrayConstructor_Nested() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                    "select mdarray [x(50:55)] values avg_cells(mdarray [y(10:20)] values x+y) from RASTEST1");
+        assertEquals(6, res.getDoubleArray().length);
+    }
+    
     /**
      * Test general array aggregate
      */

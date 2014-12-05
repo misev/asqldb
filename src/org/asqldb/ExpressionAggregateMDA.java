@@ -37,7 +37,7 @@ import org.hsqldb.Tokens;
  * @author Johannes Bachhuber
  * @author Dimitar Misev
  */
-public class ExpressionAggregateMDA extends Expression implements ExpressionMDA {
+public class ExpressionAggregateMDA extends ExpressionIterationMDA implements ExpressionMDA {
 
     public ExpressionAggregateMDA(final int type, final Expression left, final Expression right) {
         super(type);
@@ -49,16 +49,16 @@ public class ExpressionAggregateMDA extends Expression implements ExpressionMDA 
     @Override
     public void resolveTypes(final Session session, final Expression parent) {
         resolveChildrenTypes(session);
-        
         dataType = Type.SQL_VARCHAR;
     }
 
     @Override
     public Object getValue(final Session session, final boolean isMDARootNode) {
+        setRasqlIteratorNames();
         if (nodes != null && nodes.length > 1) {
-            final String condense = String.format("CONDENSE %s OVER x in %s USING %s",
-                    Tokens.getKeyword(opType), nodes[LEFT].getValue(session, false),
-                    nodes[RIGHT].getValue(session, false));
+            final String condense = String.format("CONDENSE %s OVER %s in %s USING %s",
+                    Tokens.getKeyword(opType), rasqlIteratorName,
+                    nodes[LEFT].getValue(session, false), nodes[RIGHT].getValue(session, false));
 
             if (isMDARootNode) {
                 return RasUtil.executeHsqlArrayQuery(condense, getRasArrayIds(session));

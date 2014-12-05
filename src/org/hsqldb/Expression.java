@@ -48,7 +48,6 @@ import org.hsqldb.lib.Set;
 import org.hsqldb.navigator.RowSetNavigatorData;
 import org.hsqldb.persist.PersistentStore;
 import org.asqldb.ExpressionMDA;
-import org.asqldb.ras.RasArrayId;
 import org.hsqldb.result.Result;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.CharacterType;
@@ -58,7 +57,6 @@ import org.hsqldb.types.NullType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
 
-import java.util.HashSet;
 import org.asqldb.ras.RasArrayIdSet;
 
 /**
@@ -291,6 +289,22 @@ public class Expression implements Cloneable {
             rasArrayIds.addAll(node.getRasArrayIds(session));
         }
         return rasArrayIds;
+    }
+    
+    /**
+     * @return a list of all children that are instances of the given class.
+     */
+    public HsqlArrayList getChildren(Class cl) {
+        HsqlArrayList ret = new HsqlArrayList();
+        if (cl.isInstance(this)) {
+            ret.add(this);
+        }
+        for (Expression node : nodes) {
+            if (node != null) {
+                ret.addAll(node.getChildren(cl));
+            }
+        }
+        return ret;
     }
 
     static String getContextSQL(Expression expression) {

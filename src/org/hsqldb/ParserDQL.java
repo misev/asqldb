@@ -6990,7 +6990,7 @@ public class ParserDQL extends ParserBase {
         if (dimensionToken != null) {
             final int index = dimensionToken.getIndex();
             read();
-            ret = new ExpressionValueVariableMDA(index);
+            ret = new ExpressionValueVariableMDA(index, name);
         }
         return ret;
     }

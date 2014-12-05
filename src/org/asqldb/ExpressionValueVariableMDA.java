@@ -39,10 +39,17 @@ import org.hsqldb.types.Type;
 public class ExpressionValueVariableMDA extends Expression implements ExpressionMDA {
 
     private final int index;
+    private String hsqlIteratorName = null;
+    private String rasqlIteratorName = null;
 
     public ExpressionValueVariableMDA(final int index) {
+        this(index, null);
+    }
+
+    public ExpressionValueVariableMDA(final int index, String name) {
         super(OpTypes.ARRAY_VALUE_VARIABLE);
         this.index = index;
+        this.hsqlIteratorName = name;
     }
 
     @Override
@@ -56,13 +63,26 @@ public class ExpressionValueVariableMDA extends Expression implements Expression
         if (isMDARootNode) {
             throw new IllegalArgumentException("This Expression cannot be a rasRoot");
         }
+        
+        if (rasqlIteratorName == null) {
+            rasqlIteratorName = "x";
+        }
 
         switch (opType) {
             case OpTypes.ARRAY_VALUE_VARIABLE:
-                return String.format("x[%d]", index);
+                return String.format(rasqlIteratorName + "[%d]", index);
 
             default :
                 throw org.hsqldb.error.Error.runtimeError(ErrorCode.U_S0500, "ExpressionRasValueVariable (type = "+opType+")");
         }
     }
+
+    public void setRasqlIteratorName(String rasqlIteratorName) {
+        this.rasqlIteratorName = rasqlIteratorName;
+    }
+
+    public String getHsqlIteratorName() {
+        return hsqlIteratorName;
+    }
+    
 }
