@@ -518,6 +518,9 @@ examples:
              debug="${build.debug}"
              optimize="${build.optimize}"
        >
+      <classpath>
+          <pathelement location="lib/rasj.jar" />
+      </classpath>
       <include name="org/hsqldb/util/*Swing.java"/>
       <include name="org/hsqldb/util/TableSorter.java"/>
       </javac>
@@ -697,7 +700,7 @@ examples:
        </jar>
     </target>
 
-    <target name="run" description="Runs the ">
+    <target name="run" description="Runs the GUI tool">
         <java fork="true" classname="org.hsqldb.util.DatabaseManagerSwing">
             <classpath>
                 <!--<pathelement location="${servletapi.lib}"/>-->
