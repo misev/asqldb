@@ -127,7 +127,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         
         mdaFuncMap.put(Tokens.MDA_LO, FUNC_MDA_LO);
         mdaFuncMap.put(Tokens.MDA_HI, FUNC_MDA_HI);
-        mdaFuncMap.put(Tokens.MDA_NAME, FUNC_MDA_NAME);
+        mdaFuncMap.put(Tokens.MDA_DIMENSION_NAME, FUNC_MDA_NAME);
         mdaFuncMap.put(Tokens.MDA_DIMENSION, FUNC_MDA_DIMENSION);
     }
 

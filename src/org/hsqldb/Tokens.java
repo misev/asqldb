@@ -936,7 +936,7 @@ public class Tokens {
     
     public static final String        T_MDA_LO           = "LO";
     public static final String        T_MDA_HI           = "HI";
-    public static final String        T_MDA_NAME         = "NAME";
+    public static final String        T_MDA_DIMENSION_NAME         = "DIMENSION_NAME";
     public static final String        T_MDA_DIMENSION    = "DIMENSIONALITY";
 
     //
@@ -1862,7 +1862,7 @@ public class Tokens {
     
     public static final int MDA_LO                     = 1060;
     public static final int MDA_HI                     = 1061;
-    public static final int MDA_NAME                   = 1062;
+    public static final int MDA_DIMENSION_NAME         = 1062;
     public static final int MDA_DIMENSION              = 1063;
     public static final int MDA_BBOX                   = 1064;
 
@@ -2238,7 +2238,7 @@ public class Tokens {
         
         reservedKeys.put(Tokens.T_MDA_LO, MDA_LO);
         reservedKeys.put(Tokens.T_MDA_HI, MDA_HI);
-        reservedKeys.put(Tokens.T_MDA_NAME, MDA_NAME);
+        reservedKeys.put(Tokens.T_MDA_DIMENSION_NAME, MDA_DIMENSION_NAME);
         reservedKeys.put(Tokens.T_MDA_DIMENSION, MDA_DIMENSION);
     }
 

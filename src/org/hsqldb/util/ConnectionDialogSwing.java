@@ -278,7 +278,11 @@ implements ActionListener, ItemListener {
             CommonSwing.errorMessage(e);
         }
 
-        dialog.create();
+        try {
+            dialog.create();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
 
         return dialog.mConnection;
     }
