@@ -65,6 +65,7 @@ public class ExpressionArithmetic extends Expression {
             case OpTypes.MULTIPLY :
             case OpTypes.DIVIDE :
             case OpTypes.CONCAT :
+            case OpTypes.OVERLAY :
                 return;
 
             default :

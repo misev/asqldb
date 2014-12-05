@@ -129,6 +129,7 @@ public interface OpTypes {
         ARRAY_CONSTRUCTOR_LITERAL = 205,
         ARRAY_LITERAL             = 206,
         ARRAY_CONSTRUCTOR_VALUE   = 207,
-        ARRAY_VALUE_VARIABLE      = 208
+        ARRAY_VALUE_VARIABLE      = 208,
+        OVERLAY                   = 209
     ;
 }

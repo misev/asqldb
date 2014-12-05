@@ -491,14 +491,10 @@ public class SelectTest extends BaseTest {
         assertEquals(90601, d.length);
     }
     
-    /**
-     * @TODO: to be supported, overlay clashes with existing operator in SQL
-     */
-    @Ignore
     @Test
     public void testOverlay() throws SQLException {
         RasMArrayByte res = (RasMArrayByte) executeQuerySingleResult(
-                "select a overlay array [x(0:250),y(0:210)] values 5 from RASTEST2");
+                "select a overlay cast(mdarray [x(0:255),y(0:210)] values 5 AS char) from RASTEST2");
         byte[] d = res.getArray();
         assertEquals(5, d[0]);
     }

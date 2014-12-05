@@ -51,6 +51,23 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
     }
 
     @Override
+    public void resolveTypes(Session session, Expression parent) {
+        resolveChildrenTypes(session);
+        
+        boolean resolved = false;
+        for (Expression node : nodes) {
+            if (node.isExpressionMDA() && node.getDataType().isMDArrayType()) {
+                dataType = node.getDataType();
+                resolved = true;
+                break;
+            }
+        }
+        if (!resolved) {
+            super.resolveTypes(session, parent);
+        }
+    }
+
+    @Override
     public Object getValue(Session session, boolean isRoot) {
         if (nodes.length == 0 || nodes.length > 2 ||
                 (nodes.length == 1 && !nodes[LEFT].isExpressionMDA()) ||
@@ -86,8 +103,11 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
             case OpTypes.DIVIDE :
                 operator = "/";
                 break;
+            case OpTypes.OVERLAY :
+                operator = "overlay";
+                break;
             default :
-                throw Error.runtimeError(ErrorCode.U_S0500, "ExpressionRas");
+                throw Error.runtimeError(ErrorCode.U_S0500, "Unexpected MDA operator: " + opType);
         }
         String selector = nodes[LEFT].getValue(session, false) + " " + operator
                 + " " + nodes[RIGHT].getValue(session, false);
@@ -98,23 +118,6 @@ public class ExpressionArithmeticMDA extends ExpressionArithmetic {
         //someone else will be executing the query, so we just return a rasql string
         //we only need to evaluate the hsql parts
         return selector;
-    }
-
-    @Override
-    public void resolveTypes(Session session, Expression parent) {
-        resolveChildrenTypes(session);
-        
-        boolean resolved = false;
-        for (Expression node : nodes) {
-            if (node.isExpressionMDA() && node.getDataType().isMDArrayType()) {
-                dataType = node.getDataType();
-                resolved = true;
-                break;
-            }
-        }
-        if (!resolved) {
-            super.resolveTypes(session, parent);
-        }
     }
 
 }

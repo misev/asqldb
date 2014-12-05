@@ -3102,6 +3102,11 @@ public class ParserDQL extends ParserBase {
                         break;
                     }
 
+                case Tokens.OVERLAY :
+                    type  = OpTypes.OVERLAY;
+                    boole = false;
+                    break;
+
                 // fall through
                 default :
                     end = true;

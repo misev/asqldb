@@ -2688,7 +2688,7 @@ public class Tokens {
             LEADING, LIKE, MAX, MIN, NATURAL, NULLIF, NOT, ON, ORDER, OR,
             OUTER, PRIMARY, REFERENCES, RIGHT, SELECT, SET, SOME, STDDEV_POP,
             STDDEV_SAMP, SUM, TABLE, THEN, TO, TRAILING, TRIGGER, UNION,
-            UNIQUE, USING, VALUES, VAR_POP, VAR_SAMP, WHEN, WHERE, WITH,
+            UNIQUE, USING, VALUES, VAR_POP, VAR_SAMP, WHEN, WHERE, WITH, OVERLAY
         };
 
         for (int i = 0; i < keyword.length; i++) {
