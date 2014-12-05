@@ -21,7 +21,7 @@ Suppose we have a table in ASQLDB:
     CREATE TABLE Arrays (
       id INTEGER PRIMARY KEY,
       acquired DATE,
-       MDARRAY [x]
+      a INTEGER MDARRAY [x]
     );
 
 To publish an array object in collection MYCOLL, with OID = 100, then in Arrays
@@ -42,15 +42,10 @@ is, with subtle keyword differences, like `MDARRAY` instead of `MARRAY`, and
 
 Automated tests
 ===============
-To run ASQLDB specific tests
 
-    cd build
-    ant testselect
-    
-Currently around 30% of the tests are failing, SELECT is not fully supported yet.
 
 Todo
 ====
-* Full DML support
+* Full DML support (UPDATES missing at the moment)
 * Extend documentation with Array SQL specification and examples
 * Adapt JDBC driver for multidimensional array results
