@@ -65,8 +65,11 @@ public class ExpressionArithmetic extends Expression {
             case OpTypes.MULTIPLY :
             case OpTypes.DIVIDE :
             case OpTypes.CONCAT :
-            case OpTypes.OVERLAY :
                 return;
+            case OpTypes.OVERLAY :
+                if (this instanceof ExpressionArithmeticMDA) {
+                    return;
+                }
 
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "Expression");
