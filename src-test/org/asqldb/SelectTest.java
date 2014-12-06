@@ -384,7 +384,7 @@ public class SelectTest extends BaseTest {
     public void testSdom() throws SQLException {
         Object domObj = executeQuerySingleResult(
                 "select sdom(a) from RASTEST1");
-        assertEquals(domObj.toString(), "ARRAY[ROW('d0','-9999','-9997')]");
+        assertEquals("ARRAY[ROW('d0',-9999,-9997)]", domObj.toString());
     }
     
     @Test

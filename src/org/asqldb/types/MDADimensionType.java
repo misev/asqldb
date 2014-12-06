@@ -71,7 +71,7 @@ public class MDADimensionType extends RowType {
     }
 
     public MDADimensionType(String name, String lowerBound, String upperBound) {
-        super(new Type[] {Type.SQL_VARCHAR, Type.SQL_VARCHAR, Type.SQL_VARCHAR});
+        super(new Type[]{Type.SQL_VARCHAR, Type.SQL_INTEGER, Type.SQL_INTEGER});
         this.name = name;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
@@ -79,7 +79,7 @@ public class MDADimensionType extends RowType {
     }
 
     public MDADimensionType(String name, String lowerBound) {
-        super(new Type[] {Type.SQL_VARCHAR, Type.SQL_VARCHAR});
+        super(new Type[]{Type.SQL_VARCHAR, Type.SQL_INTEGER});
         this.name = name;
         this.lowerBound = lowerBound;
         this.upperBound = null;
