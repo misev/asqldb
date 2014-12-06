@@ -31,7 +31,6 @@
 
 package org.hsqldb;
 
-import java.util.ArrayList;
 import org.asqldb.ExpressionAggregateMDA;
 import org.asqldb.FunctionMDA;
 import org.asqldb.ExpressionValueVariableMDA;
@@ -71,7 +70,6 @@ import org.asqldb.types.MDADomainType;
 import org.asqldb.types.MDADimensionType;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.asqldb.ExpressionIndexUnboundedMDA;
 import org.asqldb.types.MDAType;
@@ -99,7 +97,7 @@ public class ParserDQL extends ParserBase {
      * @param  session the connected context
      * @param  t the token source from which to parse commands
      */
-    ParserDQL(Session session, Scanner t, CompileContext baseContext) {
+    public ParserDQL(Session session, Scanner t, CompileContext baseContext) {
 
         super(t);
 
@@ -6851,7 +6849,7 @@ public class ParserDQL extends ParserBase {
     /**
      * Reads a list of dimensions for the array constructor.
      */
-    private ExpressionElementListMDA XreadMDArrayDimensionListOrNull(Set<ExpressionIndexMDA> dimensions) {
+    public ExpressionElementListMDA XreadMDArrayDimensionListOrNull(Set<ExpressionIndexMDA> dimensions) {
         return XreadMDArrayDimensionListOrNull(dimensions, false);
     }
 

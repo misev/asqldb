@@ -211,7 +211,7 @@ public class Scanner {
         }
     }
 
-    Scanner(String sql) {
+    public Scanner(String sql) {
         reset(sql);
     }
 

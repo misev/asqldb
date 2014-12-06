@@ -265,7 +265,6 @@ public class Expression implements Cloneable {
         this.nodes = list;
     }
 
-// -- ASQLDB @TODO rename to isExpressionMDA
     /**
      * Checks whether this expression (or any of its children) is an
      * MDARRAY expression.

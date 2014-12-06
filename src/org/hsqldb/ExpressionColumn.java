@@ -177,7 +177,6 @@ public class ExpressionColumn extends Expression {
         }
     }
 
-// -- ASQLDB @TODO
     @Override
     public boolean isExpressionMDA() {
         return super.isExpressionMDA() || arrayColumn || (dataType != null && dataType.isMDArrayType());

@@ -32,7 +32,6 @@
 package org.hsqldb.types;
 
 import java.math.BigDecimal;
-
 import org.hsqldb.HsqlDateTime;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
@@ -678,7 +677,7 @@ public class CharacterType extends Type {
                 return new String(b);
             }
             case Types.SQL_VARCHAR : {
-                return (String) a;
+                return a.toString();
             }
             default :
                 throw Error.runtimeError(ErrorCode.U_S0500, "CharacterType");

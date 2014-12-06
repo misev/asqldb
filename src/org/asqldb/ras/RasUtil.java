@@ -26,6 +26,19 @@
 
 package org.asqldb.ras;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
+import org.asqldb.types.MDADimensionType;
+import org.asqldb.types.MDADomainType;
 import org.hsqldb.HsqlException;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -40,20 +53,6 @@ import rasj.RasClientInternalException;
 import rasj.RasConnectionFailedException;
 import rasj.RasGMArray;
 import rasj.RasImplementation;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import rasj.RasIndexOutOfBoundsException;
 import rasj.RasMArrayByte;
 import rasj.RasMInterval;
@@ -530,6 +529,24 @@ public class RasUtil {
             Iterator it = dbag.iterator();
             if (it.hasNext()) {
                 ret = it.next();
+            }
+        }
+        return ret;
+    }
+    
+    /**
+     * Convert a rasdaman minterval to an array, taking dimension names
+     * from type into account.
+     * @return an array representing the rasql interval
+     */
+    public static Object[] toArray(RasMInterval sdom, MDADomainType type) {
+        Object[] ret = new Object[sdom.dimension()];
+        for (int i = 0; i < ret.length; i++) {
+            MDADimensionType hdim = type.getDimension(i);
+            try {
+                RasSInterval rdim = sdom.item(i);
+                ret[i] = new Object[]{hdim.getDimensionName(), rdim.low(), rdim.high()};
+            } catch (RasIndexOutOfBoundsException ex) {
             }
         }
         return ret;

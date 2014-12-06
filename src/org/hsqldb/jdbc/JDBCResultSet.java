@@ -41,25 +41,20 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
-
-//#ifdef JAVA6
-import java.sql.NClob;
-import java.sql.RowId;
-import java.sql.SQLXML;
-
-//#endif JAVA6
 import org.hsqldb.ColumnBase;
-import org.hsqldb.persist.HsqlDatabaseProperties;
 import org.hsqldb.HsqlDateTime;
 import org.hsqldb.HsqlException;
 import org.hsqldb.SessionInterface;
@@ -68,7 +63,7 @@ import org.hsqldb.error.ErrorCode;
 import org.hsqldb.lib.IntValueHashMap;
 import org.hsqldb.lib.StringInputStream;
 import org.hsqldb.navigator.RowSetNavigator;
-import org.hsqldb.navigator.RowSetNavigatorClient;
+import org.hsqldb.persist.HsqlDatabaseProperties;
 import org.hsqldb.result.Result;
 import org.hsqldb.result.ResultConstants;
 import org.hsqldb.result.ResultMetaData;
@@ -4531,18 +4526,20 @@ public class JDBCResultSet implements ResultSet {
         checkColumn(columnIndex);
 
         Type     type = resultMetaData.columnTypes[columnIndex - 1];
-        //        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
-        Object data = (Object) getCurrent()[columnIndex - 1];
+        Object[] data = (Object[]) getCurrent()[columnIndex - 1];
+//        Object data = (Object) getCurrent()[columnIndex - 1];
 
-        /*if (!type.isArrayType()) {
+        if (!type.isArrayType()) {
             throw JDBCUtil.sqlException(ErrorCode.X_42561);
-        }*/
+        }
 
         if (trackNull(data)) {
             return null;
         }
 
-        return new JDBCMArray(data, type.collectionBaseType(), type,
+//        return new JDBCMArray(data, type.collectionBaseType(), type,
+//                connection);
+        return new JDBCArray(data, type.collectionBaseType(), type,
                 connection);
     }
 

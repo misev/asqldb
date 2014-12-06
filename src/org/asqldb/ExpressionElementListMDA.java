@@ -28,10 +28,11 @@ package org.asqldb;
 
 import org.asqldb.types.MDADimensionType;
 import org.asqldb.types.MDADomainType;
-import org.hsqldb.error.*;
 import org.hsqldb.Expression;
 import org.hsqldb.OpTypes;
 import org.hsqldb.Session;
+import org.hsqldb.error.Error;
+import org.hsqldb.error.ErrorCode;
 import org.hsqldb.types.ArrayType;
 import org.hsqldb.types.Type;
 
@@ -52,8 +53,7 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
                 break;
 
             default :
-                throw org.hsqldb.error.Error.runtimeError(
-                        ErrorCode.U_S0500, "ExpressionElementListMDA");
+                throw Error.runtimeError(ErrorCode.U_S0500, "ExpressionElementListMDA");
         }
     }
 

@@ -25,14 +25,8 @@
  */
 package org.asqldb;
 
-import org.hsqldb.error.Error;
-import org.hsqldb.error.ErrorCode;
-import org.hsqldb.lib.FrameworkLogger;
-import org.hsqldb.lib.IntKeyIntValueHashMap;
-import org.asqldb.ras.RasUtil;
-import org.hsqldb.types.Type;
-
 import org.asqldb.ras.RasArrayIdSet;
+import org.asqldb.ras.RasUtil;
 import org.asqldb.types.MDADimensionType;
 import org.asqldb.types.MDADomainType;
 import org.asqldb.types.MDAType;
@@ -40,8 +34,14 @@ import org.hsqldb.Expression;
 import org.hsqldb.FunctionSQL;
 import org.hsqldb.Session;
 import org.hsqldb.Tokens;
+import org.hsqldb.error.Error;
+import org.hsqldb.error.ErrorCode;
+import org.hsqldb.lib.FrameworkLogger;
+import org.hsqldb.lib.IntKeyIntValueHashMap;
 import org.hsqldb.types.BlobDataID;
+import org.hsqldb.types.Type;
 import rasj.RasGMArray;
+import rasj.RasMInterval;
 
 /**
  * @author Johannes Bachhuber
@@ -192,10 +192,19 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         resolveChildrenTypes(session);
 
         switch (funcType) {
-            /**
-             * @TODO: sdom should be a proper SQL type, not string.
-             */
-            case FUNC_MDA_SDOM:
+            case FUNC_MDA_SDOM: {
+                dataType = new MDADomainType();
+                if (nodes.length > 0) {
+                    Type arrayType = nodes[LEFT].getDataType();
+                    if (arrayType.isMDArrayType()) {
+                        MDAType mdaType = (MDAType) arrayType;
+                        dataType = mdaType.getDomain();
+                    } else {
+                        throw Error.error(ErrorCode.X_42563, Tokens.T_MDA_SDOM);
+                    }
+                }
+                break;
+            }
             case FUNC_MDA_NAME:
                 dataType = Type.SQL_VARCHAR;
                 break;
@@ -300,7 +309,9 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
             case FUNC_MDA_SDOM:
                 final String functionCall = "sdom(" + nodes[0].getValue(session, false) + ")";
                 if (isMDARootNode) {
-                    return RasUtil.executeHsqlArrayQuery(functionCall, nodes[0].getRasArrayIds(session));
+                    RasMInterval sdom = (RasMInterval) RasUtil.executeHsqlArrayQuery(
+                            functionCall, nodes[0].getRasArrayIds(session));
+                    return RasUtil.toArray(sdom, (MDADomainType) dataType);
                 }
                 return functionCall;
                 

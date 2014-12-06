@@ -28,13 +28,15 @@ package org.asqldb;
 
 import java.sql.SQLException;
 import org.asqldb.ras.RasUtil;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import rasj.RasMArrayByte;
 import rasj.RasMArrayDouble;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Ignore;
 import rasj.RasMArrayInteger;
 
 /**
@@ -377,6 +379,13 @@ public class SelectTest extends BaseTest {
     /**
      * Test probing functions
      */
+    
+    @Test
+    public void testSdom() throws SQLException {
+        Object domObj = executeQuerySingleResult(
+                "select sdom(a) from RASTEST1");
+        assertEquals(domObj.toString(), "ARRAY[ROW('d0','-9999','-9997')]");
+    }
     
     @Test
     public void testLoIndex() throws SQLException {
