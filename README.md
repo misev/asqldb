@@ -24,12 +24,14 @@ Suppose we have a table in ASQLDB:
       a INTEGER MDARRAY [x]
     );
 
-To publish an array object in collection MYCOLL, with OID = 100, then in Arrays
-we would insert the following for example:
+In `Arrays` we could insert the following data for example, including a sample
+1D array of three elements:
 
     INSERT INTO Arrays
     VALUES (1, '2014-01-22', MDARRAY[x(0:2)] [0,1,2]);
 
+The `MDARRAY` is automatically inserted in rasdaman, while HSQLDB stores its
+unique object identifier for reference.
 In SELECT queries then we can do advanced array processing on the array column,
 and even combine it with other non-array columns, e.g.
 
@@ -43,6 +45,13 @@ is, with subtle keyword differences, like `MDARRAY` instead of `MARRAY`, and
 Automated tests
 ===============
 
+To run the automated JUnit tests:
+
+    cd build
+    ant run-asqldb-tests
+
+This will produce summary including number of passed/failed tests in the 
+terminal, as well as in ../run-asqldb-tests.txt
 
 Todo
 ====
