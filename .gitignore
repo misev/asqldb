@@ -15,4 +15,4 @@ lib/.gradle/
 *.tiff
 *.txt.rasql
 run-asqldb-tests.txt
-build/config.properties
+asqldb.properties

@@ -6,14 +6,19 @@ Part 15 of ISO SQL adds advanced query support for multidimensional arrays.
 
 Getting started
 ===============
-* Configure the rasdaman connection: `editor asqldb.properties`
-* If setting up for the first time, please
+* Go to your ASQLDB sources: `cd $ASQLDB_HOME`
+
+* If setting up for the first time, please run:
  * `mkdir -p /var/hsqldb`
- * `chown $USER: /var/hsqldb` (assuming you run hsqldb with `$USER`)
-* Go to the build directory: `cd build`, and
- * Install the configuration file to `$HOME/.asqldb.properties` with 
-   `ant install-config` if necessary;
- * Build the jar file and start the GUI client: `ant buildrun`
+ * `chown $USER: /var/hsqldb` (assuming you run ASQLDB with `$USER`)
+
+* Configure the rasdaman connection:
+ * `cp sample/asqldb.properties $HOME/.asqldb.properties`
+ * `editor $HOME/.asqldb.properties`
+
+* Go to the build directory, build the jar file and start the GUI client:
+ * `cd build`
+ * `ant buildrun`
 
 Example
 =======
@@ -47,9 +52,8 @@ Automated tests
 ===============
 
 To run the automated JUnit tests:
-
-    cd build
-    ant run-asqldb-tests
+ * `cd build`
+ * `ant run-asqldb-tests`
 
 This will produce summary including number of passed/failed tests in the 
 terminal, as well as in ../run-asqldb-tests.txt
