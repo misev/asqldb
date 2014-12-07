@@ -26,6 +26,7 @@
 
 package org.asqldb.ras;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,6 +67,9 @@ import rasj.RasSInterval;
  */
 public class RasUtil {
 
+    private static final FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
+    public static boolean printLog = false;
+
     private static final String DEFAULT_SERVER = "127.0.0.1";
     private static final String DEFAULT_BASE = "RASBASE";
     private static final String DEFAULT_PORT = "7001";
@@ -76,6 +80,10 @@ public class RasUtil {
 
     private static final int MDA_MAX_ATTEMPTS = 5;
     private static final int MDA_TIMEOUT = 1000;
+
+    private static final String HOME_DIR = System.getProperty("user.home");
+    private static final String CONFIG_FILE_NAME = ".asqldb.properties";
+    private static final String CONFIG_FILE = HOME_DIR + File.separator + CONFIG_FILE_NAME;
 
     private static PrintStream queryOutputStream = System.out;
 
@@ -91,46 +99,50 @@ public class RasUtil {
     public static String adminUsername;
     public static String adminPassword;
 
-    public static boolean printLog = false;
-
-    private static FrameworkLogger log = FrameworkLogger.getLog(RasUtil.class);
-
-    //load properties from config file
     static {
-        final Properties prop = new Properties();
+        loadProperties();
+    }
+
+    private static void loadProperties() {
         InputStream input = null;
-
         try {
-
-            input = new FileInputStream("config.properties");
-            prop.load(input);
-
-            server = prop.getProperty("ras.server", DEFAULT_SERVER);
-            database = prop.getProperty("ras.database", DEFAULT_BASE);
-            port = prop.getProperty("ras.port", DEFAULT_PORT);
-            username = prop.getProperty("ras.username", DEFAULT_USER);
-            password = prop.getProperty("ras.password", DEFAULT_PASSWD);
-            adminUsername = prop.getProperty("ras.admin.username", DEFAULT_ADMIN_USER);
-            adminPassword = prop.getProperty("ras.admin.password", DEFAULT_ADMIN_PASSWD);
-
-        } catch (IOException ex) {
-            System.out.println("RasUtil: Failed to load config file, using default values: " + ex.getMessage());
-            server = DEFAULT_SERVER;
-            database = DEFAULT_BASE;
-            port = DEFAULT_PORT;
-            username = DEFAULT_USER;
-            password = DEFAULT_PASSWD;
-            adminUsername = DEFAULT_ADMIN_USER;
-            adminPassword = DEFAULT_ADMIN_PASSWD;
+            input = loadPropertiesFromFile(CONFIG_FILE);
+        } catch (Exception ex) {
+            log.warning("Failed loading configuration file " + CONFIG_FILE + ", using default values.", ex);
+            loadDefaultProperties();
         } finally {
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }
+    }
+
+    private static InputStream loadPropertiesFromFile(String configFile) throws FileNotFoundException, IOException {
+        final InputStream input = new FileInputStream(configFile);
+        final Properties prop = new Properties();
+        prop.load(input);
+
+        server = prop.getProperty("ras.server", DEFAULT_SERVER);
+        database = prop.getProperty("ras.database", DEFAULT_BASE);
+        port = prop.getProperty("ras.port", DEFAULT_PORT);
+        username = prop.getProperty("ras.username", DEFAULT_USER);
+        password = prop.getProperty("ras.password", DEFAULT_PASSWD);
+        adminUsername = prop.getProperty("ras.admin.username", DEFAULT_ADMIN_USER);
+        adminPassword = prop.getProperty("ras.admin.password", DEFAULT_ADMIN_PASSWD);
+        return input;
+    }
+
+    private static void loadDefaultProperties() {
+        server = DEFAULT_SERVER;
+        database = DEFAULT_BASE;
+        port = DEFAULT_PORT;
+        username = DEFAULT_USER;
+        password = DEFAULT_PASSWD;
+        adminUsername = DEFAULT_ADMIN_USER;
+        adminPassword = DEFAULT_ADMIN_PASSWD;
     }
 
     /**

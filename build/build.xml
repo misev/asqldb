@@ -59,6 +59,9 @@
    <property name="junit38.lib" value="lib/junit.jar"/>
    <property name="junit4.lib" value="lib/junit-4.10.jar"/>
    <property name='jflex.lib' value='lib/JFlex.jar'/>
+   
+   <property name='config' value='${basedir}/asqldb.properties'/>
+   <property name='config.install' value='${user.home}/.asqldb.properties'/>
 
    <target name="init"/>
 
@@ -589,7 +592,6 @@ examples:
        </classpath>
        <include name="org/asqldb/**"/>
      </javac>
-     <copy file="config.properties" tofile="build/config.properties" overwrite="true" />
      <copy todir="classes/org/asqldb" preservelastmodified='true'>
        <fileset dir="${swsrc}/org/asqldb" includes='*.png'/>
      </copy>
@@ -1449,5 +1451,11 @@ optimizations) manually.
       <arg file="build/hsqldb.bnd"/>
       <arg value="hsqldb.jar"/>
     </java>
+  </target>
+
+  <target name="install-config">
+    <copy file="${config}"
+          tofile="${config.install}">
+    </copy>
   </target>
 </project>

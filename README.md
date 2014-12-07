@@ -6,13 +6,14 @@ Part 15 of ISO SQL adds advanced query support for multidimensional arrays.
 
 Getting started
 ===============
-* Configure the rasdaman connection: `editor config.properties`
+* Configure the rasdaman connection: `editor asqldb.properties`
 * If setting up for the first time, please
  * `mkdir -p /var/hsqldb`
  * `chown $USER: /var/hsqldb` (assuming you run hsqldb with `$USER`)
 * Go to the build directory: `cd build`, and
- * Build the jar file: `ant hsqldb`
- * Run the GUI tool: `ant run`
+ * Install the configuration file to `$HOME/.asqldb.properties` with 
+   `ant install-config` if necessary;
+ * Build the jar file and start the GUI client: `ant buildrun`
 
 Example
 =======
