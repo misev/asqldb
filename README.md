@@ -20,6 +20,26 @@ Getting started
  * `cd build`
  * `ant buildrun`
 
+Command-line client
+-------------------
+SqlTool is a JDBC client that allows executing queries from the command line.
+
+Before running the configurations needs to be set:
+ * `cp sample/sqltool.rc $HOME`
+ * `editor $HOME/sqltool.rc` (to adapt it)
+
+Build the latest SqlTool as an sqltool.jar in the lib directory:
+ * `cd build && ant sqltool`
+
+To run it:
+ * `java -jar lib/sqltool.jar`
+ * `java -jar lib/sqltool.jar --help` (to get more information)
+
+For example, executing the SQL commands in file setup.sql with the `personal` 
+"urlid" from the default `sqltool.rc` could be done with:
+
+    java -jar lib/sqltool.jar personal setup.sql
+
 Example
 =======
 Suppose we have a table in ASQLDB:
