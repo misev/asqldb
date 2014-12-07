@@ -27,7 +27,6 @@
 package org.asqldb;
 
 import java.io.InputStream;
-import org.asqldb.ras.RasUtil;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,6 +36,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.asqldb.ras.RasUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -75,7 +75,9 @@ public class BaseTest {
         @Override
         protected void failed(Throwable e, Description description) {
             System.out.println("*** TEST FAILED ***");
-            System.out.println("Error: " + e.getMessage());
+            if (e.getMessage() != null) {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
     };
     
@@ -206,6 +208,10 @@ public class BaseTest {
      */
     public static boolean executeUpdateQuery(final String query, final InputStream is) {
         System.out.print("  executing update query: " + query);
+        if (is == null) {
+            System.out.println(" - failed reading test data.");
+            return false;
+        }
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(query);

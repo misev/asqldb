@@ -29,9 +29,10 @@ package org.asqldb;
 import java.io.InputStream;
 import org.asqldb.ras.RasUtil;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * INSERT/DELETE MDARRAY tests.<p>

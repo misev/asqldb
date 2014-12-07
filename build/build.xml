@@ -51,12 +51,13 @@
 
    <!-- It is safe to override these with settings in your own
         build.properties file. -->
-   <property name="build.debug" value="false"/>
+   <property name="build.debug" value="true"/>
    <property name="build.optimize" value="false"/>
    <!-- N.b. Compilation optimization only has effect with JDK 1.1 and 1.2 -->
 
    <property name="servletapi.lib" value="lib/servlet-2_3-fcs-classfiles.zip"/>
    <property name="junit38.lib" value="lib/junit.jar"/>
+   <property name="junit4.lib" value="lib/junit-4.10.jar"/>
    <property name='jflex.lib' value='lib/JFlex.jar'/>
 
    <target name="init"/>
@@ -147,6 +148,7 @@ examples:
        <delete dir="classes"/>
        <copy todir='${swsrc}' preservelastmodified='true'>
            <fileset dir='src' includes='**/*.java'/>
+           <fileset dir='src-test' includes='**/*'/>
        </copy>
    </target>
 
@@ -533,6 +535,13 @@ examples:
             message="Place Jar file for v. 3.8.x of Junit at '${junit38.lib}', or set property 'junit38.lib'"/>
    </target>
 
+   <target name='-requireJunit4'>
+      <available property='_junit_available' classpath='${junit4.lib}'
+                 classname='org.junit.runner.Runner'/>
+      <fail unless='_junit_available'
+            message="Place Jar file for v4.x of Junit at '${junit4.lib}', or set property 'junit4.lib'"/>
+   </target>
+
    <target name="scanner-driver" depends="util"
        description="Build Scanner Driver.  For SqlTool scanner developers.">
       <javac srcdir="${swsrc}"
@@ -563,6 +572,45 @@ examples:
          <exclude name="org/hsqldb/test/SqlFileScannerDriver.java"/>
       </javac>
       <antcall target='-test14'/>
+   </target>
+
+   <target name="test-asqldb" depends="-requireJunit4, classes16"
+           description="compile ASQLDB JUnit tests">
+     <javac srcdir="${swsrc}"
+                includeantruntime="false"
+                encoding="${javac.encoding}"
+                destdir="classes"
+                debug="${build.debug}"
+                optimize="${build.optimize}">
+       <classpath>
+         <pathelement location="${junit4.lib}"/>
+         <pathelement location="lib/rasj.jar" />
+         <pathelement location="lib/JSAP-2.1.jar" />
+       </classpath>
+       <include name="org/asqldb/**"/>
+     </javac>
+     <copy file="config.properties" tofile="build/config.properties" overwrite="true" />
+   </target>
+   
+   <target name="run-asqldb-tests" depends="test-asqldb"
+           description="run ASQLDB JUnit tests">
+
+     <junit printsummary="yes" haltonfailure="yes" showoutput="yes">
+
+       <classpath>
+         <pathelement location="${junit4.lib}"/>
+         <pathelement location="lib/rasj.jar" />
+         <pathelement location="classes" />
+       </classpath>
+
+<!--       <test name="org.asqldb.AllTests"-->
+       <test name="org.asqldb.InsertDeleteTest"
+             haltonfailure="no">
+         <formatter type="plain"/>
+         <formatter type="xml"/>
+       </test>
+
+     </junit>
    </target>
 
     <!--jar with (jdkversion-switched) sources, useful for reading/debugging the code from other projects, can be specified via maven too-->
@@ -1238,6 +1286,7 @@ examples:
        <mkdir dir='${swsrc}'/>
        <copy todir='${swsrc}' preservelastmodified='true'>
            <fileset dir='src' includes='**/*.java'/>
+           <fileset dir='src-test' includes='**/*'/>
        </copy>
     </target>
 
