@@ -590,6 +590,9 @@ examples:
        <include name="org/asqldb/**"/>
      </javac>
      <copy file="config.properties" tofile="build/config.properties" overwrite="true" />
+     <copy todir="classes/org/asqldb" preservelastmodified='true'>
+       <fileset dir="${swsrc}/org/asqldb" includes='*.png'/>
+     </copy>
    </target>
    
    <target name="run-asqldb-tests" depends="test-asqldb"
@@ -603,11 +606,9 @@ examples:
          <pathelement location="classes" />
        </classpath>
 
-<!--       <test name="org.asqldb.AllTests"-->
-       <test name="org.asqldb.InsertDeleteTest"
-             haltonfailure="no">
+       <test name="org.asqldb.AllTests"
+             haltonfailure="no" outfile="run-asqldb-tests">
          <formatter type="plain"/>
-         <formatter type="xml"/>
        </test>
 
      </junit>

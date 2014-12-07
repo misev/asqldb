@@ -14,3 +14,5 @@ lib/.gradle/
 *.csv
 *.tiff
 *.txt.rasql
+run-asqldb-tests.txt
+build/config.properties
