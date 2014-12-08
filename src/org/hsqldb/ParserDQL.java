@@ -31,12 +31,18 @@
 
 package org.hsqldb;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.asqldb.ExpressionAggregateMDA;
-import org.asqldb.FunctionMDA;
-import org.asqldb.ExpressionValueVariableMDA;
 import org.asqldb.ExpressionArrayConstructorMDA;
 import org.asqldb.ExpressionElementListMDA;
 import org.asqldb.ExpressionIndexMDA;
+import org.asqldb.ExpressionIndexUnboundedMDA;
+import org.asqldb.ExpressionValueVariableMDA;
+import org.asqldb.FunctionMDA;
+import org.asqldb.types.MDADimensionType;
+import org.asqldb.types.MDADomainType;
+import org.asqldb.types.MDAType;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.HsqlNameManager.SimpleName;
 import org.hsqldb.error.Error;
@@ -65,14 +71,6 @@ import org.hsqldb.types.IntervalType;
 import org.hsqldb.types.NumberType;
 import org.hsqldb.types.Type;
 import org.hsqldb.types.Types;
-
-import org.asqldb.types.MDADomainType;
-import org.asqldb.types.MDADimensionType;
-
-import java.util.HashSet;
-import java.util.Set;
-import org.asqldb.ExpressionIndexUnboundedMDA;
-import org.asqldb.types.MDAType;
 
 /**
  * Parser for DQL statements
@@ -2280,20 +2278,13 @@ public class ParserDQL extends ParserBase {
                 final Type dataType = token.dataType;
 
                 read();
-                switch (token.tokenString) {
-                    case "C":
-                    case "D":
-                    case "F":
-                    case "L":
-                    case "O":
-                    case "S":
-                    case "UL":
-                    case "US":
-                        e = new ExpressionValue(tokenValue, dataType, token.tokenString);
-                        read();
-                        break;
-                    default:
-                        e = new ExpressionValue(tokenValue, dataType);
+
+                String validSuffixes = " C D F L O S UL US ";
+                if (validSuffixes.contains(" " + token.tokenString + " ")) {
+                    e = new ExpressionValue(tokenValue, dataType, token.tokenString);
+                    read();
+                } else {
+                    e = new ExpressionValue(tokenValue, dataType);
                 }
 
                 return e;

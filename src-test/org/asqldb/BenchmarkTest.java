@@ -44,14 +44,12 @@ public class BenchmarkTest extends BaseTest {
     
     @BeforeClass
     public static void setUpData() {
-        TimerUtil.startTimer("testPredefinedAggregation_AvgCells");
-//        createQueries = insertTestData();
-//        executeUpdateQuery("commit;", null);
+        createQueries = insertTestData();
     }
     
     @AfterClass
     public static void tearDownData() {
-        //dropTables(createQueries);
+        dropTables(createQueries);
     }
     
     @Test
@@ -60,12 +58,18 @@ public class BenchmarkTest extends BaseTest {
 
         TimerUtil.resetTimer("RasUtil.executeRasqlQuery");
         executeQuerySingleResult(
-                "select avg_cells(c.a) from A as c");
+                "select avg_cells(c.a) from RASTEST2 as c");
         TimerUtil.printAllTimers();
 
         TimerUtil.clearTimers();
         RasUtil.head(RasUtil.executeRasqlQuery(
-                "select avg_cells(c) from PUBLIC_A_A as c", false));
+                "select avg_cells(c) from PUBLIC_RASTEST2_A as c", false));
         TimerUtil.printAllTimers();
+    }
+
+    public static void main(String[] args) throws SQLException {
+        BenchmarkTest test = new BenchmarkTest();
+        BaseTest.connect();
+        test.testPredefinedAggregation_AvgCells();
     }
 }

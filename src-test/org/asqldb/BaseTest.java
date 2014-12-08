@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.asqldb.ras.RasUtil;
+import org.asqldb.util.TimerUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -51,8 +52,8 @@ import org.junit.runner.Description;
  */
 public class BaseTest {
 
-//    public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
-    public static final String DEFAULT_DB_PATH = "file:/home/dimitar/tmp/db/personal;shutdown=true";
+    public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
+//    public static final String DEFAULT_DB_PATH = "file:/home/dimitar/tmp/db/personal;shutdown=true";
     public static final String HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
 
     protected static String dbPath = DEFAULT_DB_PATH;
@@ -93,6 +94,7 @@ public class BaseTest {
     }
     
     protected static void connect() {
+        TimerUtil.startTimer("JUnit test suit");
         openRasConnection();
         openHsqlConnection();
     }
@@ -236,6 +238,10 @@ public class BaseTest {
         }
         System.out.println(" ... ok.");
         return true;
+    }
+
+    public static void commit() {
+        executeQuery("commit;");
     }
     
     /**

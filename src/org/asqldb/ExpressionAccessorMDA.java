@@ -29,7 +29,6 @@ package org.asqldb;
 import org.asqldb.ras.RasUtil;
 import org.asqldb.types.MDADomainType;
 import org.asqldb.types.MDAType;
-
 import org.hsqldb.Expression;
 import static org.hsqldb.Expression.LEFT;
 import org.hsqldb.ExpressionAccessor;
@@ -53,16 +52,12 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
             resolveChildrenTypes(session);
         } catch (Throwable ex) {
             // this is an array element reference
-            try {
-                ExpressionElementListMDA listExpr = (ExpressionElementListMDA) nodes[RIGHT];
-                ExpressionIndexMDA sliceExpr = (ExpressionIndexMDA) listExpr.getNodes()[0];
-                Expression arrayElementRefExpr = sliceExpr.getNodes()[0];
-                nodes[RIGHT] = arrayElementRefExpr;
-                super.resolveTypes(session, parent);
-                return;
-            } catch (Throwable ex2) {
-                throw ex2;
-            }
+            ExpressionElementListMDA listExpr = (ExpressionElementListMDA) nodes[RIGHT];
+            ExpressionIndexMDA sliceExpr = (ExpressionIndexMDA) listExpr.getNodes()[0];
+            Expression arrayElementRefExpr = sliceExpr.getNodes()[0];
+            nodes[RIGHT] = arrayElementRefExpr;
+            super.resolveTypes(session, parent);
+            return;
         }
         
         dataType = nodes[LEFT].getDataType();

@@ -405,6 +405,7 @@ public class RasUtil {
                     log.finer("Committing transaction ...");
                 }
                 tr.commit();
+                RasCollCatalog.update(query);
             } catch (QueryException ex) {
                 //Executing a rasdaman query failed
                 tr.abort();

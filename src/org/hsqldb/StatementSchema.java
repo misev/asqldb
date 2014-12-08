@@ -31,6 +31,9 @@
 
 package org.hsqldb;
 
+import org.asqldb.ras.RasCollCatalog;
+import org.asqldb.ras.RasUtil;
+import org.asqldb.types.MDAType;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -39,13 +42,10 @@ import org.hsqldb.lib.HsqlArrayList;
 import org.hsqldb.lib.OrderedHashSet;
 import org.hsqldb.map.ValuePool;
 import org.hsqldb.navigator.RowIterator;
-import org.asqldb.ras.RasUtil;
-import org.asqldb.types.MDADomainType;
 import org.hsqldb.result.Result;
 import org.hsqldb.rights.Grantee;
 import org.hsqldb.rights.GranteeManager;
 import org.hsqldb.rights.Right;
-import org.asqldb.types.MDAType;
 import org.hsqldb.types.Charset;
 import org.hsqldb.types.Collation;
 import org.hsqldb.types.Type;
@@ -1212,7 +1212,8 @@ public class StatementSchema extends Statement {
                             }
                             if (rasqlCreateStatement != null) {
                                 try {
-                                    if (!RasUtil.collectionExists(column.getRasdamanCollectionName())) {
+                                    RasCollCatalog.init();
+                                    if (!RasCollCatalog.contains(column.getRasdamanCollectionName())) {
                                         RasUtil.executeRasqlQuery(rasqlCreateStatement, true, true);
                                     }
                                 } catch (Exception ex) {

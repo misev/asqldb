@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
-
 import org.hsqldb.ColumnBase;
 import org.hsqldb.SessionInterface;
 import org.hsqldb.error.ErrorCode;
@@ -13,12 +12,9 @@ import org.hsqldb.navigator.RowSetNavigatorClient;
 import org.hsqldb.result.Result;
 import org.hsqldb.result.ResultMetaData;
 import org.hsqldb.types.Type;
-
 import rasj.RasDimensionMismatchException;
 import rasj.RasGMArray;
 import rasj.RasIndexOutOfBoundsException;
-import rasj.RasMArrayByte;
-import rasj.RasMArrayDouble;
 import rasj.RasPoint;
 
 public class JDBCMArray implements Array {
@@ -69,7 +65,7 @@ public class JDBCMArray implements Array {
         int mArraySize = 0;
         String mArrayStruct = data.getTypeStructure();
         ArrayList<Integer> dimSize = getDimSize(mArrayStruct);
-        ArrayList<Integer> iterIndex = new ArrayList<>();	//go through all the array values
+        ArrayList<Integer> iterIndex = new ArrayList<Integer>();	//go through all the array values
 
         for (int i = 0; i < dimSize.size(); i++) {
             mArraySize += dimSize.get(i);
@@ -116,8 +112,10 @@ public class JDBCMArray implements Array {
             rowData[0] = Integer.valueOf(i + 1);
             try {
                 rowData[1] = data.getCell(new RasPoint(1,1));
-            } catch (RasDimensionMismatchException
-                    | RasIndexOutOfBoundsException e) {
+            } catch (RasDimensionMismatchException e) {
+                System.err.println("Can't get the cell at point (1, 1)");
+                e.printStackTrace();
+            } catch (RasIndexOutOfBoundsException e) {
                 System.err.println("Can't get the cell at point (1, 1)");
                 e.printStackTrace();
             }
@@ -163,7 +161,7 @@ public class JDBCMArray implements Array {
      */
     // TODO implement unit test
     private ArrayList<Integer> getDimSize(String mArrayStruct) {
-        ArrayList<Integer> dimSize = new ArrayList<>();
+        ArrayList<Integer> dimSize = new ArrayList<Integer>();
         int startIndex;
         int endIndex;
 
