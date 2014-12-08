@@ -16,13 +16,18 @@ Getting started
 * Configure the rasdaman connection:
  * `mkdir -p $HOME/.asqldb`
  * `cp sample/rasdaman.properties $HOME/.asqldb/`
- * `editor $HOME/.asqldb/rasdaman.properties`
+ * `editor $HOME/.asqldb/rasdaman.properties` (to adapt it)
+
+* Configure the ASQLDB connection:
+ * `mkdir -p $HOME/.asqldb`
+ * `cp sample/sqltool.rc $HOME/.asqldb/`
+ * `editor $HOME/.asqldb/sqltool.rc` (to adapt it)
 
 GUI client
 ----------
-* Go to the build directory and build lib/hsqldb.jar:
- * `cd build`
- * `ant hsqldb`
+The Database Manager is a GUI client for ASQLDB. To start, go to the build 
+directory and build lib/hsqldb.jar:
+ * `cd build && ant hsqldb`
 
 The GUI manager can be started with the `bin/sqlgui` bash script 
 (--help for more information). You can link the script to /usr/bin for 
@@ -39,12 +44,7 @@ Database Manager: `doc/util-guide/index.html`
 Command-line client
 -------------------
 SqlTool is a JDBC client that allows executing queries from the command line.
-
-Before running the configurations needs to be set:
- * `cp sample/sqltool.rc $HOME`
- * `editor $HOME/sqltool.rc` (to adapt it)
-
-Build the latest SqlTool as an sqltool.jar in the lib directory:
+To start build the latest SqlTool as lib/sqltool.jar:
  * `cd build && ant sqltool`
 
 To run it:

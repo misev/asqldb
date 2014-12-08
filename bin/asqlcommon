@@ -25,7 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # ----------------------------------------------------------------------------
-# Description   run the SQL Manager GUI tool
+# Description   Common functionality for the asql* scripts
 # Dependencies  ASQLDB
 #
 # Date          2014-dec-08
@@ -36,23 +36,18 @@
 # variables
 # ----------------------------------------------------------------------------
 
-# script name
-PROG=$(basename $0)
-
 # return codes
 RC_OK=0    # everything went fine
 RC_ERROR=1 # something went wrong
 
-# determine script directory
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
-SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
 readonly LIB_DIR="$SCRIPT_DIR/../lib"
 readonly HSQLDB_LIB="$LIB_DIR/hsqldb.jar"
 readonly RASJ_LIB="$LIB_DIR/rasj.jar"
+readonly SQLTOOL="$LIB_DIR/sqltool.jar"
 readonly CLASSPATH="$HSQLDB_LIB:$RASJ_LIB"
 readonly DEFAULT_RCFILE="$HOME/.asqldb/sqltool.rc"
+
+readonly STDINPUT="-"
 
 # ----------------------------------------------------------------------------
 # functions
@@ -68,106 +63,48 @@ control_c()
 trap control_c SIGINT
 
 # logging
-function timestamp() {
+timestamp() {
   date +"%d-%m-%g %T"
 }
 
-function error()
+error()
 {
   echo >&2 [`timestamp`] $PROG: "$@"
   echo >&2 [`timestamp`] $PROG: exiting.
   exit $RC_ERROR
 }
 
-function usage()
+check_file()
 {
-  local -r usage="
-Usage: $PROG [OPTION]...
-
-Start the GUI manager for connecting and sending commands to ASQLDB.
-
-Options:
-  -c, --rcfile
-    specify a connection file, containing preset urlids (by default
-    $HOME/.asqldb/sqltool.rc is used)
-  -u, --urlid
-    use a sepcific urlid from the connection file
-  -s, --script
-    read SQL queries from a script file
-  -d, --dir
-    specify default working directory
-  -h, --help
-    display this help and exit
-"
-
-  echo "$usage"
-  exit $RC_OK
+  local -r infile="$1"
+  [ "$infile" == "$STDINPUT" ] && return
+  [ -e "$infile" ] || error "File $infile not found"
+  [ -r "$infile" ] || error "User $USER has no permission to read file $infile"
+  [ -s "$infile" ] || error "File $infile is empty"
+  [ -f "$infile" ] || error "$infile is not a file"
 }
 
-# ----------------------------------------------------------------------------
-# parse command-line options
-# ----------------------------------------------------------------------------
-
-option=""
-for i in "$@"; do
-
-  if [ -n "$option" ]; then
-    case $option in
-      -u|--urlid*)    urlid="$i";;
-      -c|--rcfile*)   rcfile="$i";;
-      -s|--script*)   script="$i";;
-      -d|--dir*)      wdir="$i";;
-      *)              error "unknown option: $option"
-    esac
-    option=""
-    
-  else
-    option=""
-    case $i in
-      -h|--help*)     usage;;
-      *)              option="$i";;
-    esac
+check_rcfile()
+{
+  if [ -n "$rcfile" ]; then
+    check_file "$rcfile"
+  elif [ -f "$DEFAULT_RCFILE" ]; then
+    rcfile="$DEFAULT_RCFILE"
   fi
-  
-done
+}
 
-# ----------------------------------------------------------------------------
-# begin work
-# ----------------------------------------------------------------------------
-
-if [ -n "$rcfile" ]; then
-  [ -f "$rcfile" ] || error "$rcfile not found or cannot be read."
-elif [ -f "$DEFAULT_RCFILE" ]; then
-  rcfile="$DEFAULT_RCFILE"
-fi
-
-#
-# setup args
-#
-if [ -n "$script" ]; then
-  [ -f "$script" ] || error "$script not found or cannot be read."
-  script_arg="--script $script"
-fi
-if [ -n "$wdir" ]; then
-  [ -d "$wdir" ] || error "$wdir not found or cannot be read."
-  wdir_arg="--dir $wdir"
-fi
-if [ -n "$rcfile" ]; then
-  rcfile_arg="--rcfile $rcfile"
-fi
-if [ -n "$urlid" ]; then
-  [ -n "$rcfile" ] || error "no connection file found, cannot specify --urlid"
-  urlid_arg="--urlid $urlid"
-fi
-
-#
-# start manager
-#
-java -cp "$CLASSPATH" org.hsqldb.util.DatabaseManagerSwing $script_arg $wdir_arg $rcfile_arg $urlid_arg &
-
-# ----------------------------------------------------------------------------
-# end work
-# ----------------------------------------------------------------------------
-
-exit $RC_OK
+setup_common_args()
+{
+  if [ -n "$rcfile" -a -n "$urlid" ]; then
+    rcfile_arg="$1 $rcfile"
+  fi
+  if [ -n "$script" ]; then
+    check_file "$script"
+    script_arg="$2 $script"
+  fi
+  if [ -n "$urlid" ]; then
+    [ -n "$rcfile" ] || error "no connection file specified, cannot use --urlid"
+    urlid_arg="$3 $urlid"
+  fi
+}
 
