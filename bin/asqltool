@@ -1,0 +1,154 @@
+#!/bin/bash
+#
+# Copyright (c) 2014, Dimitar Misev
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+# 
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# ----------------------------------------------------------------------------
+# Description   Wrapper script for the SqlTool command-line client
+# Dependencies  ASQLDB
+#
+# Date          2014-dec-08
+# Author        Dimitar Misev
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# variables
+# ----------------------------------------------------------------------------
+
+# script name
+PROG=$(basename $0)
+
+# determine script directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+. "$SCRIPT_DIR/asqlcommon"
+
+# ----------------------------------------------------------------------------
+# functions
+# ----------------------------------------------------------------------------
+
+usage()
+{
+  local -r usage="
+Usage: $PROG [OPTION]...
+
+Wrapper script for the SqlTool command-line client of ASQLDB.
+
+Options:
+  -c, --rcfile
+    specify a connection file, containing preset urlids (by default
+    $HOME/.asqldb/sqltool.rc is used)
+  -u, --urlid
+    use a sepcific urlid from the connection file
+  -s, --script
+    read SQL queries from a script file
+  -q, --sql
+    specify SQL queries instead of reading from a script file, e.g.
+    -q \"query1; query2; query3;\"
+  -f, --file
+    specify file to be read and used as parameter for a '?' in an SQL query,
+    e.g. to upload a TIFF file in an mdarray decode statement like
+    'insert into Table(array) values (mdarray_decode(?));'
+  --debug
+    print debug information to stderr
+  -h, --help
+    display this help and exit
+"
+
+  echo "$usage"
+  exit $RC_OK
+}
+
+normalize_sql()
+{
+  echo "$i" | egrep ";$" > /dev/null
+  if [ $? -ne 0 ]; then
+    sql="$i;"
+  else
+    sql="$i"
+  fi
+}
+
+# ----------------------------------------------------------------------------
+# parse command-line options
+# ----------------------------------------------------------------------------
+
+option=""
+for i in "$@"; do
+
+  if [ -n "$option" ]; then
+    case $option in
+      -u|--urlid*)    urlid="$i";;
+      -c|--rcfile*)   rcfile="$i";;
+      -s|--script*)   script="$i";;
+      -f|--file*)     f="$i";;
+      -q|--sql*)      normalize_sql;;
+      *)              error "unknown option: $option"
+    esac
+    option=""
+    
+  else
+    option=""
+    case $i in
+      -h|--help*)     usage;;
+      --debug*)       debug="--debug";;
+      *)              option="$i";;
+    esac
+  fi
+  
+done
+
+# ----------------------------------------------------------------------------
+# begin work
+# ----------------------------------------------------------------------------
+
+check_rcfile
+setup_common_args "--rcFile" "" ""
+
+  
+
+#
+# start manager
+#
+if [ -n "$f" -a -n "$sql" ]; then
+  check_file "$f"
+  load_file="\bl $f
+\bp
+$sql"
+  echo "$load_file" | java -cp "$CLASSPATH" -jar "$SQLTOOL" --autoCommit --noAutoFile $debug $rcfile_arg $urlid_arg
+elif [ -n "$sql" ]; then
+  java -cp "$CLASSPATH" -jar "$SQLTOOL" --autoCommit --noAutoFile $debug $rcfile_arg --sql="$sql" $urlid_arg
+else
+  java -cp "$CLASSPATH" -jar "$SQLTOOL" --autoCommit --noAutoFile $debug $rcfile_arg --sql="$sql" $urlid_arg $script_arg
+fi
+
+exit $?
+
+
+# ----------------------------------------------------------------------------
+# end work
+# ----------------------------------------------------------------------------
+
