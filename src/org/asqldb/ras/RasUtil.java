@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.asqldb.types.MDADimensionType;
 import org.asqldb.types.MDADomainType;
+import org.asqldb.util.TimerUtil;
 import org.hsqldb.HsqlException;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -357,53 +358,69 @@ public class RasUtil {
      * @throws org.hsqldb.HsqlException
      */
     public static Object executeRasqlQuery(final String query, boolean ignoreFailedQuery, boolean writeAccess, Object data) throws HsqlException {
-        String user = username;
-        String pass = password;
-        if (writeAccess) {
-            user = adminUsername;
-            pass = adminPassword;
-        }
-        if (rasImplementation == null || db == null)
-            openDatabase(user, pass, writeAccess);
-
         //The result of the query will be assigned to ret
         //Should always return a result (empty result possible)
         //since a RasdamanException will be thrown in case of error
-        Object ret=null;
+        Object ret = null;
 
-        Transaction tr;
-
-        if(printLog) log.finer("Starting transaction ...");
-        tr = rasImplementation.newTransaction();
-        tr.begin();
-
-        if(printLog) log.finer("Instantiating query ...");
-        OQLQuery q = rasImplementation.newOQLQuery();
-
-        //A free rasdaman server was obtained, executing query
         try {
-            q.create(query);
-            if (data != null) {
-                q.bind(data);
-            }
-            
-            if(printLog) log.finer("Executing query "+ query);
-            ret = q.execute();
+            TimerUtil.startTimer("RasUtil.executeRasqlQuery");
 
-            if(printLog) log.finer("Committing transaction ...");
-            tr.commit();
-        } catch (QueryException ex) {
-            //Executing a rasdaman query failed
-            tr.abort();
-            if (!ignoreFailedQuery)
-                throw Error.error(ex, ErrorCode.MDA_QUERY, query);
-        } catch (java.lang.Error ex) {
-            tr.abort();
-            throw Error.error(ErrorCode.MDA_OVERLOAD, query);
-        } catch(NullPointerException ex) {
-            //there is a rasj bug that throws a NullPointerException for queries that retrieve scalars
-            tr.abort();
-            throw Error.error(ErrorCode.MDA_RASJ_BUG, query);
+            String user = username;
+            String pass = password;
+            if (writeAccess) {
+                user = adminUsername;
+                pass = adminPassword;
+            }
+            if (rasImplementation == null || db == null) {
+                openDatabase(user, pass, writeAccess);
+            }
+
+            Transaction tr;
+
+            if (printLog) {
+                log.finer("Starting transaction ...");
+            }
+            tr = rasImplementation.newTransaction();
+            tr.begin();
+
+            if (printLog) {
+                log.finer("Instantiating query ...");
+            }
+            OQLQuery q = rasImplementation.newOQLQuery();
+
+            //A free rasdaman server was obtained, executing query
+            try {
+                q.create(query);
+                if (data != null) {
+                    q.bind(data);
+                }
+
+                if (printLog) {
+                    log.finer("Executing query " + query);
+                }
+                ret = q.execute();
+
+                if (printLog) {
+                    log.finer("Committing transaction ...");
+                }
+                tr.commit();
+            } catch (QueryException ex) {
+                //Executing a rasdaman query failed
+                tr.abort();
+                if (!ignoreFailedQuery) {
+                    throw Error.error(ex, ErrorCode.MDA_QUERY, query);
+                }
+            } catch (java.lang.Error ex) {
+                tr.abort();
+                throw Error.error(ErrorCode.MDA_OVERLOAD, query);
+            } catch (NullPointerException ex) {
+                //there is a rasj bug that throws a NullPointerException for queries that retrieve scalars
+                tr.abort();
+                throw Error.error(ErrorCode.MDA_RASJ_BUG, query);
+            }
+        } finally {
+            TimerUtil.stopTimer("RasUtil.executeRasqlQuery");
         }
         return ret;
     }

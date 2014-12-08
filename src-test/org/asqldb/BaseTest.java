@@ -51,7 +51,8 @@ import org.junit.runner.Description;
  */
 public class BaseTest {
 
-    public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
+//    public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
+    public static final String DEFAULT_DB_PATH = "file:/home/dimitar/tmp/db/personal;shutdown=true";
     public static final String HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
 
     protected static String dbPath = DEFAULT_DB_PATH;
@@ -120,6 +121,7 @@ public class BaseTest {
         }
 
         try {
+            System.out.println("jdbc: " + jdbcUrl);
             connection = DriverManager.getConnection(jdbcUrl, getJdbcConnectionProperties());
         } catch (SQLException ex) {
             throw new RuntimeException("Failed getting JDBC connection.", ex);
