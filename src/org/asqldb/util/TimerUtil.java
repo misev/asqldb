@@ -63,23 +63,32 @@ public class TimerUtil {
         return "";
     }
 
-    public static void resetTimer(String name) {
+    public static Timer resetTimer(String name) {
         Timer timer = getTimer(name);
         if (timer != null) {
             timer.reset();
         }
+        return timer;
     }
 
-    public static void removeTimer(String name) {
-        timers.remove(name);
+    public static Timer removeTimer(String name) {
+        return timers.remove(name);
     }
 
-    public static String getElapsedMilli(String name) {
+    public static long getElapsedMilli(String name) {
         Timer timer = getTimer(name);
         if (timer != null) {
-            return timer.toString();
+            return timer.getElapsedMilli();
         }
-        return "";
+        return -1;
+    }
+
+    public static long getElapsedNano(String name) {
+        Timer timer = getTimer(name);
+        if (timer != null) {
+            return timer.getElapsedNano();
+        }
+        return -1;
     }
 
     public static void printAllTimers() {
