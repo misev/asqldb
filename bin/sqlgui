@@ -1,0 +1,173 @@
+#!/bin/bash
+#
+# Copyright (c) 2014, Dimitar Misev
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+# 
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# ----------------------------------------------------------------------------
+# Description   run the SQL Manager GUI tool
+# Dependencies  ASQLDB
+#
+# Date          2014-dec-08
+# Author        Dimitar Misev
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# variables
+# ----------------------------------------------------------------------------
+
+# script name
+PROG=$(basename $0)
+
+# return codes
+RC_OK=0    # everything went fine
+RC_ERROR=1 # something went wrong
+
+# determine script directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+readonly LIB_DIR="$SCRIPT_DIR/../lib"
+readonly HSQLDB_LIB="$LIB_DIR/hsqldb.jar"
+readonly RASJ_LIB="$LIB_DIR/rasj.jar"
+readonly CLASSPATH="$HSQLDB_LIB:$RASJ_LIB"
+readonly DEFAULT_RCFILE="$HOME/.asqldb/sqltool.rc"
+
+# ----------------------------------------------------------------------------
+# functions
+# ----------------------------------------------------------------------------
+
+# run if user hits Control-C
+control_c()
+{
+  error "*** Signal caught ***"
+}
+ 
+# trap keyboard interrupt (Control-C)
+trap control_c SIGINT
+
+# logging
+function timestamp() {
+  date +"%d-%m-%g %T"
+}
+
+function error()
+{
+  echo >&2 [`timestamp`] $PROG: "$@"
+  echo >&2 [`timestamp`] $PROG: exiting.
+  exit $RC_ERROR
+}
+
+function usage()
+{
+  local -r usage="
+Usage: $PROG [OPTION]...
+
+Start the GUI manager for connecting and sending commands to ASQLDB.
+
+Options:
+  -c, --rcfile
+    specify a connection file, containing preset urlids (by default
+    $HOME/.asqldb/sqltool.rc is used)
+  -u, --urlid
+    use a sepcific urlid from the connection file
+  -s, --script
+    read SQL queries from a script file
+  -d, --dir
+    specify default working directory
+  -h, --help
+    display this help and exit
+"
+
+  echo "$usage"
+  exit $RC_OK
+}
+
+# ----------------------------------------------------------------------------
+# parse command-line options
+# ----------------------------------------------------------------------------
+
+option=""
+for i in "$@"; do
+
+  if [ -n "$option" ]; then
+    case $option in
+      -u|--urlid*)    urlid="$i";;
+      -c|--rcfile*)   rcfile="$i";;
+      -s|--script*)   script="$i";;
+      -d|--dir*)      wdir="$i";;
+      *)              error "unknown option: $option"
+    esac
+    option=""
+    
+  else
+    option=""
+    case $i in
+      -h|--help*)     usage;;
+      *)              option="$i";;
+    esac
+  fi
+  
+done
+
+# ----------------------------------------------------------------------------
+# begin work
+# ----------------------------------------------------------------------------
+
+if [ -n "$rcfile" ]; then
+  [ -f "$rcfile" ] || error "$rcfile not found or cannot be read."
+elif [ -f "$DEFAULT_RCFILE" ]; then
+  rcfile="$DEFAULT_RCFILE"
+fi
+
+#
+# setup args
+#
+if [ -n "$script" ]; then
+  [ -f "$script" ] || error "$script not found or cannot be read."
+  script_arg="--script $script"
+fi
+if [ -n "$wdir" ]; then
+  [ -d "$wdir" ] || error "$wdir not found or cannot be read."
+  wdir_arg="--dir $wdir"
+fi
+if [ -n "$rcfile" ]; then
+  rcfile_arg="--rcfile $rcfile"
+fi
+if [ -n "$urlid" ]; then
+  [ -n "$rcfile" ] || error "no connection file found, cannot specify --urlid"
+  urlid_arg="--urlid $urlid"
+fi
+
+#
+# start manager
+#
+java -cp "$CLASSPATH" org.hsqldb.util.DatabaseManagerSwing $script_arg $wdir_arg $rcfile_arg $urlid_arg &
+
+# ----------------------------------------------------------------------------
+# end work
+# ----------------------------------------------------------------------------
+
+exit $RC_OK
+

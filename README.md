@@ -20,9 +20,21 @@ Getting started
 
 GUI client
 ----------
-* Go to the build directory, build the jar file and start the GUI client:
+* Go to the build directory and build lib/hsqldb.jar:
  * `cd build`
- * `ant buildrun`
+ * `ant hsqldb`
+
+The GUI manager can be started with the `bin/sqlgui` bash script 
+(--help for more information). You can link the script to /usr/bin for 
+convenience `sudo ln -s $ASQLDB_HOME/bin/sqlgui /usr/bin`, and then use it
+simply with `sqlgui`.
+
+The `sqlgui` script is simply a wrapper that executes the hsqldb.jar; you can
+manually run this for better control:
+ * `java -cp lib/hsqldb.jar:lib/rasj.jar org.hsqldb.util.DatabaseManagerSwing`
+(--help for more information)
+ * check the Utilities documentation for full documentation on the
+Database Manager: `doc/util-guide/index.html`
 
 Command-line client
 -------------------
@@ -44,7 +56,7 @@ For example, executing the SQL commands in file setup.sql with the `personal`
     java -jar lib/sqltool.jar personal setup.sql
 
 More information can be found at:
- * `java -jar lib/sqltool.jar --help` (to get more information)
+ * `java -jar lib/sqltool.jar --help`
  * the Utilities documentation, `doc/util-guide/index.html`
 
 Example
