@@ -40,7 +40,7 @@ public class TimerUtil {
 
     private final static Map<String, Timer> timers = new HashMap<String, Timer>();
 
-    private static Timer getTimer(String name) {
+    public static Timer getTimer(String name) {
         Timer ret = timers.get(name);
         return ret;
     }
