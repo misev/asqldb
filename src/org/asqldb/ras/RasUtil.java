@@ -82,8 +82,9 @@ public class RasUtil {
     private static final int MDA_TIMEOUT = 1000;
 
     private static final String HOME_DIR = System.getProperty("user.home");
-    private static final String CONFIG_FILE_NAME = ".asqldb.properties";
-    private static final String CONFIG_FILE = HOME_DIR + File.separator + CONFIG_FILE_NAME;
+    private static final String CONFIG_DIR = HOME_DIR + File.separator + ".asqldb";
+    private static final String CONFIG_FILE_NAME = "rasdaman.properties";
+    private static final String CONFIG_FILE = CONFIG_DIR + File.separator + CONFIG_FILE_NAME;
 
     private static PrintStream queryOutputStream = System.out;
 

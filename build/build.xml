@@ -60,8 +60,9 @@
    <property name="junit4.lib" value="lib/junit-4.10.jar"/>
    <property name='jflex.lib' value='lib/JFlex.jar'/>
    
-   <property name='config' value='${basedir}/asqldb.properties'/>
-   <property name='config.install' value='${user.home}/.asqldb.properties'/>
+   <property name='config' value='${basedir}/rasdaman.properties'/>
+   <property name='config.dir' value='${user.home}/.asqldb'/>
+   <property name='config.install' value='${config.dir}/rasdaman.properties'/>
 
    <target name="init"/>
 
@@ -1454,6 +1455,7 @@ optimizations) manually.
   </target>
 
   <target name="install-config">
+    <mkdir dir="${config.dir}"/>
     <copy file="${config}"
           tofile="${config.install}">
     </copy>
