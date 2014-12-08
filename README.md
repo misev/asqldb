@@ -33,12 +33,15 @@ Build the latest SqlTool as an sqltool.jar in the lib directory:
 
 To run it:
  * `java -jar lib/sqltool.jar`
- * `java -jar lib/sqltool.jar --help` (to get more information)
 
 For example, executing the SQL commands in file setup.sql with the `personal` 
 "urlid" from the default `sqltool.rc` could be done with:
 
     java -jar lib/sqltool.jar personal setup.sql
+
+More information can be found at:
+ * `java -jar lib/sqltool.jar --help` (to get more information)
+ * the Utilities documentation, `doc/util-guide/index.html`
 
 Example
 =======
