@@ -27,17 +27,8 @@
 package org.asqldb;
 
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 import org.asqldb.ras.RasUtil;
-import org.asqldb.util.TimerUtil;
+import org.asqldb.util.AsqldbConnection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -50,16 +41,13 @@ import org.junit.runner.Description;
  *
  * @author Dimitar Misev
  */
-public class BaseTest {
+public class BaseTest extends AsqldbConnection {
 
     public static final String DEFAULT_DB_PATH = "mem:test;sql.enforce_strict_size=true";
 //    public static final String DEFAULT_DB_PATH = "file:/home/dimitar/tmp/db/personal;shutdown=true";
-    public static final String HSQLDB_JDBC_DRIVER = "org.hsqldb.jdbc.JDBCDriver";
 
     protected static String dbPath = DEFAULT_DB_PATH;
     protected static String jdbcUrl = "jdbc:hsqldb:" + dbPath;
-    
-    protected static Connection connection = null;
     
     @Rule
     public TestRule watcher = new TestWatcher() {
@@ -85,176 +73,12 @@ public class BaseTest {
     
     @BeforeClass
     public static void setUp() {
-        connect();
+        AsqldbConnection.open(jdbcUrl);
     }
     
     @AfterClass
     public static void tearDown() {
-        disconnect();
-    }
-    
-    protected static void connect() {
-        TimerUtil.startTimer("JUnit test suit");
-        openRasConnection();
-        openHsqlConnection();
-    }
-    
-    protected static void disconnect() {
-        RasUtil.closeDatabase();
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-            } finally {
-                connection = null;
-            }
-        }
-    }
-
-    protected static void openRasConnection() {
-        RasUtil.openDatabase(RasUtil.adminUsername, RasUtil.adminPassword, true);
-    }
-    
-    protected static void openHsqlConnection() {
-        try {
-            Class.forName(HSQLDB_JDBC_DRIVER);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Could not load the hsqldb JDBCDriver", e);
-        }
-
-        try {
-            System.out.println("jdbc: " + jdbcUrl);
-            connection = DriverManager.getConnection(jdbcUrl, getJdbcConnectionProperties());
-        } catch (SQLException ex) {
-            throw new RuntimeException("Failed getting JDBC connection.", ex);
-        }
-    }
-    
-    private static Properties getJdbcConnectionProperties() {
-        final Properties ret = new Properties();
-        ret.put("user", "SA");
-        ret.put("password", "");
-        return ret;
-    }
-
-    /**
-     * Execute the given query, return true if passed, false otherwise.
-     */
-    public static boolean executeQuery(final String query) {
-        System.out.print("  executing query: " + query);
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            final ResultSet rs = stmt.executeQuery(query);
-        } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
-        System.out.println(" ... ok.");
-        return true;
-    }
-
-    /**
-     * Execute the given query.
-     * @return the first column of the first returned row, as an object.
-     */
-    public static Object executeQuerySingleResult(final String query) throws SQLException {
-        List<Object> res = executeQuerySingleResult(query, 1);
-        if (res.isEmpty()) {
-            return null;
-        } else {
-            return res.get(0);
-        }
-    }
-
-    /**
-     * Execute the given query.
-     * @param columnCount number of columns per row returned by the query.
-     * @return a list of the results from the first returned row, as objects.
-     */
-    public static List<Object> executeQuerySingleResult(final String query, int columnCount) throws SQLException {
-        System.out.print("  executing query: " + query);
-        List<Object> ret = new ArrayList<Object>();
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            final ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                for (int i = 1; i <= columnCount; i++) {
-                    ret.add(rs.getObject(i));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            throw e;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
-        System.out.println(" ... ok.");
-        return ret;
-    }
-
-    /**
-     * Execute the given query, return true if passed, false otherwise.
-     */
-    public static boolean executeUpdateQuery(final String query, final InputStream is) {
-        System.out.print("  executing update query: " + query);
-        if (is == null) {
-            System.out.println(" - failed reading test data.");
-            return false;
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(query);
-            stmt.setBlob(1, is);
-            int rows = stmt.executeUpdate();
-            if (rows <= 0) {
-                System.out.println(" ... failed.");
-            }
-        } catch (SQLException e) {
-            System.out.println(" ... failed.");
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                }
-            }
-        }
-        System.out.println(" ... ok.");
-        return true;
-    }
-
-    public static void commit() {
-        executeQuery("commit;");
-    }
-    
-    /**
-     * Execute the list of queries, return the number of passed ones.
-     */
-    public static int executeQueries(String[] queries) {
-        int ret = 0;
-        for (String query : queries) {
-            if (executeQuery(query)) {
-                ++ret;
-            }
-        }
-        return ret;
+        AsqldbConnection.close();
     }
     
     public static void printCheck(boolean res) {
