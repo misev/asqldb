@@ -83,14 +83,19 @@ public class InsertDeleteTest extends BaseTest {
         assertEquals("{1,2.3,-9.88832}", RasUtil.collectionAsCsv("RASTEST1", "A"));
         assertTrue(executeQuery("DELETE FROM RASTEST1"));
     }
-    
+
     @Test
     public void testInsertArrayValues() {
         assertTrue(executeQuery("insert into RASTEST1(a) values ("
                 + "MDARRAY[x(-9999:-9997)] VALUES CAST(x AS DOUBLE))"));
         assertEquals("{-9999,-9998,-9997}", RasUtil.collectionAsCsv("RASTEST1", "A"));
         assertTrue(executeQuery("DELETE FROM RASTEST1"));
-        
+    }
+
+    @Test
+    public void testInsertArrayOid() {
+        assertTrue(executeQuery("insert into RASTEST1(a) values (100)"));
+        assertTrue(executeQuery("DELETE FROM RASTEST1"));
     }
     
     @Test

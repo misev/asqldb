@@ -28,6 +28,7 @@ package org.asqldb;
 
 import java.sql.SQLException;
 import org.asqldb.ras.RasUtil;
+import org.asqldb.util.AsqldbConnection;
 import org.asqldb.util.TimerUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -69,7 +70,7 @@ public class BenchmarkTest extends BaseTest {
 
     public static void main(String[] args) throws SQLException {
         BenchmarkTest test = new BenchmarkTest();
-        BaseTest.connect();
+        AsqldbConnection.open(jdbcUrl);
         test.testPredefinedAggregation_AvgCells();
     }
 }

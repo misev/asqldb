@@ -460,6 +460,7 @@ examples:
              optimize="${build.optimize}"
       >
          <include name="org/hsqldb/util/**"/>
+         <include name="org/asqldb/util/**"/>
          <exclude name="org/hsqldb/util/*Swing.java"/>
          <exclude name="org/hsqldb/util/preprocessor/**"/>
          <exclude name="org/hsqldb/util/TableSorter.java"/>
