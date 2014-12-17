@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.types.MDAType;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.map.ValuePool;
@@ -123,7 +124,8 @@ public class ExpressionTable extends Expression {
         }
 
         for (int i = 0; i < nodes.length; i++) {
-            if (!nodes[i].dataType.isArrayType()) {
+            if (!nodes[i].dataType.isArrayType() &&
+                    !nodes[i].dataType.isMDArrayType()) {
                 throw Error.error(ErrorCode.X_42563, Tokens.T_UNNEST);
             }
         }
@@ -134,7 +136,11 @@ public class ExpressionTable extends Expression {
         nodeDataTypes = new Type[columnCount];
 
         for (int i = 0; i < nodes.length; i++) {
-            nodeDataTypes[i] = nodes[i].dataType.collectionBaseType();
+            if (nodes[i].dataType.isMDArrayType()) {
+                nodeDataTypes[i] = ((MDAType)nodes[i].dataType).getDataType();
+            } else {
+                nodeDataTypes[i] = nodes[i].dataType.collectionBaseType();
+            }
 
             if (nodeDataTypes[i] == null
                     || nodeDataTypes[i] == Type.SQL_ALL_TYPES) {
