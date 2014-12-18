@@ -72,6 +72,12 @@ public class UnnestTest extends BaseTest {
         List<Object> o = executeQuerySingleResult("select v from RASTEST1 as c, UNNEST(c.b) as t(v)", 1);
         Assert.assertEquals(10, o.size());
     }
+    
+    @Test
+    public void testArrayUnnestWithOrdinality() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select v, ord from RASTEST1 as c, UNNEST(c.b) with ordinality as t(v, ord)", 2);
+        Assert.assertEquals(20, o.size());
+    }
 
     public static void main(String[] args) throws SQLException {
         UnnestTest test = new UnnestTest();
