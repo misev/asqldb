@@ -31,6 +31,7 @@
 
 package org.hsqldb;
 
+import org.asqldb.ras.RasUtil;
 import org.asqldb.types.MDAType;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -41,6 +42,8 @@ import org.hsqldb.persist.PersistentStore;
 import org.hsqldb.result.Result;
 import org.hsqldb.types.RowType;
 import org.hsqldb.types.Type;
+import org.odmg.DBag;
+import rasj.RasGMArray;
 
 /**
  * Implementation of table conversion.
@@ -240,10 +243,18 @@ public class ExpressionTable extends Expression {
         Object[][] array = new Object[nodes.length][];
 
         for (int i = 0; i < array.length; i++) {
-            Object[] values = (Object[]) nodes[i].getValue(session);
-
-            if (values == null) {
-                values = ValuePool.emptyObjectArray;
+            Object[] values = null;
+            Object value = nodes[i].getValue(session, true);
+            if (nodes[i].dataType.isMDArrayType()) {
+                Object head = RasUtil.head(value);
+                if (head instanceof RasGMArray) {
+                    values = RasUtil.gmarrayToArray(head);
+                }
+            } else {
+                values = (Object[]) value;
+                if (values == null) {
+                    values = ValuePool.emptyObjectArray;
+                }
             }
 
             array[i] = values;

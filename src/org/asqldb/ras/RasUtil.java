@@ -41,6 +41,7 @@ import java.util.Set;
 import org.asqldb.types.MDADimensionType;
 import org.asqldb.types.MDADomainType;
 import org.asqldb.util.TimerUtil;
+import org.asqldb.util.TypeUtil;
 import org.hsqldb.HsqlException;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
@@ -57,7 +58,13 @@ import rasj.RasGMArray;
 import rasj.RasImplementation;
 import rasj.RasIndexOutOfBoundsException;
 import rasj.RasMArrayByte;
+import rasj.RasMArrayDouble;
+import rasj.RasMArrayFloat;
+import rasj.RasMArrayInteger;
+import rasj.RasMArrayLong;
+import rasj.RasMArrayShort;
 import rasj.RasMInterval;
+import rasj.RasPoint;
 import rasj.RasSInterval;
 
 /**
@@ -551,10 +558,11 @@ public class RasUtil {
     }
     
     /**
-     * @return the first element of a DBag, or null if bag is empty or not a DBag.
+     * @return the first element of a DBag, or the input argument bag if it is
+     * not a DBag
      */
     public static Object head(Object bag) {
-        Object ret = null;
+        Object ret = bag;
         if (bag instanceof DBag) {
             DBag dbag = (DBag) bag;
             Iterator it = dbag.iterator();
@@ -579,6 +587,27 @@ public class RasUtil {
                 ret[i] = new Object[]{hdim.getDimensionName(), rdim.low(), rdim.high()};
             } catch (RasIndexOutOfBoundsException ex) {
             }
+        }
+        return ret;
+    }
+    
+    /**
+     * Convert RasGMArray to a Java array that contains the array values.
+     */
+    public static Object[] gmarrayToArray(Object gmarray) {
+        Object[] ret = null;
+        if (gmarray instanceof RasMArrayByte) {
+            ret = TypeUtil.convertArray(((RasMArrayByte)gmarray).getArray());
+        } else if (gmarray instanceof RasMArrayShort) {
+            ret = TypeUtil.convertArray(((RasMArrayShort)gmarray).getShortArray());
+        } else if (gmarray instanceof RasMArrayInteger) {
+            ret = TypeUtil.convertArray(((RasMArrayInteger)gmarray).getIntArray());
+        } else if (gmarray instanceof RasMArrayLong) {
+            ret = TypeUtil.convertArray(((RasMArrayLong)gmarray).getLongArray());
+        } else if (gmarray instanceof RasMArrayFloat) {
+            ret = TypeUtil.convertArray(((RasMArrayFloat)gmarray).getFloatArray());
+        } else if (gmarray instanceof RasMArrayDouble) {
+            ret = TypeUtil.convertArray(((RasMArrayDouble)gmarray).getDoubleArray());
         }
         return ret;
     }
