@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.asqldb.ras.RasUtil;
 import org.asqldb.types.MDAType;
-import org.asqldb.util.RowMajorIterator;
+import org.asqldb.util.MIntervalIterator;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.map.ValuePool;
@@ -258,7 +258,7 @@ public class ExpressionTable extends Expression {
     private void insertArrayValues(Session session, PersistentStore store) {
 
         Object[][] array = new Object[nodes.length][];
-        RowMajorIterator iterator = null;
+        MIntervalIterator iterator = null;
 
         for (int i = 0; i < array.length; i++) {
             Object[] values = null;
@@ -268,7 +268,7 @@ public class ExpressionTable extends Expression {
                 if (head instanceof RasGMArray) {
                     values = RasUtil.gmarrayToArray(head);
                     if (iterator == null) {
-                        iterator = new RowMajorIterator(((RasGMArray) head).spatialDomain());
+                        iterator = new MIntervalIterator(((RasGMArray) head).spatialDomain());
                     }
                 }
             } else {

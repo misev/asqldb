@@ -1,7 +1,27 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2014, Dimitar Misev
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ * 
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.asqldb.util;
 
@@ -13,17 +33,18 @@ import rasj.RasMInterval;
 import rasj.RasPoint;
 
 /**
+ * Iterate a point over a multidimensional interval.
  *
- * @author dimitar
+ * @author Dimitar Misev
  */
-public class RowMajorIterator implements Iterator<RasPoint> {
+public class MIntervalIterator implements Iterator<RasPoint> {
 
     private final RasPoint origin;
     private final RasPoint high;
     private final int dimension;
     private RasPoint iter;
 
-    public RowMajorIterator(RasPoint origin, RasPoint end) {
+    public MIntervalIterator(RasPoint origin, RasPoint end) {
         this.origin = origin;
         this.high = end;
         this.iter = null;
@@ -34,7 +55,7 @@ public class RowMajorIterator implements Iterator<RasPoint> {
         }
     }
 
-    public RowMajorIterator(RasMInterval sdom) {
+    public MIntervalIterator(RasMInterval sdom) {
         this(sdom.getOrigin(), sdom.getHigh());
     }
 
