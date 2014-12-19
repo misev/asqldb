@@ -120,6 +120,15 @@ public class MDADomainType extends ArrayType {
     public int getCardinality() {
         return cardinality;
     }
+    
+    public boolean isPointSubset() {
+        for (MDADimensionType dimension : dimensions) {
+            if (!dimension.isSlice()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public String toString() {

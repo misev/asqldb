@@ -138,8 +138,8 @@ public class UnnestTest extends BaseTest {
     
     @Test
     public void testArrayNest() throws SQLException {
-        List<Object> o = executeQuerySingleResult("select ARRAY (SELECT a.id FROM RASTEST3 as a ORDER BY id), c.b[1] from RASTEST1 as c", 1);
-        assertEquals(2, o.size());
+        List<Object> o = executeQuerySingleResult("select ARRAY (SELECT a.id FROM RASTEST3 as a ORDER BY id), c.b[1] from RASTEST1 as c", 2);
+        assertEquals(4, o.size());
     }
 
     public static void main(String[] args) throws SQLException {

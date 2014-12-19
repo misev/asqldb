@@ -125,7 +125,13 @@ public class ExpressionAccessor extends Expression {
             return null;
         }
 
-        Number index = (Number) nodes[RIGHT].getValue(session);
+        Expression right = nodes[RIGHT];
+        Number index = null;
+        if (right instanceof ExpressionElementListMDA) {
+            index = ((ExpressionElementListMDA)right).getSingleNumberValue(session);
+        } else {
+            index = (Number) nodes[RIGHT].getValue(session);
+        }
 
         if (index == null) {
             return null;

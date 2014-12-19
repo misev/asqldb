@@ -61,18 +61,27 @@ public class ExpressionAccessorMDA extends ExpressionAccessor implements Express
         }
         
         dataType = nodes[LEFT].getDataType();
-        if (dataType instanceof MDAType) {
+        if (dataType.isMDArrayType()) {
             MDADomainType subsetDomain = (MDADomainType) nodes[RIGHT].getDataType();
             MDADomainType arrayDomain = ((MDAType)dataType).getDomain();
             originalArrayDomain = arrayDomain;
-            MDADomainType newArrayDomain = arrayDomain.matchSubsetDomain(subsetDomain);
-            
-            dataType = new MDAType(((MDAType) dataType).getDataType(), newArrayDomain);
+            if (subsetDomain.isPointSubset() &&
+                    subsetDomain.getDimensionality() == arrayDomain.getDimensionality()) {
+                dataType = dataType.collectionBaseType();
+            } else {
+                MDADomainType newArrayDomain = arrayDomain.matchSubsetDomain(subsetDomain);
+                dataType = new MDAType(((MDAType) dataType).getDataType(), newArrayDomain);
+            }
+        } else if (dataType.isArrayType()) {
+            super.resolveTypes(session, parent);
         }
     }
 
     @Override
     public Object getValue(Session session, boolean isMDARootNode) {
+        if (nodes[LEFT].getDataType().isArrayType()) {
+            return super.getValue(session, isMDARootNode);
+        }
         if (nodes != null && nodes.length > 1) {
             final String index = (nodes[RIGHT] == null) ? "" :
                     nodes[RIGHT].getValue(session, originalArrayDomain, false).toString();

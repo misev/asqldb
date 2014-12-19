@@ -133,4 +133,12 @@ public class ExpressionElementListMDA extends Expression implements ExpressionMD
         }
         return sb.toString();
     }
+
+    public Number getSingleNumberValue(final Session session) {
+        Number ret = 1;
+        if (nodes.length > 0) {
+            ret = (Number) nodes[0].getValue(session, false);
+        }
+        return ret;
+    }
 }
