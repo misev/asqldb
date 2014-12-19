@@ -238,6 +238,10 @@ public class Expression implements Cloneable {
                 opType = OpTypes.ARRAY_SUBQUERY;
                 break;
 
+            case OpTypes.MDARRAY_SUBQUERY :
+                opType = OpTypes.MDARRAY_SUBQUERY;
+                break;
+
             case OpTypes.TABLE_SUBQUERY :
                 opType = OpTypes.TABLE_SUBQUERY;
                 break;
@@ -409,6 +413,7 @@ public class Expression implements Cloneable {
                 break;
 
             case OpTypes.ARRAY_SUBQUERY :
+            case OpTypes.MDARRAY_SUBQUERY :
 
             //
             case OpTypes.ROW_SUBQUERY :
@@ -450,6 +455,11 @@ public class Expression implements Cloneable {
 
             case OpTypes.ARRAY_SUBQUERY :
                 sb.append("ARRAY SUBQUERY");
+
+                return sb.toString();
+
+            case OpTypes.MDARRAY_SUBQUERY :
+                sb.append("MDARRAY SUBQUERY");
 
                 return sb.toString();
 
@@ -525,6 +535,7 @@ public class Expression implements Cloneable {
 
             //
             case OpTypes.ARRAY_SUBQUERY :
+            case OpTypes.MDARRAY_SUBQUERY :
             case OpTypes.ROW_SUBQUERY :
             case OpTypes.TABLE_SUBQUERY :
                 return table.queryExpression.isEquivalent(
@@ -636,6 +647,7 @@ public class Expression implements Cloneable {
             case OpTypes.EXISTS :
             case OpTypes.ARRAY :
             case OpTypes.ARRAY_SUBQUERY :
+            case OpTypes.MDARRAY_SUBQUERY :
             case OpTypes.TABLE_SUBQUERY :
 
             //
@@ -1126,6 +1138,7 @@ public class Expression implements Cloneable {
                 break;
 
             case OpTypes.ARRAY_SUBQUERY :
+            case OpTypes.MDARRAY_SUBQUERY :
             case OpTypes.ROW_SUBQUERY :
             case OpTypes.TABLE_SUBQUERY : {
                 RangeVariable[] rangeVars = rangeGroup.getRangeVariables();
@@ -1191,6 +1204,7 @@ public class Expression implements Cloneable {
 
             case OpTypes.ARRAY :
             case OpTypes.ARRAY_SUBQUERY :
+            case OpTypes.MDARRAY_SUBQUERY :
             case OpTypes.ROW_SUBQUERY :
             case OpTypes.TABLE_SUBQUERY :
                 if (table != null) {
@@ -1311,6 +1325,23 @@ public class Expression implements Cloneable {
                 }
 
                 dataType = new ArrayType(dataType, Integer.MAX_VALUE);
+
+                break;
+            }
+            case OpTypes.MDARRAY_SUBQUERY : {
+                QueryExpression queryExpression = table.queryExpression;
+
+                queryExpression.resolveTypes(session);
+                table.prepareTable();
+
+                nodeDataTypes = queryExpression.getColumnTypes();
+                dataType      = nodeDataTypes[0];
+
+                if (nodeDataTypes.length > 1) {
+                    throw Error.error(ErrorCode.X_42564);
+                }
+
+                dataType = new MDAType(dataType);
 
                 break;
             }
@@ -1685,6 +1716,23 @@ public class Expression implements Cloneable {
                 return array;
             }
             case OpTypes.ARRAY_SUBQUERY : {
+                table.materialiseCorrelated(session);
+
+                RowSetNavigatorData nav   = table.getNavigator(session);
+                int                 size  = nav.getSize();
+                Object[]            array = new Object[size];
+
+                nav.beforeFirst();
+
+                for (int i = 0; nav.hasNext(); i++) {
+                    Object[] data = nav.getNextRowData();
+
+                    array[i] = data[0];
+                }
+
+                return array;
+            }
+            case OpTypes.MDARRAY_SUBQUERY : {
                 table.materialiseCorrelated(session);
 
                 RowSetNavigatorData nav   = table.getNavigator(session);

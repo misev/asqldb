@@ -141,6 +141,12 @@ public class UnnestTest extends BaseTest {
         List<Object> o = executeQuerySingleResult("select ARRAY (SELECT a.id FROM RASTEST3 as a ORDER BY id), c.b[1] from RASTEST1 as c", 2);
         assertEquals(4, o.size());
     }
+    
+    @Test
+    public void testMDArrayNest() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select MDARRAY [x(1:1),y(1:3)] (SELECT a.id FROM RASTEST3 as a ORDER BY id) from RASTEST1 as c", 2);
+        assertEquals(4, o.size());
+    }
 
     public static void main(String[] args) throws SQLException {
         UnnestTest test = new UnnestTest();

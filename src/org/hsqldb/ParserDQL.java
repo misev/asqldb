@@ -4970,6 +4970,17 @@ public class ParserDQL extends ParserBase {
         return new Expression(OpTypes.ARRAY_SUBQUERY, td);
     }
 
+    Expression XreadMDArrayConstructor() {
+
+        readThis(Tokens.OPENBRACKET);
+
+        TableDerived td = XreadSubqueryTableBody(OpTypes.TABLE_SUBQUERY);
+
+        readThis(Tokens.CLOSEBRACKET);
+
+        return new Expression(OpTypes.MDARRAY_SUBQUERY, td);
+    }
+
     // Additional Common Elements
     Collation readCollateClauseOrNull() {
 
@@ -6788,6 +6799,10 @@ public class ParserDQL extends ParserBase {
             dimensions.removeAll(dimensionsTmp);
 
             constructorType = OpTypes.ARRAY_CONSTRUCTOR_VALUE;
+
+        } else if (token.tokenType == Tokens.OPENBRACKET) {
+            value = XreadMDArrayConstructor();
+            constructorType = OpTypes.MDARRAY_SUBQUERY;
         } else {
             value = XreadMDArrayLiteral();
 
