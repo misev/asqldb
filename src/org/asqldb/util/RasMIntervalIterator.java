@@ -37,26 +37,26 @@ import rasj.RasPoint;
  *
  * @author Dimitar Misev
  */
-public class MIntervalIterator implements Iterator<RasPoint> {
+public class RasMIntervalIterator implements Iterator<RasPoint> {
 
-    private final RasPoint origin;
+    private final RasPoint low;
     private final RasPoint high;
     private final int dimension;
     private RasPoint iter;
 
-    public MIntervalIterator(RasPoint origin, RasPoint end) {
-        this.origin = origin;
-        this.high = end;
+    public RasMIntervalIterator(RasPoint low, RasPoint high) {
+        this.low = low;
+        this.high = high;
         this.iter = null;
-        this.dimension = origin.dimension();
-        if (dimension != end.dimension()) {
+        this.dimension = low.dimension();
+        if (dimension != high.dimension()) {
             throw org.hsqldb.error.Error.runtimeError(
                     ErrorCode.U_S0500, "Mismatched bounding box.");
         }
     }
 
-    public MIntervalIterator(RasMInterval sdom) {
-        this(sdom.getOrigin(), sdom.getHigh());
+    public RasMIntervalIterator(RasMInterval domain) {
+        this(domain.getOrigin(), domain.getHigh());
     }
 
     @Override
@@ -72,12 +72,12 @@ public class MIntervalIterator implements Iterator<RasPoint> {
     public RasPoint next() {
         try {
             if (iter == null) {
-                iter = new RasPoint(origin);
+                iter = new RasPoint(low);
             } else {
                 for (int i = dimension - 1; i >= 0; i--) {
                     long currVal = iter.item(i);
                     if (currVal >= high.item(i)) {
-                        iter.setItem(i, origin.item(i));
+                        iter.setItem(i, low.item(i));
                     } else {
                         iter.setItem(i, currVal + 1);
                         break;
@@ -92,7 +92,7 @@ public class MIntervalIterator implements Iterator<RasPoint> {
     }
 
     public void reset() {
-        iter = origin;
+        iter = low;
     }
 
     @Override

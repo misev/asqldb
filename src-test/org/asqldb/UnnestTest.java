@@ -52,7 +52,9 @@ public class UnnestTest extends BaseTest {
                 + "b DOUBLE ARRAY[5])",
             "create table RASTEST2 ("
                 + "a DOUBLE MDARRAY[x,y],"
-                + "b DOUBLE MDARRAY[x,y])"};
+                + "b DOUBLE MDARRAY[x,y])",
+            "create table RASTEST3 ("
+                + "id INTEGER)"};
         dropTables(createQueries);
         createTables(createQueries);
         
@@ -71,6 +73,10 @@ public class UnnestTest extends BaseTest {
         executeQuery("insert into RASTEST2(a,b) values ("
                 + "MDARRAY[1:3,2:2] [12.0,22.3,-92.88832],"
                 + "MDARRAY[2:3,2:3] [13.0,23.3,-93.88832,15.0])");
+        
+        executeQuery("insert into RASTEST3(id) values (1)");
+        executeQuery("insert into RASTEST3(id) values (2)");
+        executeQuery("insert into RASTEST3(id) values (3)");
     }
     
     @AfterClass
@@ -128,6 +134,12 @@ public class UnnestTest extends BaseTest {
         assertEquals(28, o.size());
         assertEquals("[1.0, 11.0, 1, 1, 2.3, 21.3, 1, 2, -9.88832, -91.88832, 1, 3, "
                 + "12.0, 13.0, 2, 2, 22.3, 23.3, 2, 3, -92.88832, -93.88832, 3, 2, null, 15.0, 3, 3]", o.toString());
+    }
+    
+    @Test
+    public void testArrayNest() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select ARRAY (SELECT a.id FROM RASTEST3 as a ORDER BY id), c.b[1] from RASTEST1 as c", 1);
+        assertEquals(2, o.size());
     }
 
     public static void main(String[] args) throws SQLException {
