@@ -258,6 +258,7 @@ public class ExpressionTable extends Expression {
     private void insertArrayValues(Session session, PersistentStore store) {
 
         Object[][] array = new Object[nodes.length][];
+        long maxLength = -1;
         MIntervalIterator iterator = null;
 
         for (int i = 0; i < array.length; i++) {
@@ -267,8 +268,9 @@ public class ExpressionTable extends Expression {
                 Object head = RasUtil.head(value);
                 if (head instanceof RasGMArray) {
                     values = RasUtil.gmarrayToArray(head);
-                    if (iterator == null) {
+                    if (iterator == null || values.length > maxLength) {
                         iterator = new MIntervalIterator(((RasGMArray) head).spatialDomain());
+                        maxLength = values.length;
                     }
                 }
             } else {
