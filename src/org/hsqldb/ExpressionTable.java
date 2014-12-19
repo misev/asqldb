@@ -31,8 +31,11 @@
 
 package org.hsqldb;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.asqldb.ras.RasUtil;
 import org.asqldb.types.MDAType;
+import org.asqldb.util.RowMajorIterator;
 import org.hsqldb.error.Error;
 import org.hsqldb.error.ErrorCode;
 import org.hsqldb.map.ValuePool;
@@ -42,8 +45,9 @@ import org.hsqldb.persist.PersistentStore;
 import org.hsqldb.result.Result;
 import org.hsqldb.types.RowType;
 import org.hsqldb.types.Type;
-import org.odmg.DBag;
 import rasj.RasGMArray;
+import rasj.RasIndexOutOfBoundsException;
+import rasj.RasPoint;
 
 /**
  * Implementation of table conversion.
@@ -133,8 +137,19 @@ public class ExpressionTable extends Expression {
             }
         }
 
-        int columnCount = ordinality ? nodes.length + 1
-                                     : nodes.length;
+        int columnCount = nodes.length;
+        if (ordinality) {
+            int maxOrdinalityColumns = 1;
+            for (int i = 0; i < nodes.length; i++) {
+                if (nodes[i].dataType.isMDArrayType()) {
+                    int dimensionality = ((MDAType)nodes[i].dataType).getDomain().getDimensionality();
+                    if (dimensionality > maxOrdinalityColumns) {
+                        maxOrdinalityColumns = dimensionality;
+                    }
+                }
+            }
+            columnCount += maxOrdinalityColumns;
+        }
 
         nodeDataTypes = new Type[columnCount];
 
@@ -152,7 +167,9 @@ public class ExpressionTable extends Expression {
         }
 
         if (ordinality) {
-            nodeDataTypes[nodes.length] = Type.SQL_INTEGER;
+            for (int i = nodes.length; i < columnCount; i++) {
+                nodeDataTypes[i] = Type.SQL_INTEGER;
+            }
         }
 
         table.prepareTable();
@@ -241,6 +258,7 @@ public class ExpressionTable extends Expression {
     private void insertArrayValues(Session session, PersistentStore store) {
 
         Object[][] array = new Object[nodes.length][];
+        RowMajorIterator iterator = null;
 
         for (int i = 0; i < array.length; i++) {
             Object[] values = null;
@@ -249,6 +267,9 @@ public class ExpressionTable extends Expression {
                 Object head = RasUtil.head(value);
                 if (head instanceof RasGMArray) {
                     values = RasUtil.gmarrayToArray(head);
+                    if (iterator == null) {
+                        iterator = new RowMajorIterator(((RasGMArray) head).spatialDomain());
+                    }
                 }
             } else {
                 values = (Object[]) value;
@@ -276,7 +297,18 @@ public class ExpressionTable extends Expression {
             }
 
             if (ordinality) {
-                data[nodes.length] = ValuePool.getInt(i + 1);
+                
+                if (iterator != null) {
+                    RasPoint p = iterator.next();
+                    try {
+                        for (int j = nodes.length, d = 0; j < data.length; j++, d++) {
+                            data[j] = p.item(d);
+                        }
+                    } catch (RasIndexOutOfBoundsException ex) {
+                    }
+                } else {
+                    data[nodes.length] = ValuePool.getInt(i + 1);
+                }
             }
 
             Row row = (Row) store.getNewCachedObject(session, data, false);

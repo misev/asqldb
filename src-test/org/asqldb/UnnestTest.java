@@ -49,7 +49,10 @@ public class UnnestTest extends BaseTest {
         createQueries = new String[]{
             "create table RASTEST1 ("
                 + "a DOUBLE MDARRAY[-10000:-1000],"
-                + "b DOUBLE ARRAY[5])"};
+                + "b DOUBLE ARRAY[5])",
+            "create table RASTEST2 ("
+                + "a DOUBLE MDARRAY[x,y],"
+                + "b DOUBLE MDARRAY[x,y])"};
         dropTables(createQueries);
         createTables(createQueries);
         
@@ -58,8 +61,16 @@ public class UnnestTest extends BaseTest {
                 + "ARRAY[5,4,3,2,1])");
         
         executeQuery("insert into RASTEST1(a,b) values ("
-                + "MDARRAY[-9999:-9997] [11.0,21.3,-91.88832],"
+                + "MDARRAY[-9999:-9998] [11.0,21.3],"
                 + "ARRAY[15,14,13,12,11])");
+        
+        executeQuery("insert into RASTEST2(a,b) values ("
+                + "MDARRAY[1:1,1:3] [1.0,2.3,-9.88832],"
+                + "MDARRAY[1:1,2:4] [11.0,21.3,-91.88832])");
+        
+        executeQuery("insert into RASTEST2(a,b) values ("
+                + "MDARRAY[1:3,2:2] [12.0,22.3,-92.88832],"
+                + "MDARRAY[2:3,2:3] [13.0,23.3,-93.88832,15.0])");
     }
     
     @AfterClass
@@ -82,7 +93,32 @@ public class UnnestTest extends BaseTest {
     @Test
     public void testMDArrayUnnest() throws SQLException {
         List<Object> o = executeQuerySingleResult("select v from RASTEST1 as c, UNNEST(c.a) as t(v)", 1);
+        Assert.assertEquals(5, o.size());
+    }
+    
+    @Test
+    public void testMDArrayUnnestWithOrdinality() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select v, ord from RASTEST1 as c, UNNEST(c.a) with ordinality as t(v, ord)", 2);
+        Assert.assertEquals(10, o.size());
+        System.out.println(o);
+    }
+    
+    @Test
+    public void testMDArrayUnnest2d() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select v from RASTEST2 as c, UNNEST(c.a) as t(v)", 1);
         Assert.assertEquals(6, o.size());
+        Assert.assertEquals("[1.0, 2.3, -9.88832, 12.0, 22.3, -92.88832]", o.toString());
+    }
+    
+    @Test
+    public void testMDArrayUnnest2dWithOrdinality() throws SQLException {
+        List<Object> o = executeQuerySingleResult("select v,x,y from RASTEST2 as c, UNNEST(c.a) with ordinality as t(v,x,y)", 3);
+        Assert.assertEquals(18, o.size());
+        Assert.assertEquals("[1.0, 1, 1, 2.3, 1, 2, -9.88832, 1, 3, 12.0, 1, 2, 22.3, 2, 2, -92.88832, 3, 2]", o.toString());
+        
+        o = executeQuerySingleResult("select v,x,y from RASTEST2 as c, UNNEST(c.b) with ordinality as t(v,x,y)", 3);
+        Assert.assertEquals(21, o.size());
+        Assert.assertEquals("[11.0, 1, 2, 21.3, 1, 3, -91.88832, 1, 4, 13.0, 2, 2, 23.3, 2, 3, -93.88832, 3, 2, 15.0, 3, 3]", o.toString());
     }
 
     public static void main(String[] args) throws SQLException {
