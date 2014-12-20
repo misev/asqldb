@@ -181,6 +181,7 @@ public class AsqldbConnection {
             }
         } catch (SQLException e) {
             System.out.println(" ... failed.");
+            e.printStackTrace();
             return false;
         } finally {
             if (stmt != null) {

@@ -66,6 +66,9 @@ import rasj.RasMArrayShort;
 import rasj.RasMInterval;
 import rasj.RasPoint;
 import rasj.RasSInterval;
+import rasj.RasStructure;
+import rasj.odmg.RasCollection;
+import rasj.odmg.RasOID;
 
 /**
  * Rasdaman utility classes - execute queries, etc.
@@ -420,6 +423,7 @@ public class RasUtil {
                     throw Error.error(ex, ErrorCode.MDA_QUERY, query);
                 }
             } catch (java.lang.Error ex) {
+                ex.printStackTrace();
                 tr.abort();
                 throw Error.error(ErrorCode.MDA_OVERLOAD, query);
             } catch (NullPointerException ex) {
@@ -610,5 +614,21 @@ public class RasUtil {
             ret = TypeUtil.convertArray(((RasMArrayDouble)gmarray).getDoubleArray());
         }
         return ret;
+    }
+
+    /**
+     * Determine if the object is a rasdaman multidimensional array object
+     *
+     * @param obj: The object returned in the ResultSet
+     * @return true if the object is instance of any of the RasMArray* types
+     */
+    public static boolean isRasObj(Object obj) {
+        return obj instanceof RasGMArray
+                || obj instanceof RasMInterval
+                || obj instanceof RasPoint
+                || obj instanceof RasSInterval
+                || obj instanceof RasStructure
+                || obj instanceof RasCollection
+                || obj instanceof RasOID;
     }
 }
