@@ -1,11 +1,10 @@
-asqldb
-======
+# asqldb
 
 ASQLDB is an SQL/MDA implementation based on HSQLDB and rasdaman. The SQL/MDA
 Part 15 of ISO SQL adds advanced query support for multidimensional arrays.
 
-Getting started
-===============
+## Getting started
+
 * Assuming you have downloaded the ASQLDB sources to $ASQLDB_HOME:
  * `cd $ASQLDB_HOME`
 
@@ -23,8 +22,8 @@ Getting started
  * `cp sample/sqltool.rc $HOME/.asqldb/`
  * `editor $HOME/.asqldb/sqltool.rc` (to adapt it)
 
-GUI client
-----------
+### GUI client
+
 The Database Manager is a GUI client for ASQLDB. To start, go to the build 
 directory and build lib/hsqldb.jar:
  * `cd build && ant hsqldb`
@@ -41,8 +40,8 @@ manually run this for better control:
  * check the Utilities documentation for full documentation on the
 Database Manager: `doc/util-guide/index.html`
 
-Command-line client
--------------------
+### Command-line client
+
 SqlTool is a JDBC client that allows executing queries from the command line.
 To start build the latest SqlTool as lib/sqltool.jar:
  * `cd build && ant sqltool`
@@ -59,8 +58,8 @@ More information can be found at:
  * `java -jar lib/sqltool.jar --help`
  * the Utilities documentation, `doc/util-guide/index.html`
 
-Example
-=======
+### Example
+
 Suppose we have a table in ASQLDB:
 
     CREATE TABLE Arrays (
@@ -87,8 +86,7 @@ The rasql syntax (http://rasdaman.org/ for more details) is mostly supported as
 is, with subtle keyword differences, like `MDARRAY` instead of `MARRAY`, and
 `AGGREGATE` instead of `CONDENSE`.
 
-Automated tests
-===============
+## Automated tests
 
 To run the automated JUnit tests:
  * `cd build`
@@ -97,8 +95,8 @@ To run the automated JUnit tests:
 This will produce summary including number of passed/failed tests in the 
 terminal, as well as in ../run-asqldb-tests.txt
 
-Todo
-====
+## Todo
+
 * Full DML support (UPDATES missing at the moment)
 * Extend documentation with Array SQL specification and examples
 * Adapt JDBC driver for multidimensional array results
