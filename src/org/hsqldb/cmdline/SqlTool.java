@@ -41,9 +41,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import org.hsqldb.cmdline.sqltool.Token;
 import org.hsqldb.lib.FrameworkLogger;
 import org.hsqldb.lib.RCData;
-import org.hsqldb.cmdline.sqltool.Token;
 
 /* $Id: SqlTool.java 5337 2014-01-24 19:26:47Z fredt $ */
 
@@ -263,6 +263,7 @@ public class SqlTool {
         try {
             SqlTool.objectMain(args);
         } catch (SqlToolException fr) {
+            fr.printStackTrace();
             System.err.println(
                     (fr.getMessage() == null) ? fr : fr.getMessage());
             System.exit(fr.exitValue);
