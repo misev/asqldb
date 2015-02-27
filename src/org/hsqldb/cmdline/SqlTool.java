@@ -773,6 +773,7 @@ public class SqlTool {
         } catch (SQLException se) {
             // SqlTool will only throw an SQLException if it is in
             // "\c false" mode.
+            se.printStackTrace();
             throw new SqlToolException(SQLERR_EXITVAL);
         } finally {
             try {
