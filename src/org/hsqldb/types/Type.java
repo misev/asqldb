@@ -33,7 +33,6 @@ package org.hsqldb.types;
 
 import org.asqldb.types.MDADimensionType;
 import org.asqldb.types.MDAType;
-import org.hsqldb.HsqlNameManager;
 import org.hsqldb.HsqlNameManager.HsqlName;
 import org.hsqldb.SchemaObject;
 import org.hsqldb.Session;
@@ -78,10 +77,11 @@ public abstract class Type implements SchemaObject, Cloneable {
                                                         : typeCode;
     }
 
-    public final String getRasqlType() {
+    public String getRasqlType() {
         switch (typeCode) {
             case Types.SQL_BOOLEAN:
                 return "bool";
+            case Types.TINYINT:
             case Types.SQL_CHAR:
                 return "char";
             case Types.SQL_SMALLINT:
