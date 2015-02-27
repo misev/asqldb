@@ -102,6 +102,7 @@ public class AsqldbConnection {
             final ResultSet rs = stmt.executeQuery(query);
         } catch (SQLException e) {
             System.out.println(" ... failed.");
+            e.printStackTrace();
             return false;
         } finally {
             if (stmt != null) {

@@ -506,13 +506,21 @@ public class SelectTest extends BaseTest {
         byte[] d = res.getArray();
         assertEquals(90601, d.length);
     }
-    
+
     @Test
     public void testOverlay() throws SQLException {
         RasMArrayByte res = (RasMArrayByte) executeQuerySingleResult(
                 "select a overlay cast(mdarray [x(0:255),y(0:210)] values 5 AS char) from RASTEST2");
         byte[] d = res.getArray();
         assertEquals(5, d[0]);
+    }
+
+    @Test
+    public void testPow() throws SQLException {
+        RasMArrayDouble res = (RasMArrayDouble) executeQuerySingleResult(
+                "select pow(a, 2) from RASTEST2");
+        double[] d = res.getDoubleArray();
+        assertEquals(0, (int) d[0]);
     }
     
 }

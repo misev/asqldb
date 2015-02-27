@@ -83,7 +83,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     private static final int FUNC_MDA_DECODE = 250;
     private static final int FUNC_MDA_ENCODE = 251;
-    
+
     private static final int FUNC_MDA_LO = 260;
     private static final int FUNC_MDA_HI = 261;
     private static final int FUNC_MDA_NAME = 262;
@@ -124,7 +124,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         mdaFuncMap.put(Tokens.MDA_SCALE, FUNC_MDA_SCALE);
         mdaFuncMap.put(Tokens.MDA_DECODE, FUNC_MDA_DECODE);
         mdaFuncMap.put(Tokens.MDA_ENCODE, FUNC_MDA_ENCODE);
-        
+
         mdaFuncMap.put(Tokens.MDA_LO, FUNC_MDA_LO);
         mdaFuncMap.put(Tokens.MDA_HI, FUNC_MDA_HI);
         mdaFuncMap.put(Tokens.MDA_DIMENSION_NAME, FUNC_MDA_NAME);
@@ -314,11 +314,11 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                     return RasUtil.toArray(sdom, (MDADomainType) dataType);
                 }
                 return functionCall;
-                
+
             case FUNC_MDA_NAME:
                 Integer index = (Integer) nodes[RIGHT].getValue(session, false);
                 return getNameForIndex(index);
-                
+
             case FUNC_MDA_DIMENSION:
                 return getDimensionality();
 
@@ -448,6 +448,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
 
     private Object getDoubleParamFunctionValue(final Session session, boolean isMDARootNode) {
         String function = null;
+        boolean arrayParam = false;
         switch (funcType) {
             case FUNC_MDA_BIT:
                 function = "bit";
@@ -466,12 +467,15 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
                 break;
             case FUNC_MDA_SHIFT:
                 function = "shift";
+                arrayParam = true;
                 break;
             case FUNC_MDA_EXTEND:
                 function = "extend";
+                arrayParam = true;
                 break;
             case FUNC_MDA_SCALE:
                 function = "scale";
+                arrayParam = true;
                 break;
             case FUNC_MDA_DIV:
                 function = "div";
@@ -479,11 +483,16 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         }
         if (function != null) {
             String left = nodes[LEFT].getValue(session, false).toString();
-            Type arrayType = nodes[LEFT].getDataType();
-            if (arrayType instanceof MDAType) {
-                arrayType = ((MDAType) arrayType).getDomain();
+            String right = null;
+            if (arrayParam) {
+                Type arrayType = nodes[LEFT].getDataType();
+                if (arrayType instanceof MDAType) {
+                    arrayType = ((MDAType) arrayType).getDomain();
+                }
+                right = nodes[RIGHT].getValue(session, arrayType, false).toString();
+            } else {
+                right = nodes[RIGHT].getValue(session, false).toString();
             }
-            String right = nodes[RIGHT].getValue(session, arrayType, false).toString();
             final String functionCall = String.format("%s(%s, %s)", function, left, right);
             if (!isMDARootNode) {
                 return functionCall;
@@ -492,10 +501,10 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         }
         throw Error.runtimeError(ErrorCode.U_S0500, "Required: aggregate function. found: " + funcType);
     }
-    
+
     private Object getLoHiValue(final Session session, boolean isMDARootNode) {
         Object ret = null;
-        
+
         final String function;
         switch (funcType) {
             case FUNC_MDA_LO:
@@ -526,7 +535,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         }
         return ret;
     }
-    
+
     private Integer getIndexForName(String name) {
         Integer ret = null;
         Type arrayType = nodes[LEFT].getDataType();
@@ -540,7 +549,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         }
         return ret;
     }
-    
+
     private String getNameForIndex(int index) {
         String ret = null;
         Type arrayType = nodes[LEFT].getDataType();
@@ -555,7 +564,7 @@ public class FunctionMDA extends FunctionSQL implements ExpressionMDA {
         }
         return ret;
     }
-    
+
     private Integer getDimensionality() {
         Integer ret = null;
         Type arrayType = nodes[LEFT].getDataType();
